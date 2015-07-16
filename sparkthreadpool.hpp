@@ -534,18 +534,14 @@ namespace Spark
 
                 for (;;)
                 {
-                    if (pWorkThread)
-                    {
-                        pWorkThread->SetWorkStatus(emSTWStatus_Idle);
-                    }
+                    ResetWorkThreadStatus(pWorkThread);
 
                     DWORD dwRet = ::WaitForMultipleObjects(2, hWaitEvt, FALSE, 1000 * 60);
-                    if (WAIT_OBJECT_0 + 1 != dwRet && WAIT_TIMEOUT != dwRet)
+                    if (IsShouldExitRun(dwRet))
                     {
                         break;
                     }
-
-                    if (WAIT_TIMEOUT == dwRet)
+                    if (IsShouldRecycleThread(dwRet))
                     {
                         RecycleThreadPool();
                         continue;
@@ -554,25 +550,56 @@ namespace Spark
                     Runnable* pTask = GetTask();
                     if (pTask)
                     {
-                        if (pWorkThread)
-                        {
-                            pWorkThread->SetWorkStatus(emSTWStatus_Work);
-                        }
-
-                        pTask->Run();
-
-                        if (pWorkThread)
-                        {
-                            pWorkThread->SetWorkStatus(emSTWStatus_Idle);
-                        }
-
-                        if (pTask->IsBeHosted())
-                        {
-                            pTask->Release();
-                        }
+                        BeforeExecuteRun(pWorkThread, pTask);
+                        ExecuteRun(pWorkThread, pTask);
+                        AfterExecuteRun(pWorkThread, pTask);
                     }
 
                     RecycleThreadPool();
+                }
+            }
+
+            void ResetWorkThreadStatus( SparkThreadWork* pWorkThread )
+            {
+                if (pWorkThread)
+                {
+                    pWorkThread->SetWorkStatus(emSTWStatus_Idle);
+                }
+            }
+
+            bool IsShouldRecycleThread( DWORD dwRet )
+            {
+                return WAIT_TIMEOUT == dwRet;
+            }
+
+            bool IsShouldExitRun( DWORD dwRet )
+            {
+                return WAIT_OBJECT_0 + 1 != dwRet && WAIT_TIMEOUT != dwRet;
+            }
+
+            void BeforeExecuteRun( SparkThreadWork* pWorkThread, Runnable* pTask )
+            {
+                if (pWorkThread)
+                {
+                    pWorkThread->SetWorkStatus(emSTWStatus_Work);
+                }
+            }
+
+            void ExecuteRun( SparkThreadWork* pWorkThread, Runnable* pTask )
+            {
+                if (pTask)
+                {
+                    pTask->Run();
+                }
+            }
+
+            void AfterExecuteRun( SparkThreadWork* pWorkThread, Runnable* pTask )
+            {
+                ResetWorkThreadStatus(pWorkThread);
+
+                if (pTask && pTask->IsBeHosted())
+                {
+                    pTask->Release();
                 }
             }
 
