@@ -1,7 +1,10 @@
 # sparkthreadpool
 c++98/03 windows threadpool
 
-一行代码让此函数运行在工作线程中/主线程中
+一行代码让函数运行在工作线程中/主线程中
+SPARK_INSTANCE_SWTICH_TO_WORKTHREAD
+SPARK_INSTANCE_POST_MSG_EX
+还有更多简易的异步任务宏
 
 void CMainDlg::PrintText(LPCTSTR format, ...)
 {
@@ -15,7 +18,6 @@ void CMainDlg::PrintText(LPCTSTR format, ...)
 
         va_end(args);
 
-        // POST到界面线程执行
         SPARK_INSTANCE_POST_MSG_EX(CMainDlg, DoInMainThread, strText);
     }
 }
@@ -35,7 +37,6 @@ void CMainDlg::DoInMainThread(CString strText)
 
 void CMainDlg::DoInWorkThread(int a, int b)
 {
-    // 一行代码让此函数运行在线程中
     SPARK_INSTANCE_SWTICH_TO_WORKTHREAD(CMainDlg, DoInWorkThread, a, b);
 
     PrintText(L"工作线程ID：%d,开始工作,休息2秒", ::GetCurrentThreadId());
