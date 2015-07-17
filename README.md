@@ -10,7 +10,9 @@ SPARK_INSTANCE_POST_MSG_EX
 void CMainDlg::PrintText(LPCTSTR format, ...)
 
 {
+
     if (format)
+    
     {
         va_list args;
         va_start(args, format);
@@ -27,6 +29,7 @@ void CMainDlg::PrintText(LPCTSTR format, ...)
 void CMainDlg::DoInMainThread(CString strText)
 
 {
+
     strText.AppendFormat(L"\r\n输出日志运行线程ID：%d\r\n\r\n", ::GetCurrentThreadId());
     CString strLog;
     GetDlgItemText(IDC_STATIC_TEXT, strLog);
@@ -41,6 +44,7 @@ void CMainDlg::DoInMainThread(CString strText)
 void CMainDlg::DoInWorkThread(int a, int b)
 
 {
+
     SPARK_INSTANCE_SWTICH_TO_WORKTHREAD(CMainDlg, DoInWorkThread, a, b);
 
     PrintText(L"工作线程ID：%d,开始工作,休息2秒", ::GetCurrentThreadId());
