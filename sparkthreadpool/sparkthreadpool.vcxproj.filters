@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="res">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="src\pre">
+      <UniqueIdentifier>{c83ac744-cdce-4167-bb46-d08a70f888cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\res">
+      <UniqueIdentifier>{aecbbabd-3f48-4f18-afa4-5e9f9375207d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\gui">
+      <UniqueIdentifier>{b3b181f3-9f7f-4ee0-aac8-6d0fdbde3722}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\gui\dlg">
+      <UniqueIdentifier>{c99352a8-8ddf-45af-8211-15b6283da390}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\sparkthreadpool">
+      <UniqueIdentifier>{954f5ce1-da8a-47b9-a5da-f11a2b50d040}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>src\pre</Filter>
+    </ClInclude>
+    <ClInclude Include="maindlg.h">
+      <Filter>src\gui\dlg</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>src\res</Filter>
+    </ClInclude>
+    <ClInclude Include="threadpooltest.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="sparkthreadpool\sparkasyndef.hpp">
+      <Filter>src\sparkthreadpool</Filter>
+    </ClInclude>
+    <ClInclude Include="sparkthreadpool\sparklock.h">
+      <Filter>src\sparkthreadpool</Filter>
+    </ClInclude>
+    <ClInclude Include="sparkthreadpool\sparkmsgwnd.hpp">
+      <Filter>src\sparkthreadpool</Filter>
+    </ClInclude>
+    <ClInclude Include="sparkthreadpool\sparkrunnable.hpp">
+      <Filter>src\sparkthreadpool</Filter>
+    </ClInclude>
+    <ClInclude Include="sparkthreadpool\sparkthread.hpp">
+      <Filter>src\sparkthreadpool</Filter>
+    </ClInclude>
+    <ClInclude Include="sparkthreadpool\sparkthreadpool.hpp">
+      <Filter>src\sparkthreadpool</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>src\pre</Filter>
+    </ClCompile>
+    <ClCompile Include="maindlg.cpp">
+      <Filter>src\gui\dlg</Filter>
+    </ClCompile>
+    <ClCompile Include="threadpooltest.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="sparkthreadpool.rc">
+      <Filter>res</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="small.ico">
+      <Filter>res</Filter>
+    </Image>
+    <Image Include="sparkthreadpool.ico">
+      <Filter>res</Filter>
+    </Image>
+  </ItemGroup>
+</Project>
