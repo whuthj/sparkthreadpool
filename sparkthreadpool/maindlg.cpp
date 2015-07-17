@@ -69,11 +69,11 @@ void CMainDlg::DoInMainThread(CString strText)
     CString strLog;
     GetDlgItemText(IDC_STATIC_TEXT, strLog);
 
-    strLog.Append(strText);
+    strLog.Insert(0, strText);
     SetDlgItemText(IDC_STATIC_TEXT, strLog);
 
-    HWND hEditWnd = GetDlgItem(IDC_STATIC_TEXT);
-    ::SendMessage(hEditWnd, EM_SETSEL, -1, -1);
+    //HWND hEditWnd = GetDlgItem(IDC_STATIC_TEXT);
+    //::SendMessage(hEditWnd, EM_SETSEL, -1, -1);
 }
 
 void CMainDlg::DoInWorkThread(int a, int b)
