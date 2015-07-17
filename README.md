@@ -6,7 +6,9 @@ SPARK_INSTANCE_SWTICH_TO_WORKTHREAD
 SPARK_INSTANCE_POST_MSG_EX
 还有更多简易的异步任务宏
 
+
 void CMainDlg::PrintText(LPCTSTR format, ...)
+
 {
     if (format)
     {
@@ -23,6 +25,7 @@ void CMainDlg::PrintText(LPCTSTR format, ...)
 }
 
 void CMainDlg::DoInMainThread(CString strText)
+
 {
     strText.AppendFormat(L"\r\n输出日志运行线程ID：%d\r\n\r\n", ::GetCurrentThreadId());
     CString strLog;
@@ -36,6 +39,7 @@ void CMainDlg::DoInMainThread(CString strText)
 }
 
 void CMainDlg::DoInWorkThread(int a, int b)
+
 {
     SPARK_INSTANCE_SWTICH_TO_WORKTHREAD(CMainDlg, DoInWorkThread, a, b);
 
