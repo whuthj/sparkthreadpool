@@ -2,8 +2,11 @@
 c++98/03 windows threadpool
 
 一行代码让函数运行在工作线程中/主线程中
+
 SPARK_INSTANCE_SWTICH_TO_WORKTHREAD
+
 SPARK_INSTANCE_POST_MSG_EX
+
 还有更多简易的异步任务宏
 
 
