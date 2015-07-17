@@ -666,8 +666,7 @@ namespace Spark
                     pThread->Terminate(500, 0);
                     delete pThread;
 
-                    trashThread.erase(itr);
-                    itr = trashThread.begin();
+                    itr = trashThread.erase(itr);
                 }
 
                 {
@@ -676,6 +675,7 @@ namespace Spark
                     while (itr != trashThread.end())
                     {
                         m_trashThread.insert(std::make_pair(itr->first, itr->second));
+                        itr++;
                     }
                 }
             }
