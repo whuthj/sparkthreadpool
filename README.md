@@ -9,6 +9,9 @@ SPARK_INSTANCE_POST_MSG_EX
 
 还有更多简易的异步任务宏
 
+QQ:396628781
+
+有问题可以联系我
 
 void CMainDlg::PrintText(LPCTSTR format, ...)
 
