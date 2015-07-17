@@ -2,7 +2,7 @@
 
 #include <windows.h>
 #include <process.h>
-#include "sparklock.h"
+#include "sparklock.hpp"
 
 /*
 Ê¹ÓÃÊ¾Àı
