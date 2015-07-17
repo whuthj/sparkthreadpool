@@ -249,7 +249,7 @@ namespace Spark
         protected:
             static unsigned int WINAPI StaticThreadFunc(void * lpParam)
             {
-                SparkThread * pThread = (SparkThread *)lpParam;
+                SparkThread * pThread = static_cast<SparkThread*>(lpParam);
 
                 if (pThread)
                 {

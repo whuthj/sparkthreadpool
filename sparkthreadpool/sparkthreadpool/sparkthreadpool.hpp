@@ -144,6 +144,7 @@ namespace Spark
             SparkThreadPool() : m_bIsInit(false)
                               , m_nMinThreadNum(0)
                               , m_nMaxThreadNum(0)
+                              , m_nMaxPendingTasks(0)
                               , m_nMsgThreadId(0)
                               , m_hExitEvt(NULL)
                               , m_hNotifyEvt(NULL)
@@ -529,8 +530,7 @@ namespace Spark
             void Run(void* lpParam)
             {
                 HANDLE hWaitEvt[] = { m_hExitEvt, m_hNotifyEvt };
-                int nThreadId = ::GetCurrentThreadId();
-                SparkThreadWork* pWorkThread = (SparkThreadWork*)lpParam;
+                SparkThreadWork* pWorkThread = static_cast<SparkThreadWork*>(lpParam);
 
                 for (;;)
                 {
@@ -671,12 +671,7 @@ namespace Spark
 
                 {
                     SparkLocker locker(m_lockTrashThreadPool);
-                    itr = trashThread.begin();
-                    while (itr != trashThread.end())
-                    {
-                        m_trashThread.insert(std::make_pair(itr->first, itr->second));
-                        itr++;
-                    }
+                    m_trashThread.insert(trashThread.begin(), trashThread.end());
                 }
             }
 
@@ -721,7 +716,9 @@ namespace Spark
             void SetExitEvent()
             {
                 if (m_hExitEvt)
+                {
                     ::SetEvent(m_hExitEvt);
+                }
             }
 
             void DestroyMsgWnd()
