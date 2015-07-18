@@ -23,6 +23,11 @@ BOOL CMainDlg::OnInitDialog(CWindow wndFocus, LPARAM lInitParam)
     SetDlgItemInt(IDC_EDIT_NUM1, 100);
     SetDlgItemInt(IDC_EDIT_NUM2, 200);
 
+    SetWindowText(L"SparkThreadPool测试");
+    SetDlgItemText(IDC_BUTTON_TEST, L"异步执行");
+
+    SetTimer(1, 1000);
+
     return TRUE;
 }
 
@@ -31,6 +36,17 @@ LRESULT CMainDlg::OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, B
     EndDialog(0);
 
     return 0;
+}
+
+void CMainDlg::OnTimer(UINT_PTR nIDEvent)
+{
+    if (1 == nIDEvent)
+    {
+        CString strInfo;
+        strInfo.Format(L"线程池运行线程数：%d，任务数：%d，回收站线程数：%d", SparkThreadPool::Instance().GetThreadCount(),
+            SparkThreadPool::Instance().GetTaskCount(), SparkThreadPool::Instance().GetTrashThreadCount());
+        SetDlgItemText(IDC_STATIC_INFO, strInfo);
+    }
 }
 
 LRESULT CMainDlg::OnBnClickedButtonTest(BOOL& /*bHandled*/)
@@ -71,6 +87,11 @@ void CMainDlg::DoInMainThread(CString strText)
 
     strLog.Insert(0, strText);
     SetDlgItemText(IDC_STATIC_TEXT, strLog);
+
+    CString strInfo;
+    strInfo.Format(L"线程池运行线程数：%d，任务数：%d，回收站线程数：%d", SparkThreadPool::Instance().GetThreadCount(),
+        SparkThreadPool::Instance().GetTaskCount(), SparkThreadPool::Instance().GetTrashThreadCount());
+    SetDlgItemText(IDC_STATIC_INFO, strInfo);
 
     //HWND hEditWnd = GetDlgItem(IDC_STATIC_TEXT);
     //::SendMessage(hEditWnd, EM_SETSEL, -1, -1);

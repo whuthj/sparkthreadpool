@@ -54,8 +54,9 @@ namespace Spark
 {
     namespace Thread
     {
-        static const int MAX_TASK_COUNT = 100000;
-        static const int RECREATE_MSGWND_COUNT = 3;
+        static const int MAX_TASK_COUNT = 100000; //最多并发任务数
+        static const int RECREATE_MSGWND_COUNT = 3; //重试创建窗口次数
+        static const int KEEP_ALIVE_TIME = 1000 * 60; //清理空闲线程间隔时间即1分钟清理一次空闲线程
 
         typedef enum __SparkThreadWorkStatus
         {
@@ -327,6 +328,36 @@ namespace Spark
                 return m_nMsgThreadId;
             }
 
+            int GetThreadCount()
+            {
+                int nThreadPoolCount = 0;
+
+                SparkLocker locker(m_lockThreadPool);
+                nThreadPoolCount = m_threadPool.size();
+
+                return nThreadPoolCount;
+            }
+
+            int GetTrashThreadCount()
+            {
+                int nThreadCount = 0;
+
+                SparkLocker locker(m_lockTrashThreadPool);
+                nThreadCount = m_trashThread.size();
+
+                return nThreadCount;
+            }
+
+            int GetTaskCount()
+            {
+                int nTasksCount = 0;
+
+                SparkLocker locker(m_lockTasks);
+                nTasksCount = m_tasks.size();
+
+                return nTasksCount;
+            }
+
         protected:
             bool CreateCleanerThread()
             {
@@ -536,7 +567,7 @@ namespace Spark
                 {
                     ResetWorkThreadStatus(pWorkThread);
 
-                    DWORD dwRet = ::WaitForMultipleObjects(2, hWaitEvt, FALSE, 1000 * 60);
+                    DWORD dwRet = ::WaitForMultipleObjects(2, hWaitEvt, FALSE, KEEP_ALIVE_TIME);
                     if (IsShouldExitRun(dwRet))
                     {
                         break;
@@ -554,8 +585,6 @@ namespace Spark
                         ExecuteRun(pWorkThread, pTask);
                         AfterExecuteRun(pWorkThread, pTask);
                     }
-
-                    RecycleThreadPool();
                 }
             }
 

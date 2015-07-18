@@ -13,7 +13,7 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-    SparkThreadPool::Instance().Init(2, 10, 100);
+    SparkThreadPool::Instance().Init(2, 10, 1);
 
     int nRet = 0;
     {
