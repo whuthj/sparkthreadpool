@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 /*concatenate two arguments*/
 #define CONCAT(arg1, arg2)		CONCAT1(arg1, arg2)
