@@ -8,22 +8,22 @@
 #include "sparkthread.hpp"
 
 /*
-Ê¹ÓÃÊ¾Àı
+ä½¿ç”¨ç¤ºä¾‹
 
 Spark::Thread::SparkThreadPool pool;
 pool.Init(2, 10);
 
 pool.Execute(&obj, &T::Fun, NULL)
 
-// ½çÃæÏß³Ìµ÷ÓÃ
+// ç•Œé¢çº¿ç¨‹è°ƒç”¨
 pool.InitMsgWnd();
 
-// ÇĞ»»µ½½çÃæÏß³ÌÖ´ĞĞ
+// åˆ‡æ¢åˆ°ç•Œé¢çº¿ç¨‹æ‰§è¡Œ
 pool.SwitchToWndThread(&obj, &T::Fun, NULL)
 
 pool.UnInit();
 
-Òì²½ºêÊ¹ÓÃÊ¾Àı
+å¼‚æ­¥å®ä½¿ç”¨ç¤ºä¾‹
 
 class Test
 {
@@ -54,9 +54,9 @@ namespace Spark
 {
     namespace Thread
     {
-        static const int MAX_TASK_COUNT = 100000; //×î¶à²¢·¢ÈÎÎñÊı
-        static const int RECREATE_MSGWND_COUNT = 3; //ÖØÊÔ´´½¨´°¿Ú´ÎÊı
-        static const int KEEP_ALIVE_TIME = 1000 * 60; //ÇåÀí¿ÕÏĞÏß³Ì¼ä¸ôÊ±¼ä¼´1·ÖÖÓÇåÀíÒ»´Î¿ÕÏĞÏß³Ì
+        static const int MAX_TASK_COUNT = 100000; //æœ€å¤šå¹¶å‘ä»»åŠ¡æ•°
+        static const int RECREATE_MSGWND_COUNT = 3; //é‡è¯•åˆ›å»ºçª—å£æ¬¡æ•°
+        static const int KEEP_ALIVE_TIME = 1000 * 60; //æ¸…ç†ç©ºé—²çº¿ç¨‹é—´éš”æ—¶é—´å³1åˆ†é’Ÿæ¸…ç†ä¸€æ¬¡ç©ºé—²çº¿ç¨‹
 
         typedef enum __SparkThreadWorkStatus
         {
@@ -68,9 +68,9 @@ namespace Spark
         typedef enum __SparkRunnableType
         {
             emSRType_None           = 0,
-            emSRType_Schedule       = 1,  // Ä¬ÈÏÊÇÌí¼ÓÈÎÎñĞèÒªÀ©Õ¹Ïß³ÌÔòÀ©Õ¹Ïß³ÌÁ¢¼´Ö´ĞĞ
-            emSRType_Post           = 2,  // Ö»°ÑÈÎÎñ¼ÓÈëÈÎÎñ¶ÓÁĞ£¬²»¿ªÏß³Ì
-            emSRType_Schedule_Post  = 3,  // 1µÄ»ù´¡ÉÏÈç¹ûÀ©Õ¹Ïß³ÌÊ§°ÜÒ²¼ÌĞø°ÑÈÎÎñ¼ÓÈë¶ÓÁĞ
+            emSRType_Schedule       = 1,  // é»˜è®¤æ˜¯æ·»åŠ ä»»åŠ¡éœ€è¦æ‰©å±•çº¿ç¨‹åˆ™æ‰©å±•çº¿ç¨‹ç«‹å³æ‰§è¡Œ
+            emSRType_Post           = 2,  // åªæŠŠä»»åŠ¡åŠ å…¥ä»»åŠ¡é˜Ÿåˆ—ï¼Œä¸å¼€çº¿ç¨‹
+            emSRType_Schedule_Post  = 3,  // 1çš„åŸºç¡€ä¸Šå¦‚æœæ‰©å±•çº¿ç¨‹å¤±è´¥ä¹Ÿç»§ç»­æŠŠä»»åŠ¡åŠ å…¥é˜Ÿåˆ—
         }SparkRunnableType;
 
         class SparkThreadPool
@@ -161,14 +161,14 @@ namespace Spark
 
         public:
             /**
-            * @brief     ³õÊ¼»¯Ïß³Ì³Ø
-            * @param[in] nMinThreadNum ³õÊ¼»¯Ôò´´½¨Ïß³ÌÊıÄ¿
-            * @param[in] nMaxThreadNum ×î´ó´´½¨Ïß³ÌÊıÄ¿
-            * @param[in] nMaxPendingTasks Ã¿¸öÏß³ÌÖ´ĞĞÈÎÎñÊı
-            * @return    ·µ»Ø³õÊ¼»¯ÊÇ·ñ³É¹¦.
-            * @remark    ÀıÈç nMinThreadNum(2), nMaxThreadNum(10), nMaxPendingTasks(100)
-                         Ôò³õÊ¼»¯´´½¨2¸öÏß³Ì£¬Ã¿¸öÏß³Ì¿ÉÒÔÖ´ĞĞ100¸öÈÎÎñ£¬µ±Íâ²¿µ÷ÓÃÍ¬Ê±
-                         Ö´ĞĞ³¬¹ı200¸öÈÎÎñÔò»á´´½¨µÚ3¸öÏß³ÌÀ´Ö´ĞĞ¡£
+            * @brief     åˆå§‹åŒ–çº¿ç¨‹æ± 
+            * @param[in] nMinThreadNum åˆå§‹åŒ–åˆ™åˆ›å»ºçº¿ç¨‹æ•°ç›®
+            * @param[in] nMaxThreadNum æœ€å¤§åˆ›å»ºçº¿ç¨‹æ•°ç›®
+            * @param[in] nMaxPendingTasks æ¯ä¸ªçº¿ç¨‹æ‰§è¡Œä»»åŠ¡æ•°
+            * @return    è¿”å›åˆå§‹åŒ–æ˜¯å¦æˆåŠŸ.
+            * @remark    ä¾‹å¦‚ nMinThreadNum(2), nMaxThreadNum(10), nMaxPendingTasks(100)
+                         åˆ™åˆå§‹åŒ–åˆ›å»º2ä¸ªçº¿ç¨‹ï¼Œæ¯ä¸ªçº¿ç¨‹å¯ä»¥æ‰§è¡Œ100ä¸ªä»»åŠ¡ï¼Œå½“å¤–éƒ¨è°ƒç”¨åŒæ—¶
+                         æ‰§è¡Œè¶…è¿‡200ä¸ªä»»åŠ¡åˆ™ä¼šåˆ›å»ºç¬¬3ä¸ªçº¿ç¨‹æ¥æ‰§è¡Œã€‚
             */
             bool Init(int nMinThreadNum, int nMaxThreadNum, int nMaxPendingTasks = 1)
             {
@@ -199,7 +199,7 @@ namespace Spark
                 return true;
             }
 
-            // È·±£ÔÚ½çÃæÏß³Ìµ÷ÓÃ
+            // ç¡®ä¿åœ¨ç•Œé¢çº¿ç¨‹è°ƒç”¨
             bool InitMsgWnd()
             {
                 CreateMsgWnd();
@@ -296,8 +296,8 @@ namespace Spark
                     return true;
                 }
 
-                // ĞèÒªÀ©Õ¹Ïß³Ì
-                // µ±Ç°Ïß³Ì³ØÊıÄ¿<×î´óÏß³ÌÊıÔòÀ©Õ¹Ïß³Ì
+                // éœ€è¦æ‰©å±•çº¿ç¨‹
+                // å½“å‰çº¿ç¨‹æ± æ•°ç›®<æœ€å¤§çº¿ç¨‹æ•°åˆ™æ‰©å±•çº¿ç¨‹
                 if (CompareThreadCountWithMax() < 0)
                 {
                     AddWorkThread();
@@ -306,7 +306,7 @@ namespace Spark
                     return true;
                 }
 
-                // µ±Ç°Ïß³Ì³ØÊıÄ¿>=×î´óÏß³ÌÊı£¬µ«Default_Post»¹ÊÇÌí¼ÓÈÎÎñµ½¶ÓÁĞ
+                // å½“å‰çº¿ç¨‹æ± æ•°ç›®>=æœ€å¤§çº¿ç¨‹æ•°ï¼Œä½†Default_Postè¿˜æ˜¯æ·»åŠ ä»»åŠ¡åˆ°é˜Ÿåˆ—
                 if (emSRType_Schedule_Post == emRunnableType)
                 {
                     AddTaskAndNotify(pRunnable);
@@ -648,7 +648,7 @@ namespace Spark
 
             void RecycleThreadPool()
             {
-                // ¼ì²â´óÓÚ×îĞ¡Ïß³ÌÊıÔò»ØÊÕµ±Ç°Ïß³Ì
+                // æ£€æµ‹å¤§äºæœ€å°çº¿ç¨‹æ•°åˆ™å›æ”¶å½“å‰çº¿ç¨‹
                 SparkLocker locker(m_lockThreadPool);
 
                 int nThreadId = ::GetCurrentThreadId();
@@ -675,7 +675,7 @@ namespace Spark
             {
                 ThreadPool trashThread;
 
-                // ÇåÀí»ØÊÕÕ¾Ïß³Ì
+                // æ¸…ç†å›æ”¶ç«™çº¿ç¨‹
                 {
                     SparkLocker locker(m_lockTrashThreadPool);
                     trashThread.swap(m_trashThread);
@@ -812,9 +812,9 @@ void asyn_##F(void* arg){ tag_dd_##F* __p__ = (tag_dd_##F*)arg; F(EXPAND(__VA_AR
 struct tag_dd_base{ virtual ~tag_dd_base(){} };
 
 //////////////////////////////////////////////////////////////////////////
-// Ö»Ö§³ÖÒ»¸ö²ÎÊı void fun(void* lp)
+// åªæ”¯æŒä¸€ä¸ªå‚æ•° void fun(void* lp)
 
-// Òì²½Ö´ĞĞº¯Êı
+// å¼‚æ­¥æ‰§è¡Œå‡½æ•°
 #define SPARK_ASYN(T, F, LP_OBJ, LP_POOL, TYPE, PARAM)\
     {\
         Spark::Thread::SparkThreadPool* pPool = LP_POOL; \
@@ -837,7 +837,7 @@ struct tag_dd_base{ virtual ~tag_dd_base(){} };
         Spark::Thread::SparkThreadPool::Instance().Execute<T>(this, &T::F, (void*)PARAM, Spark::Thread::emSRType_Schedule_Post);\
     }
     
-// Ö÷Ïß³ÌÖ´ĞĞº¯Êı
+// ä¸»çº¿ç¨‹æ‰§è¡Œå‡½æ•°
 #define SPARK_MSG(T, F, LP_OBJ, LP_POOL, IS_SEND_MSG, PARAM)\
     {\
         Spark::Thread::SparkThreadPool* pPool = LP_POOL; \
@@ -867,7 +867,7 @@ struct tag_dd_base{ virtual ~tag_dd_base(){} };
     }
 
 //////////////////////////////////////////////////////////////////////////
-// Ö§³Ö±ä²Î£¬Ê¹ÓÃÊ±±ØĞëÒªÊ¹ÓÃSPARK_ASYN_APIÉùÃ÷º¯Êı
+// æ”¯æŒå˜å‚ï¼Œä½¿ç”¨æ—¶å¿…é¡»è¦ä½¿ç”¨SPARK_ASYN_APIå£°æ˜å‡½æ•°
 
 #define SPARK_ASYN_EX(T, F, LP_OBJ, LP_POOL, TYPE, ...)\
     {\
@@ -891,7 +891,7 @@ struct tag_dd_base{ virtual ~tag_dd_base(){} };
         SPARK_ASYN_EX(T, F, this, LP_POOL, Spark::Thread::emSRType_Schedule_Post, __VA_ARGS__);\
     }
 
-// ÇĞ»»µ½Ö÷Ïß³ÌÖ´ĞĞ
+// åˆ‡æ¢åˆ°ä¸»çº¿ç¨‹æ‰§è¡Œ
 #define SPARK_POST_MSG_EX(T, F, LP_OBJ, LP_POOL, IS_SEND_MSG, ...)\
     {\
         Spark::Thread::SparkThreadPool* pThreadPool = LP_POOL; \
@@ -907,8 +907,13 @@ struct tag_dd_base{ virtual ~tag_dd_base(){} };
     {\
         SPARK_POST_MSG_EX(T, F, this, &Spark::Thread::SparkThreadPool::Instance(), FALSE, __VA_ARGS__);\
     }
+    
+#define SPARK_INSTANCE_SEND_MSG_EX(T, F, ...)\
+    {\
+        SPARK_POST_MSG_EX(T, F, this, &Spark::Thread::SparkThreadPool::Instance(), TRUE, __VA_ARGS__); \
+    }
 
-// µ±Ç°º¯ÊıÇĞ»»µ½¹¤×÷Ïß³ÌÖ´ĞĞ
+// å½“å‰å‡½æ•°åˆ‡æ¢åˆ°å·¥ä½œçº¿ç¨‹æ‰§è¡Œ
 #define SPARK_SWTICH_TO_WORKTHREAD(T, F, LP_OBJ, LP_POOL, TYPE, ...)\
     {\
         Spark::Thread::SparkThreadPool* pThreadPool = LP_POOL; \

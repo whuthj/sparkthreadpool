@@ -5,7 +5,7 @@
 #include "sparklock.hpp"
 
 /*
-Ê¹ÓÃÊ¾Àı
+ä½¿ç”¨ç¤ºä¾‹
 
 SparkThread tWork;
 tWork.SetRunnable(this, &Test::Fun);
