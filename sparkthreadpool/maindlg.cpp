@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "maindlg.h"
 
 CMainDlg::CMainDlg()
@@ -81,9 +81,17 @@ void CMainDlg::PrintText(LPCTSTR format, ...)
 
 void CMainDlg::DoInMainThread(CString strText)
 {
+    static int _s_nLogCount = 0;
+    
     strText.AppendFormat(L"\r\n输出日志运行线程ID：%d\r\n\r\n", ::GetCurrentThreadId());
     CString strLog;
     GetDlgItemText(IDC_STATIC_TEXT, strLog);
+    
+    if (_s_nLogCount++ > 100)
+    {
+        _s_nLogCount = 0;
+        strLog.Empty();
+    }
 
     strLog.Insert(0, strText);
     SetDlgItemText(IDC_STATIC_TEXT, strLog);
@@ -92,9 +100,6 @@ void CMainDlg::DoInMainThread(CString strText)
     strInfo.Format(L"线程池运行线程数：%d，任务数：%d，回收站线程数：%d", SparkThreadPool::Instance().GetThreadCount(),
         SparkThreadPool::Instance().GetTaskCount(), SparkThreadPool::Instance().GetTrashThreadCount());
     SetDlgItemText(IDC_STATIC_INFO, strInfo);
-
-    //HWND hEditWnd = GetDlgItem(IDC_STATIC_TEXT);
-    //::SendMessage(hEditWnd, EM_SETSEL, -1, -1);
 }
 
 void CMainDlg::DoInWorkThread(int a, int b)
@@ -104,7 +109,8 @@ void CMainDlg::DoInWorkThread(int a, int b)
 
     PrintText(L"工作线程ID：%d,开始工作,休息2秒", ::GetCurrentThreadId());
 
-    ::Sleep(2000);
+	
+	::Sleep(2000);
     int n = a + b;
 
     PrintText(L"工作线程ID：%d,完成工作,结果：%d", ::GetCurrentThreadId(), n);
