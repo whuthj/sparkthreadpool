@@ -18,13 +18,13 @@ BOOL CMainDlg::OnInitDialog(CWindow wndFocus, LPARAM lInitParam)
 {
     SparkThreadPool::Instance().InitMsgWnd();
 
-    PrintText(L"Ö÷Ïß³ÌID£º%d", ::GetCurrentThreadId());
+    PrintText(L"ä¸»çº¿ç¨‹IDï¼š%d", ::GetCurrentThreadId());
 
     SetDlgItemInt(IDC_EDIT_NUM1, 100);
     SetDlgItemInt(IDC_EDIT_NUM2, 200);
 
-    SetWindowText(L"SparkThreadPool²âÊÔ");
-    SetDlgItemText(IDC_BUTTON_TEST, L"Òì²½Ö´ĞĞ");
+    SetWindowText(L"SparkThreadPoolæµ‹è¯•");
+    SetDlgItemText(IDC_BUTTON_TEST, L"å¼‚æ­¥æ‰§è¡Œ");
 
     SetTimer(1, 1000);
 
@@ -43,7 +43,7 @@ void CMainDlg::OnTimer(UINT_PTR nIDEvent)
     if (1 == nIDEvent)
     {
         CString strInfo;
-        strInfo.Format(L"Ïß³Ì³ØÔËĞĞÏß³ÌÊı£º%d£¬ÈÎÎñÊı£º%d£¬»ØÊÕÕ¾Ïß³ÌÊı£º%d", SparkThreadPool::Instance().GetThreadCount(),
+        strInfo.Format(L"çº¿ç¨‹æ± è¿è¡Œçº¿ç¨‹æ•°ï¼š%dï¼Œä»»åŠ¡æ•°ï¼š%dï¼Œå›æ”¶ç«™çº¿ç¨‹æ•°ï¼š%d", SparkThreadPool::Instance().GetThreadCount(),
             SparkThreadPool::Instance().GetTaskCount(), SparkThreadPool::Instance().GetTrashThreadCount());
         SetDlgItemText(IDC_STATIC_INFO, strInfo);
     }
@@ -74,14 +74,14 @@ void CMainDlg::PrintText(LPCTSTR format, ...)
 
         va_end(args);
 
-        // POSTµ½½çÃæÏß³ÌÖ´ĞĞ
+        // POSTåˆ°ç•Œé¢çº¿ç¨‹æ‰§è¡Œ
         SPARK_INSTANCE_POST_MSG_EX(CMainDlg, DoInMainThread, strText);
     }
 }
 
 void CMainDlg::DoInMainThread(CString strText)
 {
-    strText.AppendFormat(L"\r\nÊä³öÈÕÖ¾ÔËĞĞÏß³ÌID£º%d\r\n\r\n", ::GetCurrentThreadId());
+    strText.AppendFormat(L"\r\nè¾“å‡ºæ—¥å¿—è¿è¡Œçº¿ç¨‹IDï¼š%d\r\n\r\n", ::GetCurrentThreadId());
     CString strLog;
     GetDlgItemText(IDC_STATIC_TEXT, strLog);
 
@@ -89,7 +89,7 @@ void CMainDlg::DoInMainThread(CString strText)
     SetDlgItemText(IDC_STATIC_TEXT, strLog);
 
     CString strInfo;
-    strInfo.Format(L"Ïß³Ì³ØÔËĞĞÏß³ÌÊı£º%d£¬ÈÎÎñÊı£º%d£¬»ØÊÕÕ¾Ïß³ÌÊı£º%d", SparkThreadPool::Instance().GetThreadCount(),
+    strInfo.Format(L"çº¿ç¨‹æ± è¿è¡Œçº¿ç¨‹æ•°ï¼š%dï¼Œä»»åŠ¡æ•°ï¼š%dï¼Œå›æ”¶ç«™çº¿ç¨‹æ•°ï¼š%d", SparkThreadPool::Instance().GetThreadCount(),
         SparkThreadPool::Instance().GetTaskCount(), SparkThreadPool::Instance().GetTrashThreadCount());
     SetDlgItemText(IDC_STATIC_INFO, strInfo);
 
@@ -99,13 +99,13 @@ void CMainDlg::DoInMainThread(CString strText)
 
 void CMainDlg::DoInWorkThread(int a, int b)
 {
-    // Ò»ĞĞ´úÂëÈÃ´Ëº¯ÊıÔËĞĞÔÚÏß³ÌÖĞ
+    // ä¸€è¡Œä»£ç è®©æ­¤å‡½æ•°è¿è¡Œåœ¨çº¿ç¨‹ä¸­
     SPARK_INSTANCE_SWTICH_TO_WORKTHREAD(CMainDlg, DoInWorkThread, a, b);
 
-    PrintText(L"¹¤×÷Ïß³ÌID£º%d,¿ªÊ¼¹¤×÷,ĞİÏ¢2Ãë", ::GetCurrentThreadId());
+    PrintText(L"å·¥ä½œçº¿ç¨‹IDï¼š%d,å¼€å§‹å·¥ä½œ,ä¼‘æ¯2ç§’", ::GetCurrentThreadId());
 
     ::Sleep(2000);
     int n = a + b;
 
-    PrintText(L"¹¤×÷Ïß³ÌID£º%d,Íê³É¹¤×÷,½á¹û£º%d", ::GetCurrentThreadId(), n);
+    PrintText(L"å·¥ä½œçº¿ç¨‹IDï¼š%d,å®Œæˆå·¥ä½œ,ç»“æœï¼š%d", ::GetCurrentThreadId(), n);
 }
