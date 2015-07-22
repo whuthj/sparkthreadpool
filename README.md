@@ -1,4 +1,4 @@
-# sparkthreadpool
+﻿# sparkthreadpool
 c++98/03 windows threadpool
 
 一行代码让函数运行在工作线程中/主线程中
