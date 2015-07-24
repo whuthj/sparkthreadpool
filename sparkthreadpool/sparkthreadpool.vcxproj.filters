@@ -59,6 +59,9 @@
     <ClInclude Include="targetver.h">
       <Filter>src\res</Filter>
     </ClInclude>
+    <ClInclude Include="sparkthreadpool\sparkthreadpooldef.hpp">
+      <Filter>src\sparkthreadpool</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

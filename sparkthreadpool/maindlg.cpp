@@ -59,7 +59,32 @@ LRESULT CMainDlg::OnBnClickedButtonTest(BOOL& /*bHandled*/)
 
     DoInWorkThread(nNum1, nNum2);
 
+    //SPARK_POST_ASYN(CMainDlg, DoAsync, this, &Spark::Thread::SparkThreadPool::Instance(), NULL);
+    SPARK_INSTANCE_ASYN(CMainDlg, DoAsync, NULL);
+
     return 0;
+}
+
+void CMainDlg::DoAsync(void* lpParam)
+{
+    int a = 100;
+
+    //SPARK_INSTANCE_POST_MSG(CMainDlg, DoSwitchToMainThread, a);
+    SPARK_MSG(CMainDlg, DoSendMsgToMainThread, this, &Spark::Thread::SparkThreadPool::Instance(), true, &a);
+    SPARK_MSG(CMainDlg, DoPostMsgToMainThread, this, &Spark::Thread::SparkThreadPool::Instance(), false, a);
+
+    int b = 1000;
+}
+
+void CMainDlg::DoSendMsgToMainThread(void* lpParam)
+{
+    int* lpTmp = (int*)lpParam;
+    *lpTmp = 1200;
+}
+
+void CMainDlg::DoPostMsgToMainThread(void* lpParam)
+{
+    int a = 100;
 }
 
 void CMainDlg::PrintText(LPCTSTR format, ...)

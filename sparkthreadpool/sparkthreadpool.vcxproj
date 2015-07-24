@@ -85,6 +85,7 @@
     <ClInclude Include="sparkthreadpool\sparkrunnable.hpp" />
     <ClInclude Include="sparkthreadpool\sparkthread.hpp" />
     <ClInclude Include="sparkthreadpool\sparkthreadpool.hpp" />
+    <ClInclude Include="sparkthreadpool\sparkthreadpooldef.hpp" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="threadpooltest.h" />
     <ClInclude Include="stdafx.h" />

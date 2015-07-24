@@ -65,4 +65,8 @@ private:
     SPARK_ASYN_API(DoInMainThread, CString, strText)
     void DoInMainThread(CString strText);
 
+    void DoAsync(void* lpParam);
+    void DoSendMsgToMainThread(void* lpParam);
+    void DoPostMsgToMainThread(void* lpParam);
+
 };
