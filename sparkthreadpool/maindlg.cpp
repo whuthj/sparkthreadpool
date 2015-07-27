@@ -69,9 +69,12 @@ void CMainDlg::DoAsync(void* lpParam)
 {
     int a = 100;
 
-    //SPARK_INSTANCE_POST_MSG(CMainDlg, DoSwitchToMainThread, a);
-    SPARK_MSG(CMainDlg, DoSendMsgToMainThread, this, &Spark::Thread::SparkThreadPool::Instance(), true, &a);
-    SPARK_MSG(CMainDlg, DoPostMsgToMainThread, this, &Spark::Thread::SparkThreadPool::Instance(), false, a);
+    //SPARK_MSG(CMainDlg, DoSendMsgToMainThread, this, &Spark::Thread::SparkThreadPool::Instance(), true, &a);
+	SPARK_INSTANCE_SEND_MSG(CMainDlg, DoSendMsgToMainThread, &a);
+    //SPARK_MSG(CMainDlg, DoPostMsgToMainThread, this, &Spark::Thread::SparkThreadPool::Instance(), false, a);
+	SPARK_INSTANCE_POST_MSG(CMainDlg, DoPostMsgToMainThread, a);
+
+	SPARK_INSTANCE_ASYN(CMainDlg, DoPostMsgToMainThread, NULL);
 
     int b = 1000;
 }
