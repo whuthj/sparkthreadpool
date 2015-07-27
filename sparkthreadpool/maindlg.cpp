@@ -70,11 +70,11 @@ void CMainDlg::DoAsync(void* lpParam)
     int a = 100;
 
     //SPARK_MSG(CMainDlg, DoSendMsgToMainThread, this, &Spark::Thread::SparkThreadPool::Instance(), true, &a);
-	SPARK_INSTANCE_SEND_MSG(CMainDlg, DoSendMsgToMainThread, &a);
+    SPARK_INSTANCE_SEND_MSG(CMainDlg, DoSendMsgToMainThread, &a);
     //SPARK_MSG(CMainDlg, DoPostMsgToMainThread, this, &Spark::Thread::SparkThreadPool::Instance(), false, a);
-	SPARK_INSTANCE_POST_MSG(CMainDlg, DoPostMsgToMainThread, a);
+    SPARK_INSTANCE_POST_MSG(CMainDlg, DoPostMsgToMainThread, a);
 
-	SPARK_INSTANCE_ASYN(CMainDlg, DoPostMsgToMainThread, NULL);
+    SPARK_INSTANCE_ASYN(CMainDlg, DoPostMsgToMainThread, NULL);
 
     int b = 1000;
 }
@@ -137,8 +137,7 @@ void CMainDlg::DoInWorkThread(int a, int b)
 
     PrintText(L"工作线程ID：%d,开始工作,休息2秒", ::GetCurrentThreadId());
 
-	
-	::Sleep(2000);
+    ::Sleep(2000);
     int n = a + b;
 
     PrintText(L"工作线程ID：%d,完成工作,结果：%d", ::GetCurrentThreadId(), n);
