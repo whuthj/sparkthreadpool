@@ -55,9 +55,10 @@ namespace Spark
 {
     namespace Thread
     {
-        static const int MAX_TASK_COUNT = 100000; //最多并发任务数
-        static const int RECREATE_MSGWND_COUNT = 3; //重试创建窗口次数
-        static const int KEEP_ALIVE_TIME = 1000 * 60; //清理空闲线程间隔时间即1分钟清理一次空闲线程
+        static const int MAX_TASK_COUNT = 100000;           // 最多并发任务数
+        static const int RECREATE_MSGWND_COUNT = 3;         // 重试创建窗口次数
+        static const int KEEP_ALIVE_TIME = 1000 * 60;       // 清理空闲线程间隔时间即1分钟清理一次空闲线程
+        static const int CLEAN_POOL_INTERVAL = 1000 * 30;   // 间隔30s清理一次回收站线程
 
         typedef enum __SparkThreadWorkStatus
         {
@@ -147,6 +148,7 @@ namespace Spark
                               , m_nMinThreadNum(0)
                               , m_nMaxThreadNum(0)
                               , m_nMaxPendingTasks(0)
+                              , m_nKeepAliveTime(KEEP_ALIVE_TIME)
                               , m_nMsgThreadId(0)
                               , m_hExitEvt(NULL)
                               , m_hNotifyEvt(NULL)
@@ -163,15 +165,16 @@ namespace Spark
         public:
             /**
             * @brief     初始化线程池
-            * @param[in] nMinThreadNum 初始化则创建线程数目
+            * @param[in] nMinThreadNum 初始化核心线程数目
             * @param[in] nMaxThreadNum 最大创建线程数目
             * @param[in] nMaxPendingTasks 每个线程执行任务数
+            * @param[in] nKeepAliveTime 当线程数大于核心时，此为终止前多余的空闲线程等待新任务的最长时间
             * @return    返回初始化是否成功.
             * @remark    例如 nMinThreadNum(2), nMaxThreadNum(10), nMaxPendingTasks(100)
                          则初始化创建2个线程，每个线程可以执行100个任务，当外部调用同时
                          执行超过200个任务则会创建第3个线程来执行。
             */
-            bool Init(int nMinThreadNum, int nMaxThreadNum, int nMaxPendingTasks = 1)
+            bool Init(int nMinThreadNum, int nMaxThreadNum, int nMaxPendingTasks = 1, int nKeepAliveTime = KEEP_ALIVE_TIME)
             {
                 if (m_bIsInit)
                 {
@@ -182,7 +185,7 @@ namespace Spark
                     return false;
                 }
 
-                InitParams(nMinThreadNum, nMaxThreadNum, nMaxPendingTasks);
+                InitParams(nMinThreadNum, nMaxThreadNum, nMaxPendingTasks, nKeepAliveTime);
 
                 bool bCreate = false;
                 
@@ -568,7 +571,7 @@ namespace Spark
                 {
                     ResetWorkThreadStatus(pWorkThread);
 
-                    DWORD dwRet = ::WaitForMultipleObjects(2, hWaitEvt, FALSE, KEEP_ALIVE_TIME);
+                    DWORD dwRet = ::WaitForMultipleObjects(2, hWaitEvt, FALSE, m_nKeepAliveTime);
                     if (IsShouldExitRun(dwRet))
                     {
                         break;
@@ -637,7 +640,7 @@ namespace Spark
             {
                 for (;;)
                 {
-                    DWORD dwRet = ::WaitForSingleObject(m_hExitEvt, 1000 * 10);
+                    DWORD dwRet = ::WaitForSingleObject(m_hExitEvt, CLEAN_POOL_INTERVAL);
                     if (WAIT_TIMEOUT != dwRet)
                     {
                         break;
@@ -715,11 +718,12 @@ namespace Spark
                 return true;
             }
 
-            void InitParams(int nMinThreadNum, int nMaxThreadNum, int nMaxPendingTasks)
+            void InitParams(int nMinThreadNum, int nMaxThreadNum, int nMaxPendingTasks, int nKeepAliveTime)
             {
                 m_nMinThreadNum = nMinThreadNum;
                 m_nMaxThreadNum = nMaxThreadNum;
                 m_nMaxPendingTasks = nMaxPendingTasks;
+                m_nKeepAliveTime = nKeepAliveTime;
                 m_hExitEvt = ::CreateEvent(NULL, TRUE, FALSE, NULL);
                 m_hNotifyEvt = ::CreateSemaphore(NULL, 0, MAX_TASK_COUNT, NULL);
             }
@@ -784,6 +788,7 @@ namespace Spark
             int m_nMaxThreadNum;
             int m_nMaxPendingTasks;
             int m_nMsgThreadId;
+            int m_nKeepAliveTime;
 
             HANDLE m_hExitEvt;
             HANDLE m_hNotifyEvt;

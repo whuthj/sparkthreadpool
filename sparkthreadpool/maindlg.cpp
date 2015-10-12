@@ -79,7 +79,7 @@ void CMainDlg::DoAsync(void* lpParam)
 void CMainDlg::DoSendMsgToMainThread(void* lpParam)
 {
     int* lpTmp = (int*)lpParam;
-    *lpTmp = 1200;
+    *lpTmp = 1234;
 }
 
 void CMainDlg::DoPostMsgToMainThread(void* lpParam)
