@@ -2,15 +2,22 @@
 
 #include "sparkrunnable.hpp"
 
+#define DECLEAR_WND_CLASS_NAME(Name)\
+public:\
+    static LPCWSTR GetWndClassName()\
+    {\
+    return Name;\
+    }
+
 namespace Spark
 {
     namespace Thread
     {
         static const int TASK_HANDLE_MSG_ID = WM_APP + 1001;
-        static LPCWSTR SPARK_MSG_WND_CLASS_NAME = L"SparkMsgWnd";
         
         class SparkMsgWnd
         {
+            DECLEAR_WND_CLASS_NAME(L"SparkMsgWnd")
         public:
             SparkMsgWnd() : m_hWnd(NULL)
             {
@@ -28,19 +35,33 @@ namespace Spark
                 HINSTANCE hInstance = ::GetModuleHandle(NULL);
                 RegisterWndClass(hInstance);
 
-                m_hWnd = ::CreateWindow(SPARK_MSG_WND_CLASS_NAME, L"", NULL, 0, 0, 0, 0, HWND_MESSAGE, NULL, NULL, this);
+                m_hWnd = ::CreateWindow(GetWndClassName(), L"", NULL, 0, 0, 0, 0, HWND_MESSAGE, NULL, NULL, this);
 
                 return m_hWnd;
             }
 
-            LRESULT SendMessage( UINT Msg, WPARAM wParam = 0, LPARAM lParam = 0 )
+            LRESULT SendMessage(UINT message, WPARAM wParam = 0, LPARAM lParam = 0) throw()
             {
-                return ::SendMessage(m_hWnd, Msg, wParam, lParam);
+                ATLASSERT(::IsWindow(m_hWnd));
+                return ::SendMessage(m_hWnd, message, wParam, lParam);
             }
 
-            LRESULT PostMessage( UINT Msg, WPARAM wParam = 0, LPARAM lParam = 0 )
+            BOOL PostMessage(UINT message, WPARAM wParam = 0, LPARAM lParam = 0) throw()
             {
-                return ::PostMessage(m_hWnd, Msg, wParam, lParam);
+                ATLASSERT(::IsWindow(m_hWnd));
+                return ::PostMessage(m_hWnd, message, wParam, lParam);
+            }
+
+            UINT_PTR SetTimer(UINT_PTR nIDEvent, UINT nElapse, void (CALLBACK* lpfnTimer)(HWND, UINT, UINT_PTR, DWORD) = NULL) throw()
+            {
+                ATLASSERT(::IsWindow(m_hWnd));
+                return ::SetTimer(m_hWnd, nIDEvent, nElapse, (TIMERPROC)lpfnTimer);
+            }
+
+            BOOL KillTimer(UINT_PTR nIDEvent) throw()
+            {
+                ATLASSERT(::IsWindow(m_hWnd));
+                return ::KillTimer(m_hWnd, nIDEvent);
             }
 
             BOOL IsWindow()
@@ -70,12 +91,12 @@ namespace Spark
                 WNDCLASS wndClass;
                 memset(&wndClass, 0, sizeof(wndClass));
 
-                bInit = ::GetClassInfo(hInstance, SPARK_MSG_WND_CLASS_NAME, &wndClass);
+                bInit = ::GetClassInfo(hInstance, GetWndClassName(), &wndClass);
                 if (bInit) return bInit;
 
                 wndClass.lpfnWndProc    = SparkMsgWnd::WndProc;
                 wndClass.hInstance      = hInstance;
-                wndClass.lpszClassName  = SPARK_MSG_WND_CLASS_NAME;
+                wndClass.lpszClassName  = GetWndClassName();
 
                 bInit = ::RegisterClass(&wndClass) != 0 ? TRUE : FALSE;
 
@@ -129,6 +150,10 @@ namespace Spark
                 {
                     OnTaskHandleMsg(uMsg, wParam, lParam, bHandled);
                 }
+                else if (uMsg == WM_TIMER)
+                {
+                    OnTimer(uMsg, wParam, lParam, bHandled);
+                }
 
                 return S_OK;
             }
@@ -146,6 +171,13 @@ namespace Spark
                         pRunnable->Release();
                     }
                 }
+
+                return 0;
+            }
+
+            LRESULT OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+            {
+                UINT_PTR nEventId = (UINT_PTR)wParam;
 
                 return 0;
             }

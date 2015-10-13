@@ -41,9 +41,6 @@
     <ClInclude Include="sparkthreadpool\sparkasyndef.hpp">
       <Filter>src\sparkthreadpool</Filter>
     </ClInclude>
-    <ClInclude Include="sparkthreadpool\sparklock.h">
-      <Filter>src\sparkthreadpool</Filter>
-    </ClInclude>
     <ClInclude Include="sparkthreadpool\sparkmsgwnd.hpp">
       <Filter>src\sparkthreadpool</Filter>
     </ClInclude>
@@ -60,6 +57,18 @@
       <Filter>src\res</Filter>
     </ClInclude>
     <ClInclude Include="sparkthreadpool\sparkthreadpooldef.hpp">
+      <Filter>src\sparkthreadpool</Filter>
+    </ClInclude>
+    <ClInclude Include="sparkthreadpool\sparkthreadpoolimpl.hpp">
+      <Filter>src\sparkthreadpool</Filter>
+    </ClInclude>
+    <ClInclude Include="sparkthreadpool\sparktimer.hpp">
+      <Filter>src\sparkthreadpool</Filter>
+    </ClInclude>
+    <ClInclude Include="sparkthreadpool\sparklock.hpp">
+      <Filter>src\sparkthreadpool</Filter>
+    </ClInclude>
+    <ClInclude Include="sparkthreadpool\sparktimertask.hpp">
       <Filter>src\sparkthreadpool</Filter>
     </ClInclude>
   </ItemGroup>

@@ -80,12 +80,15 @@
     <ClInclude Include="maindlg.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="sparkthreadpool\sparkasyndef.hpp" />
-    <ClInclude Include="sparkthreadpool\sparklock.h" />
+    <ClInclude Include="sparkthreadpool\sparklock.hpp" />
     <ClInclude Include="sparkthreadpool\sparkmsgwnd.hpp" />
     <ClInclude Include="sparkthreadpool\sparkrunnable.hpp" />
     <ClInclude Include="sparkthreadpool\sparkthread.hpp" />
     <ClInclude Include="sparkthreadpool\sparkthreadpool.hpp" />
     <ClInclude Include="sparkthreadpool\sparkthreadpooldef.hpp" />
+    <ClInclude Include="sparkthreadpool\sparkthreadpoolimpl.hpp" />
+    <ClInclude Include="sparkthreadpool\sparktimer.hpp" />
+    <ClInclude Include="sparkthreadpool\sparktimertask.hpp" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="threadpooltest.h" />
     <ClInclude Include="stdafx.h" />
