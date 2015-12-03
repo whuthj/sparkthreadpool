@@ -19,8 +19,10 @@ namespace Spark
                 virtual ~TimerWnd()
                 {
                     DestroyWindow();
+                    DestroyTimerTasks();
                 }
 
+            protected:
                 virtual void OnTimer(UINT_PTR nTimerId)
                 {
                     SparkTimerTask* pRunnable = m_mapTimerTask.Get(nTimerId);
@@ -31,6 +33,22 @@ namespace Spark
                     }
                 }
 
+                void DestroyTimerTasks()
+                {
+                    m_mapTimerTask.Lock();
+                    std::map<long, SparkTimerTask*>& map = m_mapTimerTask.GetMap();
+                    std::map<long, SparkTimerTask*>::iterator itr = map.begin();
+                    while (itr != map.end())
+                    {
+                        SparkTimerTask* pRunnable = itr->second;
+                        SAFE_HOST_RELEASE(pRunnable);
+                        itr++;
+                    }
+                    m_mapTimerTask.Clear();
+                    m_mapTimerTask.Unlock();
+                }
+
+            public:
                 long StartTimer(SparkTimerTask* pTask, UINT nElapse)
                 {
                     long lTimerIndex = m_mapTimerTask.Count();

@@ -1,6 +1,16 @@
 ﻿#pragma once
 
-#include <WinBase.h>
+//#include <WinBase.h>
+
+#define RUNNABLE_PTR_HOST_ADDREF(pRunnable)\
+{\
+if (NULL == pRunnable){ return false; } pRunnable->SetBeHosted(true); pRunnable->AddRef(); \
+}
+
+#define SAFE_HOST_RELEASE(pObj) \
+{\
+if (pObj && pObj->IsBeHosted()) pObj->Release(); \
+}
 
 namespace Spark
 {

@@ -8,19 +8,9 @@
 #include "sparkthread.hpp"
 #include "sparkthreadpooldef.hpp"
 
-#define RUNNABLE_PTR_HOST_ADDREF(pRunnable)\
-{\
-    if (NULL == pRunnable){ return false; } pRunnable->SetBeHosted(true); pRunnable->AddRef();\
-}
-
 #define FAILED_THEN_UNINIT_AND_RETURN(result)\
 {\
 if (!result){ UnInit(); return false; } \
-}
-
-#define SAFE_HOST_RELEASE(pObj) \
-{\
-if (pObj && pObj->IsBeHosted()) pObj->Release(); \
 }
 
 namespace Spark

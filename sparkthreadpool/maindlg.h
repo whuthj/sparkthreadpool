@@ -44,7 +44,6 @@ public:
         MESSAGE_HANDLER(WM_CREATE, OnCreate)
         MESSAGE_HANDLER(WM_CLOSE, OnClose)
         MSG_WM_INITDIALOG(OnInitDialog)
-        MSG_WM_TIMER(OnTimer)
         MY_COMMAND_HANDLER(IDC_BUTTON_TEST, BN_CLICKED, OnBnClickedButtonTest)
     END_MSG_MAP()
 
@@ -54,7 +53,6 @@ protected:
     LRESULT OnBnClickedButtonTest(BOOL& /*bHandled*/);
 
     BOOL OnInitDialog(CWindow wndFocus, LPARAM lInitParam);
-    void OnTimer(UINT_PTR nIDEvent);
 
 private:
     void PrintText(LPCTSTR format, ...);

@@ -26,7 +26,7 @@ BOOL CMainDlg::OnInitDialog(CWindow wndFocus, LPARAM lInitParam)
     SetWindowText(L"SparkThreadPool测试");
     SetDlgItemText(IDC_BUTTON_TEST, L"异步执行");
 
-    SetTimer(1, 1000);
+    mTimerLog.StartTimer(this, &CMainDlg::DoTimerLog, NULL, 1000);
 
     return TRUE;
 }
@@ -36,17 +36,6 @@ LRESULT CMainDlg::OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, B
     EndDialog(0);
 
     return 0;
-}
-
-void CMainDlg::OnTimer(UINT_PTR nIDEvent)
-{
-    if (1 == nIDEvent)
-    {
-        CString strInfo;
-        strInfo.Format(L"线程池运行线程数：%d，任务数：%d，回收站线程数：%d", SparkThreadPool::Instance().GetThreadCount(),
-            SparkThreadPool::Instance().GetTaskCount(), SparkThreadPool::Instance().GetTrashThreadCount());
-        SetDlgItemText(IDC_STATIC_INFO, strInfo);
-    }
 }
 
 LRESULT CMainDlg::OnBnClickedButtonTest(BOOL& /*bHandled*/)
@@ -62,19 +51,17 @@ LRESULT CMainDlg::OnBnClickedButtonTest(BOOL& /*bHandled*/)
     //SPARK_POST_ASYN(CMainDlg, DoAsync, this, &Spark::Thread::SparkThreadPool::Instance(), NULL);
     SPARK_INSTANCE_ASYN(CMainDlg, DoAsync, NULL);
 
-    mTimer1.StartTimer(this, &CMainDlg::DoTimer1, NULL, 1000);
     mTimer2.StartTimer(this, &CMainDlg::DoTimer2, NULL, 1000);
 
     return 0;
 }
 
-void CMainDlg::DoTimer1(void* lpParam)
+void CMainDlg::DoTimerLog(void* lpParam)
 {
-    PrintText(L"DoTimer1：%d", mTimer1.GetRunCount());
-    if (mTimer1.GetRunCount() == 10)
-    {
-        mTimer1.StopTimer();
-    }
+    CString strInfo;
+    strInfo.Format(L"线程池运行线程数：%d，任务数：%d，回收站线程数：%d", SparkThreadPool::Instance().GetThreadCount(),
+        SparkThreadPool::Instance().GetTaskCount(), SparkThreadPool::Instance().GetTrashThreadCount());
+    SetDlgItemText(IDC_STATIC_INFO, strInfo);
 }
 
 void CMainDlg::DoTimer2(void* lpParam)

@@ -97,6 +97,28 @@ namespace Spark
                 return nCount;
             }
 
+            void Clear()
+            {
+                SparkLocker locker(m_lockMap);
+                m_Map.clear();
+            }
+
+            void Lock()
+            {
+                m_lockMap.Lock();
+            }
+
+            void Unlock()
+            {
+                m_lockMap.Unlock();
+            }
+
+            std::map<K, V>& GetMap()
+            {
+                SparkLocker locker(m_lockMap);
+                return m_Map;
+            }
+
         private:
             std::map<K, V> m_Map;
             SparkLock m_lockMap;
