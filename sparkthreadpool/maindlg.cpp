@@ -26,7 +26,7 @@ BOOL CMainDlg::OnInitDialog(CWindow wndFocus, LPARAM lInitParam)
     SetWindowText(L"SparkThreadPool测试");
     SetDlgItemText(IDC_BUTTON_TEST, L"异步执行");
 
-    mTimerLog.StartTimer(this, &CMainDlg::DoTimerLog, NULL, 1000);
+    m_timerLog.StartTimer(this, &CMainDlg::DoTimerLog, NULL, 1000);
 
     return TRUE;
 }
@@ -51,7 +51,7 @@ LRESULT CMainDlg::OnBnClickedButtonTest(BOOL& /*bHandled*/)
     //SPARK_POST_ASYN(CMainDlg, DoAsync, this, &Spark::Thread::SparkThreadPool::Instance(), NULL);
     SPARK_INSTANCE_ASYN(CMainDlg, DoAsync, NULL);
 
-    mTimer2.StartTimer(this, &CMainDlg::DoTimer2, NULL, 1000);
+    m_timer.StartTimer(this, &CMainDlg::DoTimer2, NULL, 1000, 2);
 
     return 0;
 }
@@ -66,11 +66,11 @@ void CMainDlg::DoTimerLog(void* lpParam)
 
 void CMainDlg::DoTimer2(void* lpParam)
 {
-    PrintText(L"DoTimer2：%d", mTimer2.GetRunCount());
-    if (mTimer2.GetRunCount() == 10)
-    {
-        mTimer2.StopTimer();
-    }
+    PrintText(L"DoTimer2：%d", m_timer.GetRunCount());
+    //if (mTimer2.GetRunCount() == 10)
+    //{
+    //    mTimer2.StopTimer();
+    //}
 }
 
 void CMainDlg::DoAsync(void* lpParam)

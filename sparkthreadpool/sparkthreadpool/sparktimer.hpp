@@ -26,10 +26,22 @@ namespace Spark
                 virtual void OnTimer(UINT_PTR nTimerId)
                 {
                     SparkTimerTask* pRunnable = m_mapTimerTask.Get(nTimerId);
-                    if (pRunnable)
+                    if (NULL == pRunnable)
                     {
-                        pRunnable->AddRunCount();
-                        pRunnable->Run();
+                        return;
+                    }
+
+                    pRunnable->AddRunCount();
+                    pRunnable->Run();
+
+                    if (pRunnable->GetLimitRunCount() <= 0)
+                    {
+                        return;
+                    }
+
+                    if (pRunnable->GetLimitRunCount() <= pRunnable->GetRunCount())
+                    {
+                        StopTimer(nTimerId);
                     }
                 }
 
@@ -51,30 +63,30 @@ namespace Spark
             public:
                 long StartTimer(SparkTimerTask* pTask, UINT nElapse)
                 {
-                    long lTimerIndex = m_mapTimerTask.Count();
-                    SetTimer(lTimerIndex, nElapse);
-                    m_mapTimerTask.Push(lTimerIndex, pTask);
+                    long lTimerId = m_mapTimerTask.Count();
+                    SetTimer(lTimerId, nElapse);
+                    m_mapTimerTask.Push(lTimerId, pTask);
 
-                    return lTimerIndex;
+                    return lTimerId;
                 }
 
-                void StopTimer(long lTimerIndex)
+                void StopTimer(long lTimerId)
                 {
-                    SparkTimerTask* pRunnable = m_mapTimerTask.Get(lTimerIndex);
+                    SparkTimerTask* pRunnable = m_mapTimerTask.Get(lTimerId);
                     if (NULL == pRunnable) { return; }
 
                     if (pRunnable && pRunnable->IsBeHosted())
                     {
                         pRunnable->Release();
                     }
-                    KillTimer(lTimerIndex);
-                    m_mapTimerTask.Remove(lTimerIndex);
+                    KillTimer(lTimerId);
+                    m_mapTimerTask.Remove(lTimerId);
                 }
 
-                int GetTimerRunCount(long lTimerIndex)
+                int GetTimerRunCount(long lTimerId)
                 {
                     int nRunCount = 0;
-                    SparkTimerTask* pRunnable = m_mapTimerTask.Get(lTimerIndex);
+                    SparkTimerTask* pRunnable = m_mapTimerTask.Get(lTimerId);
                     if (pRunnable)
                     {
                         nRunCount = pRunnable->GetRunCount();
@@ -94,16 +106,20 @@ namespace Spark
             }
 
             template<typename T>
-            void StartTimer(T* pObj, void(T::*pFun)(void*), void* lpParam, UINT nElapse)
+            bool StartTimer(T* pObj, void(T::*pFun)(void*), void* lpParam, UINT nElapse, int nRunCount = 0)
             {
+                if (nRunCount < 0) { return false; }
+
                 StopTimer();
                 SparkTimerTask* pTask = CreateTimerTask(pObj, pFun, lpParam);
 
-                pTask->SetBeHosted(true);
-                pTask->AddRef();
+                RUNNABLE_PTR_HOST_ADDREF(pTask);
+                pTask->SetLimitRunCount(nRunCount);
 
                 s_wnd.Create(SPARK_TIMER_WND_CLASS_NAME);
                 m_lTimerIndex = s_wnd.StartTimer(pTask, nElapse);
+
+                return true;
             }
 
             void StopTimer()

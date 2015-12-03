@@ -68,11 +68,11 @@ private:
     void DoSendMsgToMainThread(void* lpParam);
     void DoPostMsgToMainThread(void* lpParam);
 
-    void DoTimer1(void* lpParam);
+    void DoTimerLog(void* lpParam);
     void DoTimer2(void* lpParam);
 
 private:
-    SparkWndTimer mTimer1;
-    SparkWndTimer mTimer2;
+    SparkWndTimer m_timerLog;
+    SparkWndTimer m_timer;
 
 };

@@ -12,6 +12,8 @@ namespace Spark
             virtual ~SparkTimerTask() {};
             virtual int GetRunCount() const = 0;
             virtual void SetRunCount(int nValue) = 0;
+            virtual int GetLimitRunCount() const = 0;
+            virtual void SetLimitRunCount(int nValue) = 0;
             virtual void AddRunCount() = 0;
         };
         
@@ -27,6 +29,7 @@ namespace Spark
                 m_pMemberFun->AddRef();
 
                 m_nRunCount = 0;
+                m_nLimitRunCount = 0;
             }
 
             virtual ~MemberSparkTimerTask()
@@ -55,6 +58,16 @@ namespace Spark
                 m_nRunCount = nValue;
             }
 
+            virtual int GetLimitRunCount() const
+            {
+                return m_nLimitRunCount;
+            }
+
+            virtual void SetLimitRunCount(int nValue)
+            {
+                m_nLimitRunCount = nValue;
+            }
+
             virtual void AddRunCount()
             {
                 ++m_nRunCount;
@@ -63,6 +76,7 @@ namespace Spark
         private:
             MemberFunPtrRunnable<T>* m_pMemberFun;
             int m_nRunCount;
+            int m_nLimitRunCount;
 
         };
 
