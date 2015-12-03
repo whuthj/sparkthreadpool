@@ -73,6 +73,13 @@ namespace Spark
                 ++m_nRunCount;
             }
 
+            virtual void* GetRunObj()
+            {
+                if (NULL == m_pMemberFun) { return NULL; }
+
+                return m_pMemberFun->GetRunObj();
+            }
+
         private:
             MemberFunPtrRunnable<T>* m_pMemberFun;
             int m_nRunCount;

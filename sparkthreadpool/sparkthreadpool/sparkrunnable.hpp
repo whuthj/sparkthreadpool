@@ -47,6 +47,7 @@ namespace Spark
         {
         public:
             virtual ~Runnable() {};
+            virtual void* GetRunObj() { return NULL; };
             
         };
 
@@ -99,6 +100,11 @@ namespace Spark
                 {
                     (m_pObj->*m_pFun)(m_pParam);
                 }
+            }
+
+            virtual void* GetRunObj()
+            {
+                return m_pObj;
             }
 
         private:

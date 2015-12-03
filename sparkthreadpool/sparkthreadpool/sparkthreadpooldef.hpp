@@ -14,7 +14,15 @@
 struct tag_dd_##F : public tag_dd_base{ FIELD(__VA_ARGS__); }; \
 void asyn_##F(void* arg){ tag_dd_##F* __p__ = (tag_dd_##F*)arg; F(EXPAND(__VA_ARGS__)); delete __p__; }
 
-struct tag_dd_base{ virtual ~tag_dd_base(){} };
+struct tag_dd_base { virtual ~tag_dd_base() {} };
+
+//////////////////////////////////////////////////////////////////////////
+// 移除当前类任务
+
+#define SPARK_INSTANCE_DESTROY_TASKS(LP_OBJ)\
+{\
+    Spark::Thread::SparkThreadPool::Instance().DestroyThisTasks(LP_OBJ);\
+}
 
 //////////////////////////////////////////////////////////////////////////
 // 切换到非主线程执行

@@ -121,6 +121,11 @@ namespace Spark
                 m_threadPoolImpl.UnInit(dwPerWaitMilliseconds);
             }
 
+            int DestroyThisTasks(void* lpThis)
+            {
+                return m_threadPoolImpl.DestroyThisTasks(lpThis);
+            }
+
             template<typename T>
             bool SwitchToWndThread(T* pObj, void(T::*pFun)(void*), void* lpParam = NULL, bool bIsSendMsg = false)
             {

@@ -139,6 +139,11 @@ namespace Spark
                 m_nMsgThreadId = ::GetCurrentThreadId();
             }
 
+            int DestroyThisTasks(void* lpThis)
+            {
+                return DestroyTasksByRunObj(lpThis);
+            }
+
             void UnInit(DWORD dwPerWaitMilliseconds = 100)
             {
                 SetExitEvent();
@@ -388,6 +393,30 @@ namespace Spark
                     itr++;
                 }
                 m_tasks.clear();
+            }
+
+            int DestroyTasksByRunObj(void* lpRunObj)
+            {
+                int nDeleteCount = 0;
+
+                SparkLocker locker(m_lockTasks);
+
+                TasksItr itr = m_tasks.begin();
+                while (itr != m_tasks.end())
+                {
+                    Runnable* pRunnable = *itr;
+                    if (lpRunObj == pRunnable->GetRunObj())
+                    {
+                        SAFE_HOST_RELEASE(pRunnable);
+                        itr = m_tasks.erase(itr);
+                        nDeleteCount++;
+                        continue;
+                    }
+                    itr++;
+                }
+                m_tasks.clear();
+
+                return nDeleteCount;
             }
 
             void AddTaskAndNotify(Runnable* pRunnable)

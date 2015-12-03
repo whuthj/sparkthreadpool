@@ -7,6 +7,7 @@ CMainDlg::CMainDlg()
 
 CMainDlg::~CMainDlg()
 {
+    SparkWndTimer::DestroyThisTimerTask(this);
 }
 
 LRESULT CMainDlg::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
@@ -35,6 +36,8 @@ LRESULT CMainDlg::OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, B
 {
     EndDialog(0);
 
+    SPARK_INSTANCE_DESTROY_TASKS(this);
+
     return 0;
 }
 
@@ -52,7 +55,7 @@ LRESULT CMainDlg::OnBnClickedButtonTest(BOOL& /*bHandled*/)
     SPARK_INSTANCE_ASYN(CMainDlg, DoAsync, NULL);
 
     m_timer.StartTimer(this, &CMainDlg::DoTimer, NULL, 1000, 2);
-    SparkWndTimer::DelayExecute(this, &CMainDlg::DoDelay, NULL, 2000);
+    SparkWndTimer::Schedule(this, &CMainDlg::DoDelay, NULL, 2000, 10);
 
     return 0;
 }

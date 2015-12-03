@@ -100,6 +100,30 @@ namespace Spark
                     return nRunCount;
                 }
 
+                int DestroyTimerTask(void* lpThis)
+                {
+                    int nDeleteCount = 0;
+
+                    m_mapTimerTask.Lock();
+                    std::map<long, SparkTimerTask*>& map = m_mapTimerTask.GetMap();
+                    std::map<long, SparkTimerTask*>::iterator itr = map.begin();
+                    while (itr != map.end())
+                    {
+                        SparkTimerTask* pRunnable = itr->second;
+                        if (lpThis == pRunnable->GetRunObj())
+                        {
+                            SAFE_HOST_RELEASE(pRunnable);
+                            itr = map.erase(itr);
+                            nDeleteCount++;
+                            continue;
+                        }
+                        itr++;
+                    }
+                    m_mapTimerTask.Unlock();
+
+                    return nDeleteCount;
+                }
+
             private:
                 SparkSyncMap<long, SparkTimerTask*> m_mapTimerTask;
                 volatile long m_lTimerId;
@@ -129,17 +153,22 @@ namespace Spark
             }
 
             template<typename T>
-            static bool DelayExecute(T* pObj, void(T::*pFun)(void*), void* lpParam, UINT nElapse)
+            static bool Schedule(T* pObj, void(T::*pFun)(void*), void* lpParam, UINT nElapse, int nRunCount = 0)
             {
                 SparkTimerTask* pTask = CreateTimerTask(pObj, pFun, lpParam);
 
                 RUNNABLE_PTR_HOST_ADDREF(pTask);
-                pTask->SetLimitRunCount(1);
+                pTask->SetLimitRunCount(nRunCount);
 
                 s_wnd.Create(SPARK_TIMER_WND_CLASS_NAME);
                 s_wnd.StartTimer(pTask, nElapse);
 
                 return true;
+            }
+
+            static int DestroyThisTimerTask(void* lpThis)
+            {
+                return s_wnd.DestroyTimerTask(lpThis);
             }
 
             void StopTimer()
