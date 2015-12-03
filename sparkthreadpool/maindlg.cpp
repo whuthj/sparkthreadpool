@@ -51,7 +51,8 @@ LRESULT CMainDlg::OnBnClickedButtonTest(BOOL& /*bHandled*/)
     //SPARK_POST_ASYN(CMainDlg, DoAsync, this, &Spark::Thread::SparkThreadPool::Instance(), NULL);
     SPARK_INSTANCE_ASYN(CMainDlg, DoAsync, NULL);
 
-    m_timer.StartTimer(this, &CMainDlg::DoTimer2, NULL, 1000, 2);
+    m_timer.StartTimer(this, &CMainDlg::DoTimer, NULL, 1000, 2);
+    SparkWndTimer::DelayExecute(this, &CMainDlg::DoDelay, NULL, 2000);
 
     return 0;
 }
@@ -64,13 +65,18 @@ void CMainDlg::DoTimerLog(void* lpParam)
     SetDlgItemText(IDC_STATIC_INFO, strInfo);
 }
 
-void CMainDlg::DoTimer2(void* lpParam)
+void CMainDlg::DoTimer(void* lpParam)
 {
     PrintText(L"DoTimer2：%d", m_timer.GetRunCount());
     //if (mTimer2.GetRunCount() == 10)
     //{
     //    mTimer2.StopTimer();
     //}
+}
+
+void CMainDlg::DoDelay(void* lpParam)
+{
+    PrintText(L"DoDelay 延迟2s执行");
 }
 
 void CMainDlg::DoAsync(void* lpParam)

@@ -16,6 +16,11 @@ namespace Spark
             class TimerWnd : public SparkMsgWnd
             {
             public:
+                TimerWnd()
+                {
+                    m_lTimerId = -1;
+                }
+
                 virtual ~TimerWnd()
                 {
                     DestroyWindow();
@@ -63,11 +68,11 @@ namespace Spark
             public:
                 long StartTimer(SparkTimerTask* pTask, UINT nElapse)
                 {
-                    long lTimerId = m_mapTimerTask.Count();
-                    SetTimer(lTimerId, nElapse);
-                    m_mapTimerTask.Push(lTimerId, pTask);
+                    ::InterlockedIncrement(&m_lTimerId);
+                    SetTimer(m_lTimerId, nElapse);
+                    m_mapTimerTask.Push(m_lTimerId, pTask);
 
-                    return lTimerId;
+                    return m_lTimerId;
                 }
 
                 void StopTimer(long lTimerId)
@@ -97,6 +102,7 @@ namespace Spark
 
             private:
                 SparkSyncMap<long, SparkTimerTask*> m_mapTimerTask;
+                volatile long m_lTimerId;
 
             };
         public:
@@ -118,6 +124,20 @@ namespace Spark
 
                 s_wnd.Create(SPARK_TIMER_WND_CLASS_NAME);
                 m_lTimerIndex = s_wnd.StartTimer(pTask, nElapse);
+
+                return true;
+            }
+
+            template<typename T>
+            static bool DelayExecute(T* pObj, void(T::*pFun)(void*), void* lpParam, UINT nElapse)
+            {
+                SparkTimerTask* pTask = CreateTimerTask(pObj, pFun, lpParam);
+
+                RUNNABLE_PTR_HOST_ADDREF(pTask);
+                pTask->SetLimitRunCount(1);
+
+                s_wnd.Create(SPARK_TIMER_WND_CLASS_NAME);
+                s_wnd.StartTimer(pTask, nElapse);
 
                 return true;
             }
