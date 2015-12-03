@@ -78,6 +78,11 @@ namespace Spark
                 m_pParam = lpParam;
             }
 
+            virtual ~MemberFunPtrRunnable()
+            {
+
+            }
+
             virtual void Run()
             {
                 if (NULL != m_pObj && NULL != m_pFun)

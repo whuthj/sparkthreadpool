@@ -62,7 +62,28 @@ LRESULT CMainDlg::OnBnClickedButtonTest(BOOL& /*bHandled*/)
     //SPARK_POST_ASYN(CMainDlg, DoAsync, this, &Spark::Thread::SparkThreadPool::Instance(), NULL);
     SPARK_INSTANCE_ASYN(CMainDlg, DoAsync, NULL);
 
+    mTimer1.StartTimer(this, &CMainDlg::DoTimer1, NULL, 1000);
+    mTimer2.StartTimer(this, &CMainDlg::DoTimer2, NULL, 1000);
+
     return 0;
+}
+
+void CMainDlg::DoTimer1(void* lpParam)
+{
+    PrintText(L"DoTimer1：%d", mTimer1.GetRunCount());
+    if (mTimer1.GetRunCount() == 10)
+    {
+        mTimer1.StopTimer();
+    }
+}
+
+void CMainDlg::DoTimer2(void* lpParam)
+{
+    PrintText(L"DoTimer2：%d", mTimer2.GetRunCount());
+    if (mTimer2.GetRunCount() == 10)
+    {
+        mTimer2.StopTimer();
+    }
 }
 
 void CMainDlg::DoAsync(void* lpParam)

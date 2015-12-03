@@ -2,40 +2,34 @@
 
 #include "sparkrunnable.hpp"
 
-#define DECLEAR_WND_CLASS_NAME(Name)\
-public:\
-    static LPCWSTR GetWndClassName()\
-    {\
-    return Name;\
-    }
-
 namespace Spark
 {
     namespace Thread
     {
         static const int TASK_HANDLE_MSG_ID = WM_APP + 1001;
+        static const LPCWSTR SPARK_MSG_WND_CLASS_NAME = L"SparkMsgWnd";
         
         class SparkMsgWnd
         {
-            DECLEAR_WND_CLASS_NAME(L"SparkMsgWnd")
         public:
             SparkMsgWnd() : m_hWnd(NULL)
             {
 
             }
 
-            ~SparkMsgWnd()
+            virtual ~SparkMsgWnd()
             {
             }
 
-            HWND Create()
+            HWND Create(LPCWSTR lpszClassName = SPARK_MSG_WND_CLASS_NAME)
             {
-                if (::IsWindow(m_hWnd)) return m_hWnd;
+                if (::IsWindow(m_hWnd)) { return m_hWnd; }
+                if (NULL == lpszClassName) { return NULL; }
 
                 HINSTANCE hInstance = ::GetModuleHandle(NULL);
-                RegisterWndClass(hInstance);
+                RegisterWndClass(hInstance, lpszClassName);
 
-                m_hWnd = ::CreateWindow(GetWndClassName(), L"", NULL, 0, 0, 0, 0, HWND_MESSAGE, NULL, NULL, this);
+                m_hWnd = ::CreateWindow(lpszClassName, L"", NULL, 0, 0, 0, 0, HWND_MESSAGE, NULL, NULL, this);
 
                 return m_hWnd;
             }
@@ -84,19 +78,20 @@ namespace Spark
             }
 
         protected:
-            BOOL RegisterWndClass(HINSTANCE hInstance)
+            BOOL RegisterWndClass(HINSTANCE hInstance, LPCWSTR lpszClassName)
             {
                 BOOL bInit = FALSE;
+                if (NULL == lpszClassName) { return bInit; }
 
                 WNDCLASS wndClass;
                 memset(&wndClass, 0, sizeof(wndClass));
 
-                bInit = ::GetClassInfo(hInstance, GetWndClassName(), &wndClass);
-                if (bInit) return bInit;
+                bInit = ::GetClassInfo(hInstance, lpszClassName, &wndClass);
+                if (bInit) { return bInit; }
 
                 wndClass.lpfnWndProc    = SparkMsgWnd::WndProc;
                 wndClass.hInstance      = hInstance;
-                wndClass.lpszClassName  = GetWndClassName();
+                wndClass.lpszClassName = lpszClassName;
 
                 bInit = ::RegisterClass(&wndClass) != 0 ? TRUE : FALSE;
 
@@ -177,10 +172,14 @@ namespace Spark
 
             LRESULT OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
             {
-                UINT_PTR nEventId = (UINT_PTR)wParam;
+                UINT_PTR nTimerId = (UINT_PTR)wParam;
+
+                OnTimer(nTimerId);
 
                 return 0;
             }
+
+            virtual void OnTimer(UINT_PTR nTimerId) {}
 
         private:
             HWND m_hWnd;

@@ -83,6 +83,7 @@
     <ClInclude Include="sparkthreadpool\sparklock.hpp" />
     <ClInclude Include="sparkthreadpool\sparkmsgwnd.hpp" />
     <ClInclude Include="sparkthreadpool\sparkrunnable.hpp" />
+    <ClInclude Include="sparkthreadpool\sparksynccontainer.hpp" />
     <ClInclude Include="sparkthreadpool\sparkthread.hpp" />
     <ClInclude Include="sparkthreadpool\sparkthreadpool.hpp" />
     <ClInclude Include="sparkthreadpool\sparkthreadpooldef.hpp" />

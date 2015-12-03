@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "threadpooltest.h"
+#include "sparkthreadpool\sparktimer.hpp"
 
 #define MY_COMMAND_HANDLER(id, code, func) \
 if (uMsg == WM_COMMAND && id == LOWORD(wParam) && code == HIWORD(wParam)) \
@@ -68,5 +69,12 @@ private:
     void DoAsync(void* lpParam);
     void DoSendMsgToMainThread(void* lpParam);
     void DoPostMsgToMainThread(void* lpParam);
+
+    void DoTimer1(void* lpParam);
+    void DoTimer2(void* lpParam);
+
+private:
+    SparkWndTimer mTimer1;
+    SparkWndTimer mTimer2;
 
 };
