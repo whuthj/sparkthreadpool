@@ -3,13 +3,19 @@ c++98/03 windows threadpool
 
 新增特性：
 1.线程池安全回调解决方案
+
 SPARK_INSTANCE_DESTROY_TASKS(this);
+
 类析构时调用，安全结束运行的线程任务
 
 2.添加UI定时器的使用
+
 SparkWndTimer::Schedule(this, &T::DoDelay, NULL, 2000, 10);
+
 UI定时器运行在主线程，方便做延时任务，支持设置执行多次
+
 窗口销毁时调用
+
 SparkWndTimer::DestroyThisTimerTask(this);
 
 一行代码让函数运行在工作线程中/主线程中
