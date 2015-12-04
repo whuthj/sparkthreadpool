@@ -19,6 +19,8 @@ UI定时器运行在主线程，方便做延时任务，支持设置执行多次
 
 SparkWndTimer::DestroyThisTimerTask(this);
 
+--------------------------------------------------------------------------------------
+
 一行代码让函数运行在工作线程中/主线程中
 
 SPARK_INSTANCE_SWTICH_TO_WORKTHREAD
