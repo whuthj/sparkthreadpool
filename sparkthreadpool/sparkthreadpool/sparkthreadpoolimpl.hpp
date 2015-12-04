@@ -151,6 +151,7 @@ namespace Spark
                 DestroyCleanerThread();
                 DestroyThreadPool(dwPerWaitMilliseconds);
                 DestroyTasks();
+                DestroyRunTasks();
                 DestroyMsgWnd();
 
                 CloseHandles();
@@ -395,26 +396,31 @@ namespace Spark
                 m_tasks.clear();
             }
 
+            void DestroyRunTasks()
+            {
+                SparkLocker locker(m_lockRunTasks);
+                m_runTasks.clear();
+            }
+
             int DestroyTasksByRunObj(void* lpRunObj)
             {
                 int nDeleteCount = 0;
 
-                SparkLocker locker(m_lockTasks);
+                SparkLocker locker(m_lockRunTasks);
 
-                TasksItr itr = m_tasks.begin();
-                while (itr != m_tasks.end())
+                TasksItr itr = m_runTasks.begin();
+                while (itr != m_runTasks.end())
                 {
                     Runnable* pRunnable = *itr;
                     if (lpRunObj == pRunnable->GetRunObj())
                     {
-                        SAFE_HOST_RELEASE(pRunnable);
-                        itr = m_tasks.erase(itr);
+                        SAFE_RELEASE_RUN_OBJ(pRunnable);
+                        itr = m_runTasks.erase(itr);
                         nDeleteCount++;
                         continue;
                     }
                     itr++;
                 }
-                m_tasks.clear();
 
                 return nDeleteCount;
             }
@@ -430,6 +436,30 @@ namespace Spark
                 SparkLocker locker(m_lockTasks);
 
                 m_tasks.push_back(pRunnable);
+            }
+
+            void AddRunTask(Runnable* pRunnable)
+            {
+                SparkLocker locker(m_lockRunTasks);
+
+                m_runTasks.push_back(pRunnable);
+            }
+
+            void RemoveRunTask(Runnable* pRunnable)
+            {
+                SparkLocker locker(m_lockRunTasks);
+
+                TasksItr itr = m_runTasks.begin();
+                while (itr != m_runTasks.end())
+                {
+                    Runnable* pTmp = *itr;
+                    if (pRunnable == pTmp)
+                    {
+                        itr = m_runTasks.erase(itr);
+                        continue;
+                    }
+                    itr++;
+                }
             }
 
             void NotifyAddTask()
@@ -550,6 +580,7 @@ namespace Spark
                 {
                     pWorkThread->SetWorkStatus(emSTWStatus_Work);
                 }
+                AddRunTask(pTask);
             }
 
             void ExecuteRun( SparkThreadWork* pWorkThread, Runnable* pTask )
@@ -563,7 +594,7 @@ namespace Spark
             void AfterExecuteRun( SparkThreadWork* pWorkThread, Runnable* pTask )
             {
                 ResetWorkThreadStatus(pWorkThread);
-
+                RemoveRunTask(pTask);
                 SAFE_HOST_RELEASE(pTask);
             }
 
@@ -727,6 +758,7 @@ namespace Spark
             ThreadPool m_threadPool;
             ThreadPool m_trashThread;
             Tasks m_tasks;
+            Tasks m_runTasks;
 
             SparkThread* m_pCleanerThread;
             SparkMsgWnd  m_msgWnd;
@@ -734,6 +766,7 @@ namespace Spark
             SparkLock m_lockThreadPool;
             SparkLock m_lockTrashThreadPool;
             SparkLock m_lockTasks;
+            SparkLock m_lockRunTasks;
 
         };
 

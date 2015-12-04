@@ -32,6 +32,18 @@ if (uMsg == WM_TIMER) \
         return TRUE; \
 }
 
+class CTestTaskRelease
+{
+public:
+    CTestTaskRelease();
+    virtual ~CTestTaskRelease();
+    void TestDoAsync();
+    void DoAsync(void* lpParam);
+    void DoTest();
+private:
+    int m_nTest;
+};
+
 class CMainDlg : public CDialogImpl<CMainDlg>
 {
 public:

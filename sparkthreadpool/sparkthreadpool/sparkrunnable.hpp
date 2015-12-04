@@ -12,6 +12,11 @@ if (NULL == pRunnable){ return false; } pRunnable->SetBeHosted(true); pRunnable-
 if (pObj && pObj->IsBeHosted()) pObj->Release(); \
 }
 
+#define SAFE_RELEASE_RUN_OBJ(pObj) \
+{\
+if (pObj) pObj->ReleaseRunObj(); \
+}
+
 namespace Spark
 {
     namespace Thread
@@ -48,7 +53,7 @@ namespace Spark
         public:
             virtual ~Runnable() {};
             virtual void* GetRunObj() { return NULL; };
-            
+            virtual void ReleaseRunObj() {};
         };
 
         class FunPtrRunnable : public Runnable
@@ -87,6 +92,9 @@ namespace Spark
                 m_pObj = pObj;
                 m_pFun = pFun;
                 m_pParam = lpParam;
+                m_lObjRef = 0;
+
+                ::InterlockedIncrement(&m_lObjRef);
             }
 
             virtual ~MemberFunPtrRunnable()
@@ -96,10 +104,18 @@ namespace Spark
 
             virtual void Run()
             {
-                if (NULL != m_pObj && NULL != m_pFun)
+                if (NULL == m_pObj) { return; }
+                if (NULL == m_pFun) { return; }
+
+                if (::InterlockedIncrement(&m_lObjRef) <= 1)
                 {
-                    (m_pObj->*m_pFun)(m_pParam);
+                    ::InterlockedDecrement(&m_lObjRef);
+                    return;
                 }
+
+                (m_pObj->*m_pFun)(m_pParam);
+
+                ::InterlockedDecrement(&m_lObjRef);
             }
 
             virtual void* GetRunObj()
@@ -107,10 +123,25 @@ namespace Spark
                 return m_pObj;
             }
 
+            virtual void ReleaseRunObj()
+            {
+                for (;;)
+                {
+                    if (::InterlockedDecrement(&m_lObjRef) <= 0)
+                    {
+                        break;
+                    }
+
+                    ::InterlockedIncrement(&m_lObjRef);
+                    ::Sleep(10);
+                }
+            }
+
         private:
             T*            m_pObj;
             RunFun        m_pFun;
             void*         m_pParam;
+            volatile long m_lObjRef;
 
         };
 

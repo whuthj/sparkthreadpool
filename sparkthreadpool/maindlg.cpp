@@ -1,6 +1,34 @@
 ﻿#include "stdafx.h"
 #include "maindlg.h"
 
+CTestTaskRelease::CTestTaskRelease()
+{
+    m_nTest = 123;
+}
+
+CTestTaskRelease::~CTestTaskRelease()
+{
+    SPARK_INSTANCE_DESTROY_TASKS(this);
+}
+
+void CTestTaskRelease::TestDoAsync()
+{
+    SPARK_INSTANCE_ASYN(CTestTaskRelease, DoAsync, NULL);
+}
+
+void CTestTaskRelease::DoAsync(void* lpParam)
+{
+    ::Sleep(10000);
+    DoTest();
+}
+
+void CTestTaskRelease::DoTest()
+{
+    int nTest = m_nTest;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 CMainDlg::CMainDlg()
 {
 }
@@ -92,6 +120,10 @@ void CMainDlg::DoAsync(void* lpParam)
     SPARK_INSTANCE_POST_MSG(CMainDlg, DoPostMsgToMainThread, a);
 
     SPARK_INSTANCE_ASYN(CMainDlg, DoPostMsgToMainThread, NULL);
+
+    CTestTaskRelease test;
+    test.TestDoAsync();
+    ::Sleep(1000);
 
     int b = 1000;
 }
