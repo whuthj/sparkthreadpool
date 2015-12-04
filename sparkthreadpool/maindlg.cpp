@@ -9,11 +9,13 @@ CTestTaskRelease::CTestTaskRelease()
 CTestTaskRelease::~CTestTaskRelease()
 {
     SPARK_INSTANCE_DESTROY_TASKS(this);
+    m_nTest = 100;
 }
 
 void CTestTaskRelease::TestDoAsync()
 {
     SPARK_INSTANCE_ASYN(CTestTaskRelease, DoAsync, NULL);
+    ::Sleep(2000);
 }
 
 void CTestTaskRelease::DoAsync(void* lpParam)
@@ -123,7 +125,6 @@ void CMainDlg::DoAsync(void* lpParam)
 
     CTestTaskRelease test;
     test.TestDoAsync();
-    ::Sleep(1000);
 
     int b = 1000;
 }

@@ -406,6 +406,16 @@ namespace Spark
             {
                 int nDeleteCount = 0;
 
+                nDeleteCount = DestroyWaitTasksByRunObj(lpRunObj);
+                nDeleteCount += DestroyRunTasksByRunObj(lpRunObj);
+
+                return nDeleteCount;
+            }
+
+            int DestroyRunTasksByRunObj(void* lpRunObj)
+            {
+                int nDeleteCount = 0;
+
                 SparkLocker locker(m_lockRunTasks);
 
                 TasksItr itr = m_runTasks.begin();
@@ -416,6 +426,29 @@ namespace Spark
                     {
                         SAFE_RELEASE_RUN_OBJ(pRunnable);
                         itr = m_runTasks.erase(itr);
+                        nDeleteCount++;
+                        continue;
+                    }
+                    itr++;
+                }
+
+                return nDeleteCount;
+            }
+
+            int DestroyWaitTasksByRunObj(void* lpRunObj)
+            {
+                int nDeleteCount = 0;
+
+                SparkLocker locker(m_lockTasks);
+
+                TasksItr itr = m_tasks.begin();
+                while (itr != m_tasks.end())
+                {
+                    Runnable* pRunnable = *itr;
+                    if (lpRunObj == pRunnable->GetRunObj())
+                    {
+                        SAFE_RELEASE_RUN_OBJ(pRunnable);
+                        itr = m_tasks.erase(itr);
                         nDeleteCount++;
                         continue;
                     }
