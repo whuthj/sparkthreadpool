@@ -8,17 +8,26 @@ CTestTaskRelease::CTestTaskRelease()
 
 CTestTaskRelease::~CTestTaskRelease()
 {
+    DWORD dwStart = ::GetTickCount();
     SPARK_INSTANCE_DESTROY_TASKS(this);
     m_nTest = 100;
+    DWORD dwCost = ::GetTickCount() - dwStart;
 }
 
 void CTestTaskRelease::TestDoAsync()
 {
-    SPARK_INSTANCE_ASYN(CTestTaskRelease, DoAsync, NULL);
+    SPARK_INSTANCE_ASYN(CTestTaskRelease, DoAsync1, NULL);
+    SPARK_INSTANCE_ASYN(CTestTaskRelease, DoAsync2, NULL);
     ::Sleep(1000);
 }
 
-void CTestTaskRelease::DoAsync(void* lpParam)
+void CTestTaskRelease::DoAsync1(void* lpParam)
+{
+    ::Sleep(5000);
+    DoTest();
+}
+
+void CTestTaskRelease::DoAsync2(void* lpParam)
 {
     ::Sleep(5000);
     DoTest();
@@ -66,7 +75,9 @@ LRESULT CMainDlg::OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, B
 {
     EndDialog(0);
 
+    DWORD dwStart = ::GetTickCount();
     SPARK_INSTANCE_DESTROY_TASKS(this);
+    DWORD dwCost = ::GetTickCount() - dwStart;
 
     return 0;
 }

@@ -38,7 +38,8 @@ public:
     CTestTaskRelease();
     virtual ~CTestTaskRelease();
     void TestDoAsync();
-    void DoAsync(void* lpParam);
+    void DoAsync1(void* lpParam);
+    void DoAsync2(void* lpParam);
     void DoTest();
 private:
     int m_nTest;
