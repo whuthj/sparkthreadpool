@@ -15,12 +15,12 @@ CTestTaskRelease::~CTestTaskRelease()
 void CTestTaskRelease::TestDoAsync()
 {
     SPARK_INSTANCE_ASYN(CTestTaskRelease, DoAsync, NULL);
-    ::Sleep(2000);
+    ::Sleep(1000);
 }
 
 void CTestTaskRelease::DoAsync(void* lpParam)
 {
-    ::Sleep(10000);
+    ::Sleep(5000);
     DoTest();
 }
 

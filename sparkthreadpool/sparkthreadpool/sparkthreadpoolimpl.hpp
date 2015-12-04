@@ -489,7 +489,7 @@ namespace Spark
                     if (pRunnable == pTmp)
                     {
                         itr = m_runTasks.erase(itr);
-                        continue;
+                        break;
                     }
                     itr++;
                 }
