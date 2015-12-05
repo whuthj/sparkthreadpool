@@ -3,14 +3,18 @@
 
 CTestTaskRelease::CTestTaskRelease()
 {
-    m_nTest = 123;
+    m_pTest = new int(123);
 }
 
 CTestTaskRelease::~CTestTaskRelease()
 {
     DWORD dwStart = ::GetTickCount();
     SPARK_INSTANCE_DESTROY_TASKS(this);
-    m_nTest = 100;
+    if (m_pTest)
+    {
+        delete m_pTest;
+        m_pTest = NULL;
+    }
     DWORD dwCost = ::GetTickCount() - dwStart;
 }
 
@@ -22,19 +26,19 @@ void CTestTaskRelease::TestDoAsync()
 
 void CTestTaskRelease::DoAsync1(void* lpParam)
 {
-    ::Sleep(1000);
+    ::Sleep(2000);
     DoTest();
 }
 
 void CTestTaskRelease::DoAsync2(void* lpParam)
 {
-    ::Sleep(1000);
+    ::Sleep(2000);
     DoTest();
 }
 
 void CTestTaskRelease::DoTest()
 {
-    int nTest = m_nTest;
+    int nTest = *m_pTest;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

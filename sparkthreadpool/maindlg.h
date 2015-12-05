@@ -42,7 +42,7 @@ public:
     void DoAsync2(void* lpParam);
     void DoTest();
 private:
-    int m_nTest;
+    int* m_pTest;
 };
 
 class CMainDlg : public CDialogImpl<CMainDlg>
