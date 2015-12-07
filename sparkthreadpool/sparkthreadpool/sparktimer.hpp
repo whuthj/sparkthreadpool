@@ -132,7 +132,7 @@ namespace Spark
         public:
             SparkWndTimer() 
             {
-                m_lTimerIndex = -1;
+                m_lTimerId = -1;
             }
 
             template<typename T>
@@ -147,13 +147,13 @@ namespace Spark
                 pTask->SetLimitRunCount(nRunCount);
 
                 s_wnd.Create(SPARK_TIMER_WND_CLASS_NAME);
-                m_lTimerIndex = s_wnd.StartTimer(pTask, nElapse);
+                m_lTimerId = s_wnd.StartTimer(pTask, nElapse);
 
                 return true;
             }
 
             template<typename T>
-            static bool Schedule(T* pObj, void(T::*pFun)(void*), void* lpParam, UINT nElapse, int nRunCount = 0)
+            static long Schedule(T* pObj, void(T::*pFun)(void*), void* lpParam, UINT nElapse, int nRunCount = 0)
             {
                 SparkTimerTask* pTask = CreateTimerTask(pObj, pFun, lpParam);
 
@@ -161,9 +161,12 @@ namespace Spark
                 pTask->SetLimitRunCount(nRunCount);
 
                 s_wnd.Create(SPARK_TIMER_WND_CLASS_NAME);
-                s_wnd.StartTimer(pTask, nElapse);
+                return s_wnd.StartTimer(pTask, nElapse);
+            }
 
-                return true;
+            static void StopTimer(long lTimerId)
+            {
+                s_wnd.StopTimer(lTimerId);
             }
 
             static int DestroyThisTimerTask(void* lpThis)
@@ -173,17 +176,17 @@ namespace Spark
 
             void StopTimer()
             {
-                s_wnd.StopTimer(m_lTimerIndex);
+                s_wnd.StopTimer(m_lTimerId);
             }
 
             int GetRunCount()
             {
-                return s_wnd.GetTimerRunCount(m_lTimerIndex);
+                return s_wnd.GetTimerRunCount(m_lTimerId);
             }
 
         private:
             static TimerWnd s_wnd;
-            long m_lTimerIndex;
+            long m_lTimerId;
         };
 
         __declspec(selectany) SparkWndTimer::TimerWnd SparkWndTimer::s_wnd;

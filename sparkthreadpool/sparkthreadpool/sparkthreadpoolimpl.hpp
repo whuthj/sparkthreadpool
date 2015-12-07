@@ -2,6 +2,7 @@
 
 #include <map>
 #include <list>
+#include <assert.h>
 #include "sparkasyndef.hpp"
 #include "sparkmsgwnd.hpp"
 #include "sparkrunnable.hpp"
@@ -404,6 +405,8 @@ namespace Spark
 
             int DestroyTasksByRunObj(void* lpRunObj)
             {
+                assert(::GetCurrentThreadId() == m_nMsgThreadId);
+
                 int nDeleteCount = 0;
 
                 nDeleteCount = DestroyWaitTasksByRunObj(lpRunObj);
