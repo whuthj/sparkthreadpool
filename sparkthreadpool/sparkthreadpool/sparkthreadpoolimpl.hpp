@@ -3,6 +3,7 @@
 #include <map>
 #include <list>
 #include <assert.h>
+#include <iterator>
 #include "sparkasyndef.hpp"
 #include "sparkmsgwnd.hpp"
 #include "sparkrunnable.hpp"
@@ -405,7 +406,8 @@ namespace Spark
 
             int DestroyTasksByRunObj(void* lpRunObj)
             {
-                assert(::GetCurrentThreadId() == m_nMsgThreadId);
+                //assert(::GetCurrentThreadId() == m_nMsgThreadId);
+                //throw std::runtime_error("建议在主线程调用避免死锁！！！");
 
                 int nDeleteCount = 0;
 
@@ -419,21 +421,36 @@ namespace Spark
             {
                 int nDeleteCount = 0;
 
-                SparkLocker locker(m_lockRunTasks);
+                Tasks tasks;
+                {
+                    SparkLocker locker(m_lockRunTasks);
+                    TasksItr itr = m_runTasks.begin();
+                    while (itr != m_runTasks.end())
+                    {
+                        Runnable* pRunnable = *itr;
+                        if (NULL != pRunnable && lpRunObj == pRunnable->GetRunObj())
+                        {
+                            pRunnable->AddRef();
+                            tasks.push_back(pRunnable);
+                        }
+                        itr++;
+                    }
+                }
 
-                TasksItr itr = m_runTasks.begin();
-                while (itr != m_runTasks.end())
+                TasksItr itr = tasks.begin();
+                while (itr != tasks.end())
                 {
                     Runnable* pRunnable = *itr;
                     if (lpRunObj == pRunnable->GetRunObj())
                     {
                         SAFE_RELEASE_RUN_OBJ(pRunnable);
-                        itr = m_runTasks.erase(itr);
+                        RemoveRunTask(pRunnable);
+                        SAFE_HOST_RELEASE(pRunnable);
                         nDeleteCount++;
-                        continue;
                     }
                     itr++;
                 }
+                tasks.clear();
 
                 return nDeleteCount;
             }
