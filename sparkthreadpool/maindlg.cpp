@@ -3,14 +3,18 @@
 
 CTestTaskRelease::CTestTaskRelease()
 {
-    m_nTest = 123;
+    m_pTest = new int(123);
 }
 
 CTestTaskRelease::~CTestTaskRelease()
 {
     DWORD dwStart = ::GetTickCount();
     SPARK_INSTANCE_DESTROY_TASKS(this);
-    m_nTest = 100;
+    if (m_pTest)
+    {
+        delete m_pTest;
+        m_pTest = NULL;
+    }
     DWORD dwCost = ::GetTickCount() - dwStart;
 }
 
@@ -18,24 +22,23 @@ void CTestTaskRelease::TestDoAsync()
 {
     SPARK_INSTANCE_ASYN(CTestTaskRelease, DoAsync1, NULL);
     SPARK_INSTANCE_ASYN(CTestTaskRelease, DoAsync2, NULL);
-    ::Sleep(1000);
 }
 
 void CTestTaskRelease::DoAsync1(void* lpParam)
 {
-    ::Sleep(5000);
+    ::Sleep(2000);
     DoTest();
 }
 
 void CTestTaskRelease::DoAsync2(void* lpParam)
 {
-    ::Sleep(5000);
+    ::Sleep(2000);
     DoTest();
 }
 
 void CTestTaskRelease::DoTest()
 {
-    int nTest = m_nTest;
+    int nTest = *m_pTest;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -96,7 +99,11 @@ LRESULT CMainDlg::OnBnClickedButtonTest(BOOL& /*bHandled*/)
     SPARK_INSTANCE_ASYN(CMainDlg, DoAsync, NULL);
 
     m_timer.StartTimer(this, &CMainDlg::DoTimer, NULL, 1000, 2);
-    SparkWndTimer::Schedule(this, &CMainDlg::DoDelay, NULL, 2000, 10);
+
+    CTestTaskRelease* pTest = new CTestTaskRelease();
+    pTest->TestDoAsync();
+
+    SparkWndTimer::Schedule(this, &CMainDlg::DoDelay, pTest, 2000, 1);
 
     return 0;
 }
@@ -121,6 +128,13 @@ void CMainDlg::DoTimer(void* lpParam)
 void CMainDlg::DoDelay(void* lpParam)
 {
     PrintText(L"DoDelay 延迟2s执行");
+    CTestTaskRelease* pTest = (CTestTaskRelease*)lpParam;
+
+    if (pTest)
+    {
+        delete pTest;
+        pTest = NULL;
+    }
 }
 
 void CMainDlg::DoAsync(void* lpParam)
@@ -133,9 +147,6 @@ void CMainDlg::DoAsync(void* lpParam)
     SPARK_INSTANCE_POST_MSG(CMainDlg, DoPostMsgToMainThread, a);
 
     SPARK_INSTANCE_ASYN(CMainDlg, DoPostMsgToMainThread, NULL);
-
-    CTestTaskRelease test;
-    test.TestDoAsync();
 
     int b = 1000;
 }
