@@ -1,9 +1,10 @@
 ﻿#include "stdafx.h"
 #include "maindlg.h"
 
-CTestTaskRelease::CTestTaskRelease()
+CTestTaskRelease::CTestTaskRelease(CMainDlg* pDlg)
 {
     m_pTest = new int(123);
+    m_pMainDlg = pDlg;
 }
 
 CTestTaskRelease::~CTestTaskRelease()
@@ -26,19 +27,23 @@ void CTestTaskRelease::TestDoAsync()
 
 void CTestTaskRelease::DoAsync1(void* lpParam)
 {
-    ::Sleep(2000);
+    ::Sleep(12000);
     DoTest();
 }
 
 void CTestTaskRelease::DoAsync2(void* lpParam)
 {
-    ::Sleep(2000);
+    ::Sleep(12000);
     DoTest();
 }
 
 void CTestTaskRelease::DoTest()
 {
     int nTest = *m_pTest;
+    if (m_pMainDlg)
+    {
+        m_pMainDlg->PrintText(L"CTestTaskRelease::DoTest %d", nTest);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -50,6 +55,9 @@ CMainDlg::CMainDlg()
 CMainDlg::~CMainDlg()
 {
     SparkWndTimer::DestroyThisTimerTask(this);
+    DWORD dwStart = ::GetTickCount();
+    SPARK_INSTANCE_DESTROY_TASKS(this);
+    DWORD dwCost = ::GetTickCount() - dwStart;
 }
 
 LRESULT CMainDlg::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
@@ -78,10 +86,6 @@ LRESULT CMainDlg::OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, B
 {
     EndDialog(0);
 
-    DWORD dwStart = ::GetTickCount();
-    SPARK_INSTANCE_DESTROY_TASKS(this);
-    DWORD dwCost = ::GetTickCount() - dwStart;
-
     return 0;
 }
 
@@ -100,7 +104,7 @@ LRESULT CMainDlg::OnBnClickedButtonTest(BOOL& /*bHandled*/)
 
     m_timer.StartTimer(this, &CMainDlg::DoTimer, NULL, 1000, 2);
 
-    CTestTaskRelease* pTest = new CTestTaskRelease();
+    CTestTaskRelease* pTest = new CTestTaskRelease(this);
     pTest->TestDoAsync();
 
     SparkWndTimer::Schedule(this, &CMainDlg::DoDelay, pTest, 2000, 1);
@@ -148,6 +152,12 @@ void CMainDlg::DoAsync(void* lpParam)
 
     SPARK_INSTANCE_ASYN(CMainDlg, DoPostMsgToMainThread, NULL);
 
+    for (int i = 0; i < 100; i++)
+    {
+        CTestTaskRelease test(this);
+        test.TestDoAsync();
+    }
+
     int b = 1000;
 }
 
@@ -186,6 +196,7 @@ void CMainDlg::DoInMainThread(CString strText)
     strText.AppendFormat(L"\r\n输出日志运行线程ID：%d\r\n\r\n", ::GetCurrentThreadId());
     CString strLog;
     GetDlgItemText(IDC_STATIC_TEXT, strLog);
+    OutputDebugString(strLog);
     
     if (_s_nLogCount++ > 100)
     {

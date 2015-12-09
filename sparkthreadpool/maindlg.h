@@ -32,10 +32,11 @@ if (uMsg == WM_TIMER) \
         return TRUE; \
 }
 
+class CMainDlg;
 class CTestTaskRelease
 {
 public:
-    CTestTaskRelease();
+    CTestTaskRelease(CMainDlg* pDlg);
     virtual ~CTestTaskRelease();
     void TestDoAsync();
     void DoAsync1(void* lpParam);
@@ -43,6 +44,7 @@ public:
     void DoTest();
 private:
     int* m_pTest;
+    CMainDlg* m_pMainDlg;
 };
 
 class CMainDlg : public CDialogImpl<CMainDlg>
@@ -67,7 +69,7 @@ protected:
 
     BOOL OnInitDialog(CWindow wndFocus, LPARAM lInitParam);
 
-private:
+public:
     void PrintText(LPCTSTR format, ...);
 
 private:

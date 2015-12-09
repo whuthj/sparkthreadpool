@@ -413,6 +413,10 @@ namespace Spark
 
                 nDeleteCount = DestroyWaitTasksByRunObj(lpRunObj);
                 nDeleteCount += DestroyRunTasksByRunObj(lpRunObj);
+                
+                // 再次检查有没有刚加入新的等待任务，
+                // 避免正在跑的任务完成后又添加新的任务
+                nDeleteCount += DestroyWaitTasksByRunObj(lpRunObj);
 
                 return nDeleteCount;
             }
@@ -446,7 +450,9 @@ namespace Spark
                         SAFE_RELEASE_RUN_OBJ(pRunnable);
                         RemoveRunTask(pRunnable);
                         SAFE_HOST_RELEASE(pRunnable);
+                        itr = tasks.erase(itr);
                         nDeleteCount++;
+                        continue;
                     }
                     itr++;
                 }
