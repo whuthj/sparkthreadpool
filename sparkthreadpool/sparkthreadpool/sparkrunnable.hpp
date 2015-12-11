@@ -29,7 +29,7 @@ namespace Spark
 
         public:
             virtual void AddRef(){ ::InterlockedIncrement(&m_lRef); }
-            virtual void Release(){ ::InterlockedDecrement(&m_lRef); if (0 == m_lRef){ delete this; } }
+            virtual void Release(){ if (0 == ::InterlockedDecrement(&m_lRef)){ delete this; } }
             virtual void SetBeHosted(bool value){ m_bIsBeHosted = value; }
             virtual bool IsBeHosted(){ return m_bIsBeHosted; }
 
