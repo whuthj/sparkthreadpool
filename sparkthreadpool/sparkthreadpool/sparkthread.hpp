@@ -24,7 +24,8 @@ namespace Spark
         class SparkThread : public IRunnable
         {
         private:
-            DISALLOW_COPY_AND_ASSIGN(SparkThread);
+            SparkThread(const SparkThread&);
+            void operator=(const SparkThread&);
 
         public:
             SparkThread() : m_pRunnable(NULL)
@@ -47,8 +48,8 @@ namespace Spark
             }
 
         public:
-            template<typename T>
-            bool SetRunnable(T* pObj, void(T::*pFun)(void*), void* lpParam = NULL)
+            template<typename T, typename ParamType>
+            bool SetRunnable(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam = NULL)
             {
                 m_pRunnable = Spark::Thread::CreateRunnable(pObj, pFun, lpParam);
 
@@ -78,8 +79,8 @@ namespace Spark
                 return true;
             }
 
-            template<typename T>
-            bool SingletonStart(T* pObj, void(T::*pFun)(void*), void* lpParam = NULL)
+            template<typename T, typename ParamType>
+            bool SingletonStart(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam = NULL)
             {
                 SparkLocker locker(m_lockStart);
 
@@ -118,8 +119,8 @@ namespace Spark
                 return false;
             }
 
-            template<typename T>
-            bool Start(T* pObj, void(T::*pFun)(void*), void* lpParam = NULL)
+            template<typename T, typename ParamType>
+            bool Start(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam = NULL)
             {
                 if (SetRunnable(pObj, pFun, lpParam))
                 {

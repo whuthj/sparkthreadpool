@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-//#include <WinBase.h>
+#include "sparksharedptr.hpp"
 
 #define RUNNABLE_PTR_HOST_ADDREF(pRunnable)\
 {\
@@ -81,13 +81,13 @@ namespace Spark
 
         };
 
-        template<typename T>
+        template<typename T, typename ParamType>
         class MemberFunPtrRunnable : public Runnable
         {
         public:
-            typedef void (T::*RunFun)(void* pParam);
+            typedef void (T::*RunFun)(ParamType);
 
-            MemberFunPtrRunnable(T* pObj, RunFun pFun, void* lpParam = NULL)
+            MemberFunPtrRunnable(T* pObj, RunFun pFun, ParamType lpParam = NULL)
             {
                 m_pObj = pObj;
                 m_pFun = pFun;
@@ -113,9 +113,17 @@ namespace Spark
                     return;
                 }
 
-                (m_pObj->*m_pFun)(m_pParam);
+                Execute();
 
                 ::InterlockedDecrement(&m_lObjRef);
+            }
+
+            virtual void Execute()
+            {
+                if (NULL == m_pObj) { return; }
+                if (NULL == m_pFun) { return; }
+
+                (m_pObj->*m_pFun)(m_pParam);
             }
 
             virtual void* GetRunObj()
@@ -140,15 +148,15 @@ namespace Spark
         private:
             T*            m_pObj;
             RunFun        m_pFun;
-            void*         m_pParam;
+            ParamType     m_pParam;
             volatile long m_lObjRef;
 
         };
 
-        template<typename T>
-        inline Runnable* CreateRunnable(T* pObj, void(T::*pFun)(void*), void* lpParam = NULL)
+        template<typename T, typename ParamType>
+        inline Runnable* CreateRunnable(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam = NULL)
         {
-            Runnable *pTask = new MemberFunPtrRunnable<T>(pObj, pFun, lpParam);
+            Runnable *pTask = new MemberFunPtrRunnable<T, ParamType>(pObj, pFun, lpParam);
 
             return pTask;
         };

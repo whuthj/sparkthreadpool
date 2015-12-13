@@ -137,8 +137,8 @@ namespace Spark
                 return m_threadPoolImpl.SwitchToWndThread(pTask, bIsSendMsg);
             }
 
-            template<typename T>
-            bool Execute(T* pObj, void(T::*pFun)(void*), void* lpParam = NULL, 
+            template<typename T, typename ParamType>
+            bool Execute(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam = NULL,
                 SparkRunnableType emRunnableType = emSRType_Schedule_Post)
             {
                 return m_threadPoolImpl.Execute(pObj, pFun, lpParam, emRunnableType);

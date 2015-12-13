@@ -17,15 +17,15 @@ namespace Spark
             virtual void AddRunCount() = 0;
         };
         
-        template<typename T>
+        template<typename T, typename ParamType>
         class MemberSparkTimerTask : public SparkTimerTask
         {
         public:
-            typedef void (T::*RunFun)(void* pParam);
+            typedef void (T::*RunFun)(ParamType);
 
-            MemberSparkTimerTask(T* pObj, RunFun pFun, void* lpParam = NULL)
+            MemberSparkTimerTask(T* pObj, RunFun pFun, ParamType lpParam = NULL)
             {
-                m_pMemberFun = new MemberFunPtrRunnable<T>(pObj, pFun, lpParam);
+                m_pMemberFun = new MemberFunPtrRunnable<T, ParamType>(pObj, pFun, lpParam);
                 m_pMemberFun->AddRef();
 
                 m_nRunCount = 0;
@@ -81,16 +81,16 @@ namespace Spark
             }
 
         private:
-            MemberFunPtrRunnable<T>* m_pMemberFun;
+            MemberFunPtrRunnable<T, ParamType>* m_pMemberFun;
             int m_nRunCount;
             int m_nLimitRunCount;
 
         };
 
-        template<typename T>
-        inline SparkTimerTask* CreateTimerTask(T* pObj, void(T::*pFun)(void*), void* lpParam = NULL)
+        template<typename T, typename ParamType>
+        inline SparkTimerTask* CreateTimerTask(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam = NULL)
         {
-            SparkTimerTask *pTask = new MemberSparkTimerTask<T>(pObj, pFun, lpParam);
+            SparkTimerTask *pTask = new MemberSparkTimerTask<T, ParamType>(pObj, pFun, lpParam);
 
             return pTask;
         };

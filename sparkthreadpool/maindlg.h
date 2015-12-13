@@ -36,6 +36,7 @@ class CMainDlg;
 class CTestTaskRelease
 {
 public:
+    CTestTaskRelease();
     CTestTaskRelease(CMainDlg* pDlg);
     virtual ~CTestTaskRelease();
     void TestDoAsync();
@@ -80,6 +81,15 @@ private:
     void DoInMainThread(CString strText);
 
     void DoAsync(void* lpParam);
+    void DoAsyncEx(SparkSharedPtr<CTestTaskRelease> param);
+    void DoAsyncEx_1(SparkSharedPtr<CTestTaskRelease> param);
+
+    SPARK_ASYN_API(DoAsyncEx_2, SparkSharedPtr<CTestTaskRelease>, testTaskRelease)
+    void DoAsyncEx_2(SparkSharedPtr<CTestTaskRelease> testTaskRelease);
+
+    SPARK_ASYN_API(DoAsyncEx_3)
+    void DoAsyncEx_3();
+
     void DoSendMsgToMainThread(void* lpParam);
     void DoPostMsgToMainThread(void* lpParam);
 

@@ -11,5 +11,7 @@
 #include <atlstr.h>
 
 #include "sparkthreadpool\sparkthreadpool.hpp"
+#include "sparkthreadpool\sparksharedptr.hpp"
 
 using namespace Spark::Thread;
+using namespace Spark::Memory;

@@ -1,6 +1,12 @@
 ﻿#include "stdafx.h"
 #include "maindlg.h"
 
+CTestTaskRelease::CTestTaskRelease()
+{
+    m_pTest = new int(123);
+    m_pMainDlg = NULL;
+}
+
 CTestTaskRelease::CTestTaskRelease(CMainDlg* pDlg)
 {
     m_pTest = new int(123);
@@ -9,6 +15,11 @@ CTestTaskRelease::CTestTaskRelease(CMainDlg* pDlg)
 
 CTestTaskRelease::~CTestTaskRelease()
 {
+    if (m_pMainDlg)
+    {
+        m_pMainDlg->PrintText(L"CTestTaskRelease::~CTestTaskRelease Start");
+    }
+
     DWORD dwStart = ::GetTickCount();
     SPARK_INSTANCE_DESTROY_TASKS(this);
     if (m_pTest)
@@ -17,6 +28,11 @@ CTestTaskRelease::~CTestTaskRelease()
         m_pTest = NULL;
     }
     DWORD dwCost = ::GetTickCount() - dwStart;
+
+    if (m_pMainDlg)
+    {
+        m_pMainDlg->PrintText(L"CTestTaskRelease::~CTestTaskRelease End(%d)", dwCost);
+    }
 }
 
 void CTestTaskRelease::TestDoAsync()
@@ -99,15 +115,22 @@ LRESULT CMainDlg::OnBnClickedButtonTest(BOOL& /*bHandled*/)
 
     DoInWorkThread(nNum1, nNum2);
 
+    //CTestTaskRelease* pTest = new CTestTaskRelease(this);
+    //pTest->TestDoAsync();
+    SparkSharedPtr<CTestTaskRelease> testTaskRelease(new CTestTaskRelease(this));
+    testTaskRelease->TestDoAsync();
+
+    SPARK_INSTANCE_ASYN_EX(CMainDlg, DoAsyncEx_2, testTaskRelease);
+
+    //SparkThreadPool::Instance().Execute(this, &CMainDlg::DoAsyncEx, testTaskRelease);
+    SPARK_PARAM_INSTANCE_ASYN(CMainDlg, DoAsyncEx, SparkSharedPtr<CTestTaskRelease>, testTaskRelease);
+    SPARK_INSTANCE_ASYN_EX(CMainDlg, DoAsyncEx_3);
+
     //SPARK_POST_ASYN(CMainDlg, DoAsync, this, &Spark::Thread::SparkThreadPool::Instance(), NULL);
     SPARK_INSTANCE_ASYN(CMainDlg, DoAsync, NULL);
 
     m_timer.StartTimer(this, &CMainDlg::DoTimer, NULL, 1000, 2);
-
-    CTestTaskRelease* pTest = new CTestTaskRelease(this);
-    pTest->TestDoAsync();
-
-    SparkWndTimer::Schedule(this, &CMainDlg::DoDelay, pTest, 2000, 1);
+    SparkWndTimer::Schedule(this, &CMainDlg::DoDelay, NULL, 2000, 1);
 
     return 0;
 }
@@ -132,13 +155,6 @@ void CMainDlg::DoTimer(void* lpParam)
 void CMainDlg::DoDelay(void* lpParam)
 {
     PrintText(L"DoDelay 延迟2s执行");
-    CTestTaskRelease* pTest = (CTestTaskRelease*)lpParam;
-
-    if (pTest)
-    {
-        delete pTest;
-        pTest = NULL;
-    }
 }
 
 void CMainDlg::DoAsync(void* lpParam)
@@ -152,13 +168,37 @@ void CMainDlg::DoAsync(void* lpParam)
 
     SPARK_INSTANCE_ASYN(CMainDlg, DoPostMsgToMainThread, NULL);
 
-    for (int i = 0; i < 100; i++)
+    /*for (int i = 0; i < 100; i++)
     {
         CTestTaskRelease test(this);
         test.TestDoAsync();
-    }
+    }*/
 
     int b = 1000;
+}
+
+void CMainDlg::DoAsyncEx(SparkSharedPtr<CTestTaskRelease> param)
+{
+    ::Sleep(2000);
+    SparkSharedPtr<CTestTaskRelease> test = param;
+    SparkThread tWork;
+    tWork.Start(this, &CMainDlg::DoAsyncEx_1, test);
+    tWork.Join();
+}
+
+void CMainDlg::DoAsyncEx_1(SparkSharedPtr<CTestTaskRelease> param)
+{
+    param->TestDoAsync();
+}
+
+void CMainDlg::DoAsyncEx_2(SparkSharedPtr<CTestTaskRelease> testTaskRelease)
+{
+    testTaskRelease->TestDoAsync();
+}
+
+void CMainDlg::DoAsyncEx_3()
+{
+
 }
 
 void CMainDlg::DoSendMsgToMainThread(void* lpParam)

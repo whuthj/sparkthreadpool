@@ -50,6 +50,27 @@ struct tag_dd_base { virtual ~tag_dd_base() {} };
     SPARK_ASYN(T, F, this, &Spark::Thread::SparkThreadPool::Instance(), Spark::Thread::emSRType_Schedule_Post, PARAM); \
 }
 
+#define SPARK_PARAM_ASYN(T, F, PARAM_TYPE, LP_OBJ, LP_POOL, TYPE, PARAM)\
+{\
+    Spark::Thread::SparkThreadPool* pPool = LP_POOL; \
+    if (pPool){pPool->Execute<T, PARAM_TYPE>(LP_OBJ, &T::F, PARAM, TYPE);}\
+}
+
+#define SPARK_PARAM_POST_ASYN(T, F, PARAM_TYPE, LP_OBJ, LP_POOL, PARAM)\
+{\
+    SPARK_PARAM_ASYN(T, F, PARAM_TYPE, LP_OBJ, LP_POOL, Spark::Thread::emSRType_Post, PARAM); \
+}
+
+#define SPARK_PARAM_INSTANCE_POST_ASYN(T, F, PARAM_TYPE, PARAM)\
+{\
+    SPARK_PARAM_POST_ASYN(T, F, PARAM_TYPE, this, &Spark::Thread::SparkThreadPool::Instance(), PARAM);\
+}
+
+#define SPARK_PARAM_INSTANCE_ASYN(T, F, PARAM_TYPE, PARAM)\
+{\
+    SPARK_PARAM_ASYN(T, F, PARAM_TYPE, this, &Spark::Thread::SparkThreadPool::Instance(), Spark::Thread::emSRType_Schedule_Post, PARAM); \
+}
+
 //////////////////////////////////////////////////////////////////////////
 // 切换到主线程执行
 

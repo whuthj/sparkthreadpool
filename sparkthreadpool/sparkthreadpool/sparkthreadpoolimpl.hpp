@@ -159,8 +159,8 @@ namespace Spark
                 CloseHandles();
             }
 
-            template<typename T>
-            bool SwitchToWndThread(T* pObj, void(T::*pFun)(void*), void* lpParam = NULL, bool bIsSendMsg = false)
+            template<typename T, typename ParamType>
+            bool SwitchToWndThread(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam = NULL, bool bIsSendMsg = false)
             {
                 Runnable* pTask = Spark::Thread::CreateRunnable(pObj, pFun, lpParam);
 
@@ -184,8 +184,8 @@ namespace Spark
                 return false;
             }
 
-            template<typename T>
-            bool Execute(T* pObj, void(T::*pFun)(void*), void* lpParam = NULL, 
+            template<typename T, typename ParamType>
+            bool Execute(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam = NULL,
                 SparkRunnableType emRunnableType = emSRType_Schedule_Post)
             {
                 Runnable* pTask = Spark::Thread::CreateRunnable(pObj, pFun, lpParam);
