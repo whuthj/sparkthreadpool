@@ -145,6 +145,13 @@ namespace Spark
                 return m_threadPoolImpl.Execute(pObj, pFun, lpParam, emRunnableType);
             }
 
+            template<typename T>
+            bool Execute(T* pObj, void(T::*pFun)(),
+                SparkRunnableType emRunnableType = emSRType_Schedule_Post)
+            {
+                return m_threadPoolImpl.Execute(pObj, pFun, emRunnableType);
+            }
+
             bool Execute(void(*pFun)(void*), void* lpParam = NULL, 
                 SparkRunnableType emRunnableType = emSRType_Schedule_Post)
             {

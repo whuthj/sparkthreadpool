@@ -22,10 +22,20 @@ namespace Spark
         {
         public:
             typedef void (T::*RunFun)(ParamType);
+            typedef void (T::*NoParamRunFun)();
 
             MemberSparkTimerTask(T* pObj, RunFun pFun, ParamType lpParam = NULL)
             {
                 m_pMemberFun = new MemberFunPtrRunnable<T, ParamType>(pObj, pFun, lpParam);
+                m_pMemberFun->AddRef();
+
+                m_nRunCount = 0;
+                m_nLimitRunCount = 0;
+            }
+
+            MemberSparkTimerTask(T* pObj, NoParamRunFun pFun)
+            {
+                m_pMemberFun = new MemberFunPtrRunnable<T, void*>(pObj, pFun);
                 m_pMemberFun->AddRef();
 
                 m_nRunCount = 0;
@@ -91,6 +101,14 @@ namespace Spark
         inline SparkTimerTask* CreateTimerTask(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam = NULL)
         {
             SparkTimerTask *pTask = new MemberSparkTimerTask<T, ParamType>(pObj, pFun, lpParam);
+
+            return pTask;
+        };
+
+        template<typename T>
+        inline SparkTimerTask* CreateTimerTask(T* pObj, void(T::*pFun)())
+        {
+            SparkTimerTask *pTask = new MemberSparkTimerTask<T, void*>(pObj, pFun);
 
             return pTask;
         };

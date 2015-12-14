@@ -196,6 +196,17 @@ namespace Spark
                 return Execute(pTask, emRunnableType);
             }
 
+            template<typename T>
+            bool Execute(T* pObj, void(T::*pFun)(),
+                SparkRunnableType emRunnableType = emSRType_Schedule_Post)
+            {
+                Runnable* pTask = Spark::Thread::CreateRunnable(pObj, pFun);
+
+                RUNNABLE_PTR_HOST_ADDREF(pTask);
+
+                return Execute(pTask, emRunnableType);
+            }
+
             bool Execute(void(*pFun)(void*), void* lpParam = NULL, 
                 SparkRunnableType emRunnableType = emSRType_Schedule_Post)
             {

@@ -135,13 +135,30 @@ namespace Spark
                 m_lTimerId = -1;
             }
 
-            template<typename T>
-            bool StartTimer(T* pObj, void(T::*pFun)(void*), void* lpParam, UINT nElapse, int nRunCount = 0)
+            template<typename T, typename ParamType = void*>
+            bool StartTimer(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam, UINT nElapse, int nRunCount = 0)
             {
                 if (nRunCount < 0) { return false; }
 
                 StopTimer();
-                SparkTimerTask* pTask = CreateTimerTask(pObj, pFun, lpParam);
+                SparkTimerTask* pTask = CreateTimerTask<T, ParamType>(pObj, pFun, lpParam);
+
+                RUNNABLE_PTR_HOST_ADDREF(pTask);
+                pTask->SetLimitRunCount(nRunCount);
+
+                s_wnd.Create(SPARK_TIMER_WND_CLASS_NAME);
+                m_lTimerId = s_wnd.StartTimer(pTask, nElapse);
+
+                return true;
+            }
+
+            template<typename T>
+            bool StartTimer(T* pObj, void(T::*pFun)(), UINT nElapse, int nRunCount = 0)
+            {
+                if (nRunCount < 0) { return false; }
+
+                StopTimer();
+                SparkTimerTask* pTask = CreateTimerTask<T>(pObj, pFun);
 
                 RUNNABLE_PTR_HOST_ADDREF(pTask);
                 pTask->SetLimitRunCount(nRunCount);
@@ -156,6 +173,18 @@ namespace Spark
             static long Schedule(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam, UINT nElapse, int nRunCount = 0)
             {
                 SparkTimerTask* pTask = CreateTimerTask<T, ParamType>(pObj, pFun, lpParam);
+
+                RUNNABLE_PTR_HOST_ADDREF(pTask);
+                pTask->SetLimitRunCount(nRunCount);
+
+                s_wnd.Create(SPARK_TIMER_WND_CLASS_NAME);
+                return s_wnd.StartTimer(pTask, nElapse);
+            }
+
+            template<typename T>
+            static long Schedule(T* pObj, void(T::*pFun)(), UINT nElapse, int nRunCount = 0)
+            {
+                SparkTimerTask* pTask = CreateTimerTask<T>(pObj, pFun);
 
                 RUNNABLE_PTR_HOST_ADDREF(pTask);
                 pTask->SetLimitRunCount(nRunCount);

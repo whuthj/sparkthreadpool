@@ -86,12 +86,25 @@ namespace Spark
         {
         public:
             typedef void (T::*RunFun)(ParamType);
+            typedef void (T::*NoParamRunFun)();
 
             MemberFunPtrRunnable(T* pObj, RunFun pFun, ParamType lpParam = NULL)
             {
                 m_pObj = pObj;
                 m_pFun = pFun;
+                m_pNoParamFun = NULL;
                 m_pParam = lpParam;
+                m_lObjRef = 0;
+
+                ::InterlockedIncrement(&m_lObjRef);
+            }
+
+            MemberFunPtrRunnable(T* pObj, NoParamRunFun pFun)
+            {
+                m_pObj = pObj;
+                m_pNoParamFun = pFun;
+                m_pFun = NULL;
+                m_pParam = NULL;
                 m_lObjRef = 0;
 
                 ::InterlockedIncrement(&m_lObjRef);
@@ -105,7 +118,7 @@ namespace Spark
             virtual void Run()
             {
                 if (NULL == m_pObj) { return; }
-                if (NULL == m_pFun) { return; }
+                if (NULL == m_pFun && NULL == m_pNoParamFun) { return; }
 
                 if (::InterlockedIncrement(&m_lObjRef) <= 1)
                 {
@@ -121,9 +134,19 @@ namespace Spark
             virtual void Execute()
             {
                 if (NULL == m_pObj) { return; }
-                if (NULL == m_pFun) { return; }
+                if (NULL == m_pFun && NULL == m_pNoParamFun) { return; }
 
-                (m_pObj->*m_pFun)(m_pParam);
+                if (NULL != m_pFun)
+                {
+                    (m_pObj->*m_pFun)(m_pParam);
+                    return;
+                }
+
+                if (NULL != m_pNoParamFun)
+                {
+                    (m_pObj->*m_pNoParamFun)();
+                    return;
+                }
             }
 
             virtual void* GetRunObj()
@@ -148,6 +171,7 @@ namespace Spark
         private:
             T*            m_pObj;
             RunFun        m_pFun;
+            NoParamRunFun m_pNoParamFun;
             ParamType     m_pParam;
             volatile long m_lObjRef;
 
@@ -157,6 +181,14 @@ namespace Spark
         inline Runnable* CreateRunnable(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam = NULL)
         {
             Runnable *pTask = new MemberFunPtrRunnable<T, ParamType>(pObj, pFun, lpParam);
+
+            return pTask;
+        };
+
+        template<typename T>
+        inline Runnable* CreateRunnable(T* pObj, void(T::*pFun)())
+        {
+            Runnable *pTask = new MemberFunPtrRunnable<T, void*>(pObj, pFun);
 
             return pTask;
         };

@@ -80,7 +80,7 @@ private:
     SPARK_ASYN_API(DoInMainThread, CString, strText)
     void DoInMainThread(CString strText);
 
-    void DoAsync(void* lpParam);
+    void DoAsync();
     void DoAsyncEx(SparkSharedPtr<CTestTaskRelease> param);
     void DoAsyncEx_1(SparkSharedPtr<CTestTaskRelease> param);
 
@@ -93,8 +93,8 @@ private:
     void DoSendMsgToMainThread(void* lpParam);
     void DoPostMsgToMainThread(void* lpParam);
 
-    void DoTimerLog(void* lpParam);
-    void DoTimer(void* lpParam);
+    void DoTimerLog();
+    void DoTimer();
     void DoDelay(SparkSharedPtr<CTestTaskRelease> param);
 
 private:
