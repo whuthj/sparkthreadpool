@@ -125,12 +125,13 @@ LRESULT CMainDlg::OnBnClickedButtonTest(BOOL& /*bHandled*/)
     //SparkThreadPool::Instance().Execute(this, &CMainDlg::DoAsyncEx, testTaskRelease);
     SPARK_PARAM_INSTANCE_ASYN(CMainDlg, DoAsyncEx, SparkSharedPtr<CTestTaskRelease>, testTaskRelease);
     SPARK_INSTANCE_ASYN_EX(CMainDlg, DoAsyncEx_3);
+    SPARK_PARAM_INSTANCE_ASYN(CMainDlg, DoAsyncEx_4, double, 1234.1234);
 
     //SPARK_POST_ASYN(CMainDlg, DoAsync, this, &Spark::Thread::SparkThreadPool::Instance(), NULL);
     SPARK_NOPARAM_INSTANCE_ASYN(CMainDlg, DoAsync);
 
     m_timer.StartTimer(this, &CMainDlg::DoTimer, 1000, 2);
-    SparkWndTimer::Schedule(this, &CMainDlg::DoDelay, testTaskRelease, 2000, 1);
+    SparkWndTimer::Schedule(this, &CMainDlg::DoDelay, 123, 2000, 1);
 
     return 0;
 }
@@ -152,9 +153,9 @@ void CMainDlg::DoTimer()
     //}
 }
 
-void CMainDlg::DoDelay(SparkSharedPtr<CTestTaskRelease> param)
+void CMainDlg::DoDelay(int value)
 {
-    PrintText(L"DoDelay 延迟2s执行 param 引用次数:%d", param.use_count());
+    PrintText(L"DoDelay 延迟2s执行 value %d", value);
 }
 
 void CMainDlg::DoAsync()
@@ -197,6 +198,11 @@ void CMainDlg::DoAsyncEx_2(SparkSharedPtr<CTestTaskRelease> testTaskRelease)
 }
 
 void CMainDlg::DoAsyncEx_3()
+{
+
+}
+
+void CMainDlg::DoAsyncEx_4(double value)
 {
 
 }

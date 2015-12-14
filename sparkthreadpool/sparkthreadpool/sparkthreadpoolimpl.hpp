@@ -217,6 +217,16 @@ namespace Spark
                 return Execute(pTask, emRunnableType);
             }
 
+            bool Execute(void(*pFun)(),
+                SparkRunnableType emRunnableType = emSRType_Schedule_Post)
+            {
+                Runnable* pTask = Spark::Thread::CreateRunnable(pFun);
+
+                RUNNABLE_PTR_HOST_ADDREF(pTask);
+
+                return Execute(pTask, emRunnableType);
+            }
+
             bool Execute(Runnable * pRunnable, 
                 SparkRunnableType emRunnableType = emSRType_Schedule_Post)
             {

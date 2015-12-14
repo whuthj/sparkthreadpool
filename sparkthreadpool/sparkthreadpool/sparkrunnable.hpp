@@ -60,11 +60,20 @@ namespace Spark
         {
         public:
             typedef void(*RunFun)(void* pParam);
+            typedef void (*NoParamRunFun)();
 
             FunPtrRunnable(RunFun pFun, void* lpParam = NULL)
             {
                 m_pFun = pFun;
+                m_pNoParamFun = NULL;
                 m_pParam = lpParam;
+            }
+
+            FunPtrRunnable(NoParamRunFun pFun)
+            {
+                m_pNoParamFun = pFun;
+                m_pFun = NULL;
+                m_pParam = NULL;
             }
 
             virtual void Run()
@@ -72,11 +81,19 @@ namespace Spark
                 if (NULL != m_pFun)
                 {
                     (*m_pFun)(m_pParam);
+                    return;
+                }
+
+                if (NULL != m_pNoParamFun)
+                {
+                    (*m_pNoParamFun)();
+                    return;
                 }
             }
 
         private:
             RunFun        m_pFun;
+            NoParamRunFun m_pNoParamFun;
             void*         m_pParam;
 
         };
@@ -196,6 +213,13 @@ namespace Spark
         inline Runnable* CreateRunnable(void(*pFun)(void*), void* lpParam = NULL)
         {
             Runnable *pTask = new FunPtrRunnable(pFun, lpParam);
+
+            return pTask;
+        };
+
+        inline Runnable* CreateRunnable(void(*pFun)())
+        {
+            Runnable *pTask = new FunPtrRunnable(pFun);
 
             return pTask;
         };

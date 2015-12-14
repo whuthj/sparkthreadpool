@@ -90,12 +90,14 @@ private:
     SPARK_ASYN_API(DoAsyncEx_3)
     void DoAsyncEx_3();
 
+    void DoAsyncEx_4(double value);
+
     void DoSendMsgToMainThread(void* lpParam);
     void DoPostMsgToMainThread(void* lpParam);
 
     void DoTimerLog();
     void DoTimer();
-    void DoDelay(SparkSharedPtr<CTestTaskRelease> param);
+    void DoDelay(int value);
 
 private:
     SparkWndTimer m_timerLog;
