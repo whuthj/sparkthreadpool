@@ -152,10 +152,10 @@ namespace Spark
                 return true;
             }
 
-            template<typename T>
-            static long Schedule(T* pObj, void(T::*pFun)(void*), void* lpParam, UINT nElapse, int nRunCount = 0)
+            template<typename T, typename ParamType = void*>
+            static long Schedule(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam, UINT nElapse, int nRunCount = 0)
             {
-                SparkTimerTask* pTask = CreateTimerTask(pObj, pFun, lpParam);
+                SparkTimerTask* pTask = CreateTimerTask<T, ParamType>(pObj, pFun, lpParam);
 
                 RUNNABLE_PTR_HOST_ADDREF(pTask);
                 pTask->SetLimitRunCount(nRunCount);

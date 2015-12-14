@@ -38,6 +38,16 @@ namespace Spark
                 _ReleaseRefPtr();
             }
 
+            long use_count()
+            {
+                if (NULL == m_plRef)
+                {
+                    return 0;
+                }
+
+                return static_cast<long>(*m_plRef);
+            }
+
             T& operator*() { return *m_ptr; }
             T* operator->() { return m_ptr; }
 
@@ -71,7 +81,7 @@ namespace Spark
                 ::InterlockedIncrement((long *)m_plRef);
             }
 
-        public:
+         private:
             long* m_plRef;
             T* m_ptr;
         };

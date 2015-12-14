@@ -47,7 +47,8 @@ namespace Spark
         class SparkThreadPool
         {
         private:
-            DISALLOW_COPY_AND_ASSIGN(SparkThreadPool);
+            SparkThreadPool(const SparkThreadPool&);
+            void operator=(const SparkThreadPool&);
 
         public:
             static SparkThreadPool& Instance()

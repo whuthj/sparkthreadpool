@@ -130,7 +130,7 @@ LRESULT CMainDlg::OnBnClickedButtonTest(BOOL& /*bHandled*/)
     SPARK_INSTANCE_ASYN(CMainDlg, DoAsync, NULL);
 
     m_timer.StartTimer(this, &CMainDlg::DoTimer, NULL, 1000, 2);
-    SparkWndTimer::Schedule(this, &CMainDlg::DoDelay, NULL, 2000, 1);
+    SparkWndTimer::Schedule(this, &CMainDlg::DoDelay, testTaskRelease, 2000, 1);
 
     return 0;
 }
@@ -152,9 +152,9 @@ void CMainDlg::DoTimer(void* lpParam)
     //}
 }
 
-void CMainDlg::DoDelay(void* lpParam)
+void CMainDlg::DoDelay(SparkSharedPtr<CTestTaskRelease> param)
 {
-    PrintText(L"DoDelay 延迟2s执行");
+    PrintText(L"DoDelay 延迟2s执行 param 引用次数:%d", param.use_count());
 }
 
 void CMainDlg::DoAsync(void* lpParam)

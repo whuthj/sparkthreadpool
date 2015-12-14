@@ -42,7 +42,8 @@ namespace Spark
         class SparkThreadPoolImpl
         {
         private:
-            DISALLOW_COPY_AND_ASSIGN(SparkThreadPoolImpl);
+            SparkThreadPoolImpl(const SparkThreadPoolImpl&);
+            void operator=(const SparkThreadPoolImpl&);
         private:
             class SparkThreadWork : public SparkThread
             {

@@ -144,9 +144,3 @@
 #endif
 #define MA2FAX_(N, args)		CONCAT(MA2FA_, N) args
 #define MA2FA(...)				MA2FAX_(__VA_ARGC_HALF__(__VA_ARGS__), (__VA_ARGS__))
-
-#ifndef DISALLOW_COPY_AND_ASSIGN
-#define DISALLOW_COPY_AND_ASSIGN(TypeName)\
-    TypeName(const TypeName&);\
-    void operator=(const TypeName&)
-#endif // !DISALLOW_ASSIGN

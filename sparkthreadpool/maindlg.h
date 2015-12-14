@@ -95,7 +95,7 @@ private:
 
     void DoTimerLog(void* lpParam);
     void DoTimer(void* lpParam);
-    void DoDelay(void* lpParam);
+    void DoDelay(SparkSharedPtr<CTestTaskRelease> param);
 
 private:
     SparkWndTimer m_timerLog;
