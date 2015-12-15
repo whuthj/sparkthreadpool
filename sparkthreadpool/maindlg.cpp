@@ -37,19 +37,33 @@ CTestTaskRelease::~CTestTaskRelease()
 
 void CTestTaskRelease::TestDoAsync()
 {
-    SPARK_INSTANCE_ASYN(CTestTaskRelease, DoAsync1, NULL);
-    SPARK_INSTANCE_ASYN(CTestTaskRelease, DoAsync2, NULL);
+    SPARK_NOPARAM_INSTANCE_ASYN(CTestTaskRelease, DoAsync1);
+    SPARK_NOPARAM_INSTANCE_ASYN(CTestTaskRelease, DoAsync2);
+    SPARK_NOPARAM_INSTANCE_ASYN(CTestTaskRelease, DoAsync3);
+    SPARK_NOPARAM_INSTANCE_ASYN(CTestTaskRelease, DoAsync4);
 }
 
-void CTestTaskRelease::DoAsync1(void* lpParam)
+void CTestTaskRelease::DoAsync1()
 {
     ::Sleep(12000);
     DoTest();
 }
 
-void CTestTaskRelease::DoAsync2(void* lpParam)
+void CTestTaskRelease::DoAsync2()
 {
     ::Sleep(12000);
+    DoTest();
+}
+
+void CTestTaskRelease::DoAsync3()
+{
+    ::Sleep(5000);
+    DoTest();
+}
+
+void CTestTaskRelease::DoAsync4()
+{
+    ::Sleep(2000);
     DoTest();
 }
 

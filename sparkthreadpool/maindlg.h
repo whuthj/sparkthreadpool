@@ -40,8 +40,10 @@ public:
     CTestTaskRelease(CMainDlg* pDlg);
     virtual ~CTestTaskRelease();
     void TestDoAsync();
-    void DoAsync1(void* lpParam);
-    void DoAsync2(void* lpParam);
+    void DoAsync1();
+    void DoAsync2();
+    void DoAsync3();
+    void DoAsync4();
     void DoTest();
 private:
     int* m_pTest;

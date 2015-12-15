@@ -66,6 +66,12 @@ namespace Spark
                         delete m_ptr;
                         m_ptr = NULL;
                     }
+
+                    if (m_plRef)
+                    {
+                        delete m_plRef;
+                        m_plRef = NULL;
+                    }
                 }
             }
 

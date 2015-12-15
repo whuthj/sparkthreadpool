@@ -111,9 +111,9 @@ namespace Spark
                 m_pFun = pFun;
                 m_pNoParamFun = NULL;
                 m_pParam = lpParam;
-                m_lObjRef = 0;
+                m_lWorkRef = 0;
 
-                ::InterlockedIncrement(&m_lObjRef);
+                ::InterlockedIncrement(&m_lWorkRef);
             }
 
             MemberFunPtrRunnable(T* pObj, NoParamRunFun pFun)
@@ -122,9 +122,9 @@ namespace Spark
                 m_pNoParamFun = pFun;
                 m_pFun = NULL;
                 m_pParam = NULL;
-                m_lObjRef = 0;
+                m_lWorkRef = 0;
 
-                ::InterlockedIncrement(&m_lObjRef);
+                ::InterlockedIncrement(&m_lWorkRef);
             }
 
             virtual ~MemberFunPtrRunnable()
@@ -137,15 +137,15 @@ namespace Spark
                 if (NULL == m_pObj) { return; }
                 if (NULL == m_pFun && NULL == m_pNoParamFun) { return; }
 
-                if (::InterlockedIncrement(&m_lObjRef) <= 1)
+                if (::InterlockedIncrement(&m_lWorkRef) <= 1)
                 {
-                    ::InterlockedDecrement(&m_lObjRef);
+                    ::InterlockedDecrement(&m_lWorkRef);
                     return;
                 }
 
                 Execute();
 
-                ::InterlockedDecrement(&m_lObjRef);
+                ::InterlockedDecrement(&m_lWorkRef);
             }
 
             virtual void Execute()
@@ -175,22 +175,22 @@ namespace Spark
             {
                 for (;;)
                 {
-                    if (::InterlockedDecrement(&m_lObjRef) <= 0)
+                    if (::InterlockedDecrement(&m_lWorkRef) <= 0)
                     {
                         break;
                     }
 
-                    ::InterlockedIncrement(&m_lObjRef);
+                    ::InterlockedIncrement(&m_lWorkRef);
                     ::Sleep(10);
                 }
             }
 
         private:
-            T*            m_pObj;
-            RunFun        m_pFun;
-            NoParamRunFun m_pNoParamFun;
-            ParamType     m_pParam;
-            volatile long m_lObjRef;
+            T*              m_pObj;
+            RunFun          m_pFun;
+            NoParamRunFun   m_pNoParamFun;
+            ParamType       m_pParam;
+            volatile long   m_lWorkRef;
 
         };
 

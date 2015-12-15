@@ -639,7 +639,6 @@ namespace Spark
                         continue;
                     }
 
- 
                     if (pWorkThread->AddWorkRef() <= 1)
                     {
                         pWorkThread->ReleaseWorkRef();
