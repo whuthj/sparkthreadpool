@@ -153,11 +153,11 @@ namespace Spark
                 return false;
             }
 
-            void Join(DWORD dwMilliseconds = INFINITE)
+            DWORD Join(DWORD dwMilliseconds = INFINITE)
             {
                 if (NULL == m_handle)
                 {
-                    return;
+                    return WAIT_FAILED;
                 }
 
                 if (dwMilliseconds <= 0)
@@ -165,7 +165,7 @@ namespace Spark
                     dwMilliseconds = INFINITE;
                 }
 
-                ::WaitForSingleObject(m_handle, dwMilliseconds);
+                return ::WaitForSingleObject(m_handle, dwMilliseconds);
             }
 
             bool Terminate(DWORD dwWaitMilliseconds = 100, DWORD dwExitCode = 0)

@@ -50,8 +50,9 @@ namespace Spark
             public:
                 SparkThreadWork(SparkThreadPoolImpl* pThreadPool) : m_pThreadPool(pThreadPool)
                                                                   , m_emWorkStatus(emSTWStatus_None)
+                                                                  , m_lWorkRef(0)
                 {
-
+                    ::InterlockedIncrement(&m_lWorkRef);
                 }
 
                 virtual void Run()
@@ -73,9 +74,20 @@ namespace Spark
                     return m_emWorkStatus;
                 }
 
+                long AddWorkRef()
+                {
+                    return ::_InterlockedIncrement(&m_lWorkRef);
+                }
+
+                long ReleaseWorkRef()
+                {
+                    return ::_InterlockedDecrement(&m_lWorkRef);
+                }
+
             private:
                 SparkThreadPoolImpl* const m_pThreadPool;
                 SparkThreadWorkStatus  m_emWorkStatus;
+                long m_lWorkRef;
 
             };
 
@@ -627,6 +639,13 @@ namespace Spark
                         continue;
                     }
 
+ 
+                    if (pWorkThread->AddWorkRef() <= 1)
+                    {
+                        pWorkThread->ReleaseWorkRef();
+                        continue;
+                    }
+
                     Runnable* pTask = GetTask();
                     if (pTask)
                     {
@@ -634,6 +653,8 @@ namespace Spark
                         ExecuteRun(pWorkThread, pTask);
                         AfterExecuteRun(pWorkThread, pTask);
                     }
+
+                    pWorkThread->ReleaseWorkRef();
                 }
             }
 
@@ -674,9 +695,9 @@ namespace Spark
 
             void AfterExecuteRun( SparkThreadWork* pWorkThread, Runnable* pTask )
             {
-                ResetWorkThreadStatus(pWorkThread);
                 RemoveRunTask(pTask);
                 SAFE_HOST_RELEASE(pTask);
+                ResetWorkThreadStatus(pWorkThread);
             }
 
             void CleanerRun(void* pParam)
@@ -733,15 +754,17 @@ namespace Spark
                 {
                     SparkThreadWork* pThread = itr->second;
 
-                    if (emSTWStatus_Work == pThread->GetWorkStatus())
+                    // 线程工作中
+                    if (pThread->ReleaseWorkRef() >= 1)
                     {
+                        pThread->AddWorkRef();
                         itr++;
                         continue;
                     }
 
                     pThread->Terminate(500, 0);
+                    pThread->AddWorkRef();
                     delete pThread;
-
                     itr = trashThread.erase(itr);
                 }
 

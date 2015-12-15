@@ -169,11 +169,11 @@ void CMainDlg::DoAsync()
 
     SPARK_INSTANCE_ASYN(CMainDlg, DoPostMsgToMainThread, NULL);
 
-    /*for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 100; i++)
     {
         CTestTaskRelease test(this);
         test.TestDoAsync();
-    }*/
+    }
 
     int b = 1000;
 }
