@@ -94,11 +94,6 @@ CMainDlg::CMainDlg()
 
 CMainDlg::~CMainDlg()
 {
-    if (IsWindow())
-    {
-        DestroyWindow();
-    }
-
     SparkWndTimer::DestroyThisTimerTask(this);
     DWORD dwStart = ::GetTickCount();
     SPARK_INSTANCE_DESTROY_TASKS(this);
@@ -200,6 +195,7 @@ void CMainDlg::DoAsync()
 
     for (int i = 0; i < 100; i++)
     {
+        SPARK_INSTANCE_SEND_MSG(CMainDlg, DoSendMsgToMainThread, &a);
         CTestTaskRelease test(this);
         test.TestDoAsync();
     }

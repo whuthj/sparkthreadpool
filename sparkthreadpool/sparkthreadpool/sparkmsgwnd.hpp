@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "sparkrunnable.hpp"
+#include "sparklock.hpp"
 
 namespace Spark
 {
@@ -34,10 +35,15 @@ namespace Spark
                 return m_hWnd;
             }
 
-            LRESULT SendMessage(UINT message, WPARAM wParam = 0, LPARAM lParam = 0) throw()
+            LRESULT SendMessage(UINT message, WPARAM wParam = 0, LPARAM lParam = 0, UINT uTimeout = 1000) throw()
             {
                 ATLASSERT(::IsWindow(m_hWnd));
-                return ::SendMessage(m_hWnd, message, wParam, lParam);
+                //LRESULT hr = ::SendMessage(m_hWnd, message, wParam, lParam);
+                
+                DWORD dwResult;
+                LRESULT hr = ::SendMessageTimeout(m_hWnd, message, wParam, lParam, SMTO_ABORTIFHUNG | SMTO_BLOCK, uTimeout, &dwResult);
+
+                return hr;
             }
 
             BOOL PostMessage(UINT message, WPARAM wParam = 0, LPARAM lParam = 0) throw()
@@ -183,6 +189,7 @@ namespace Spark
 
         private:
             HWND m_hWnd;
+            SparkLock m_lockSendMsg;
 
         };
     }

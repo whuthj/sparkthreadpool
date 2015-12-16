@@ -50,7 +50,6 @@ namespace Spark
                 RunObjRef() : lRef(0l), isReleased(false) {}
                 long lRef;
                 bool isReleased;
-                SparkLock lockRunObjOpt;
             };
             class SparkThreadWork : public SparkThread
             {
@@ -191,22 +190,37 @@ namespace Spark
 
             bool SwitchToWndThread(Runnable* pTask, bool bIsSendMsg = false)
             {
+                if (!m_msgWnd.IsWindow())
+                {
+                    SAFE_HOST_RELEASE(pTask);
+                    return false;
+                }
                 if (!IsRunObjValid(pTask))
                 {
                     SAFE_HOST_RELEASE(pTask);
                     return false;
                 }
-
-                if (m_msgWnd.IsWindow())
+                if (!bIsSendMsg)
                 {
-                    if (bIsSendMsg) { m_msgWnd.SendMessage(TASK_HANDLE_MSG_ID, (WPARAM)pTask); }
-                    else { m_msgWnd.PostMessage(TASK_HANDLE_MSG_ID, (WPARAM)pTask); }
-
+                    m_msgWnd.PostMessage(TASK_HANDLE_MSG_ID, (WPARAM)pTask);
                     return true;
                 }
 
-                SAFE_HOST_RELEASE(pTask);
-                return false;
+                for (;;)
+                {
+                    LRESULT hr = m_msgWnd.SendMessage(TASK_HANDLE_MSG_ID, (WPARAM)pTask);
+                    if (SUCCEEDED(hr))
+                    {
+                        break;
+                    }
+                    if (!IsRunObjValid(pTask))
+                    {
+                        SAFE_HOST_RELEASE(pTask);
+                        return false;
+                    }
+                }
+
+                return true;
             }
 
             template<typename T, typename ParamType>
@@ -455,16 +469,8 @@ namespace Spark
                 int nDeleteCount = 0;
 
                 ReleseRunObj(lpRunObj);
-                RunObjRef* pRunObjRef = FindRunObjRef(lpRunObj);
-                if (NULL != pRunObjRef)
-                {
-                    SparkLocker locker(pRunObjRef->lockRunObjOpt);
-                    nDeleteCount = DoDestroyTasksByRunObj(lpRunObj);
-                }
-                else
-                {
-                    nDeleteCount = DoDestroyTasksByRunObj(lpRunObj);
-                }
+                nDeleteCount = DoDestroyTasksByRunObj(lpRunObj);
+
                 return nDeleteCount;
             }
 
@@ -799,11 +805,6 @@ namespace Spark
 
             void ExecuteRun( SparkThreadWork* pWorkThread, Runnable* pTask )
             {
-                RunObjRef* pRunObjRef = FindRunObjRef(pTask->GetRunObj());
-                if (NULL == pRunObjRef) { return; }
-
-                SparkLocker locker(pRunObjRef->lockRunObjOpt);
-
                 if (!IsRunObjValid(pTask)) { return; }
 
                 if (pTask)
