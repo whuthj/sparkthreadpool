@@ -767,10 +767,8 @@ namespace Spark
             void ExecuteRun( SparkThreadWork* pWorkThread, Runnable* pTask )
             {
                 RunObjRef* pRunObjRef = FindRunObjRef(pTask->GetRunObj());
-                if (pRunObjRef->isReleased)
-                {
-                    return;
-                }
+                if (NULL == pRunObjRef) { return; }
+                if (pRunObjRef->isReleased) { return; }
 
                 if (pTask)
                 {

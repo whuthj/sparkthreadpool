@@ -39,31 +39,31 @@ void CTestTaskRelease::TestDoAsync()
 {
     SPARK_NOPARAM_INSTANCE_ASYN(CTestTaskRelease, DoAsync1);
     SPARK_NOPARAM_INSTANCE_ASYN(CTestTaskRelease, DoAsync2);
+    SPARK_NOPARAM_INSTANCE_ASYN(CTestTaskRelease, DoAsync3);
+    SPARK_NOPARAM_INSTANCE_ASYN(CTestTaskRelease, DoAsync4);
 }
 
 void CTestTaskRelease::DoAsync1()
 {
-    SPARK_NOPARAM_INSTANCE_ASYN(CTestTaskRelease, DoAsync3);
     ::Sleep(12000);
     DoTest();
 }
 
 void CTestTaskRelease::DoAsync2()
 {
-    SPARK_NOPARAM_INSTANCE_ASYN(CTestTaskRelease, DoAsync4);
     ::Sleep(12000);
     DoTest();
 }
 
 void CTestTaskRelease::DoAsync3()
 {
-    ::Sleep(5000);
+    ::Sleep(12000);
     DoTest();
 }
 
 void CTestTaskRelease::DoAsync4()
 {
-    ::Sleep(2000);
+    ::Sleep(12000);
     DoTest();
 }
 
@@ -84,6 +84,11 @@ CMainDlg::CMainDlg()
 
 CMainDlg::~CMainDlg()
 {
+    if (IsWindow())
+    {
+        DestroyWindow();
+    }
+
     SparkWndTimer::DestroyThisTimerTask(this);
     DWORD dwStart = ::GetTickCount();
     SPARK_INSTANCE_DESTROY_TASKS(this);
