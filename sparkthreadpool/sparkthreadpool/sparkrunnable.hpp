@@ -186,11 +186,11 @@ namespace Spark
             }
 
         private:
-            T*              m_pObj;
-            RunFun          m_pFun;
-            NoParamRunFun   m_pNoParamFun;
-            ParamType       m_pParam;
-            volatile long   m_lWorkRef;
+            T*                      m_pObj;
+            RunFun                  m_pFun;
+            NoParamRunFun           m_pNoParamFun;
+            ParamType               m_pParam;
+            volatile long           m_lWorkRef;
 
         };
 

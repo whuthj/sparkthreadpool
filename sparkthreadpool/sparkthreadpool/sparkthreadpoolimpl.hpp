@@ -45,6 +45,12 @@ namespace Spark
             SparkThreadPoolImpl(const SparkThreadPoolImpl&);
             void operator=(const SparkThreadPoolImpl&);
         private:
+            struct RunObjRef
+            {
+                RunObjRef() : lRef(0l), isReleased(false) {}
+                long lRef;
+                bool isReleased;
+            };
             class SparkThreadWork : public SparkThread
             {
             public:
@@ -440,10 +446,9 @@ namespace Spark
 
             int DestroyTasksByRunObj(void* lpRunObj)
             {
-                //assert(::GetCurrentThreadId() == m_nMsgThreadId);
-                //throw std::runtime_error("建议在主线程调用避免死锁！！！");
-
                 int nDeleteCount = 0;
+
+                ReleseRunObj(lpRunObj);
 
                 nDeleteCount = DestroyWaitTasksByRunObj(lpRunObj);
                 nDeleteCount += DestroyRunTasksByRunObj(lpRunObj);
@@ -492,6 +497,9 @@ namespace Spark
                 }
                 tasks.clear();
 
+                long lAddRefCount = -1 * nDeleteCount;
+                UpdateRunObjRef(lpRunObj, lAddRefCount);
+
                 return nDeleteCount;
             }
 
@@ -515,6 +523,9 @@ namespace Spark
                     itr++;
                 }
 
+                long lAddRefCount = -1 * nDeleteCount;
+                UpdateRunObjRef(lpRunObj, lAddRefCount);
+
                 return nDeleteCount;
             }
 
@@ -527,14 +538,83 @@ namespace Spark
             void AddTask(Runnable* pRunnable)
             {
                 SparkLocker locker(m_lockTasks);
-
+                UpdateRunObjRef(pRunnable->GetRunObj(), 1);
                 m_tasks.push_back(pRunnable);
+            }
+
+            Runnable* FindTask(void* lpRunObj)
+            {
+                SparkLocker locker(m_lockTasks);
+
+                Runnable* pFindRunnable = NULL;
+                TasksItr itr = m_tasks.begin();
+                while (itr != m_tasks.end())
+                {
+                    pFindRunnable = *itr;
+                    if (lpRunObj == pFindRunnable->GetRunObj())
+                    {
+                        itr++;
+                        break;
+                    }
+                    itr++;
+                }
+
+                return pFindRunnable;
+            }
+
+            void UpdateRunObjRef(Runnable* pRunnable, long lRefCount)
+            {
+                if (NULL == pRunnable) { return; }
+
+                UpdateRunObjRef(pRunnable->GetRunObj(), lRefCount);
+            }
+
+            void UpdateRunObjRef(void* lpRunObj, long lRefCount)
+            {
+                SparkLocker lockerObjRef(m_lockObjRefMap);
+
+                RunObjRef* pObjRef = FindRunObjRef(lpRunObj);
+                if (NULL == pObjRef)
+                {
+                    pObjRef = new RunObjRef;
+                    m_objRefMap[lpRunObj] = pObjRef;
+                }
+
+                pObjRef->lRef += lRefCount;
+                if (0 == pObjRef->lRef)
+                {
+                    delete pObjRef;
+                    m_objRefMap.erase(lpRunObj);
+                }
+            }
+
+            void ReleseRunObj(void* lpRunObj)
+            {
+                SparkLocker lockerObjRef(m_lockObjRefMap);
+
+                RunObjRef* pObjRef = FindRunObjRef(lpRunObj);
+                if (NULL != pObjRef)
+                {
+                    pObjRef->isReleased = true;
+                }
+            }
+
+            RunObjRef* FindRunObjRef(void* lpRunObj)
+            {
+                SparkLocker locker(m_lockObjRefMap);
+
+                RunObjRef* pRef = NULL;
+                ObjRefMapItr itr = m_objRefMap.find(lpRunObj);
+                if (itr != m_objRefMap.end())
+                {
+                    pRef = itr->second;
+                }
+                return pRef;
             }
 
             void AddRunTask(Runnable* pRunnable)
             {
                 SparkLocker locker(m_lockRunTasks);
-
                 m_runTasks.push_back(pRunnable);
             }
 
@@ -686,6 +766,12 @@ namespace Spark
 
             void ExecuteRun( SparkThreadWork* pWorkThread, Runnable* pTask )
             {
+                RunObjRef* pRunObjRef = FindRunObjRef(pTask->GetRunObj());
+                if (pRunObjRef->isReleased)
+                {
+                    return;
+                }
+
                 if (pTask)
                 {
                     pTask->Run();
@@ -694,6 +780,7 @@ namespace Spark
 
             void AfterExecuteRun( SparkThreadWork* pWorkThread, Runnable* pTask )
             {
+                UpdateRunObjRef(pTask, -1);
                 RemoveRunTask(pTask);
                 SAFE_HOST_RELEASE(pTask);
                 ResetWorkThreadStatus(pWorkThread);
@@ -843,10 +930,12 @@ namespace Spark
             }
 
         private:
+            typedef std::map<void*, RunObjRef*> ObjRefMap;
             typedef std::map<int, SparkThreadWork *> ThreadPool;
             typedef std::list<Runnable *> Tasks;
             typedef Tasks::iterator TasksItr;
             typedef ThreadPool::iterator ThreadPoolItr;
+            typedef ObjRefMap::iterator ObjRefMapItr;
 
             bool m_bIsInit;
             int m_nMinThreadNum;
@@ -860,6 +949,7 @@ namespace Spark
 
             ThreadPool m_threadPool;
             ThreadPool m_trashThread;
+            ObjRefMap m_objRefMap;
             Tasks m_tasks;
             Tasks m_runTasks;
 
@@ -870,6 +960,7 @@ namespace Spark
             SparkLock m_lockTrashThreadPool;
             SparkLock m_lockTasks;
             SparkLock m_lockRunTasks;
+            SparkLock m_lockObjRefMap;
 
         };
 
