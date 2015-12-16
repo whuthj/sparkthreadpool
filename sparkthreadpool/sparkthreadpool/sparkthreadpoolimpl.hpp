@@ -190,16 +190,21 @@ namespace Spark
 
             bool SwitchToWndThread(Runnable* pTask, bool bIsSendMsg = false)
             {
+                if (!IsRunObjValid(pTask))
+                {
+                    SAFE_HOST_RELEASE(pTask);
+                    return false;
+                }
+
                 if (m_msgWnd.IsWindow())
                 {
-                    if (bIsSendMsg) m_msgWnd.SendMessage(TASK_HANDLE_MSG_ID, (WPARAM)pTask);
-                    else m_msgWnd.PostMessage(TASK_HANDLE_MSG_ID, (WPARAM)pTask);
+                    if (bIsSendMsg) { m_msgWnd.SendMessage(TASK_HANDLE_MSG_ID, (WPARAM)pTask); }
+                    else { m_msgWnd.PostMessage(TASK_HANDLE_MSG_ID, (WPARAM)pTask); }
 
                     return true;
                 }
 
                 SAFE_HOST_RELEASE(pTask);
-
                 return false;
             }
 
@@ -562,6 +567,17 @@ namespace Spark
                 return pFindRunnable;
             }
 
+            bool IsRunObjValid(Runnable* pRunnable)
+            {
+                if (NULL == pRunnable) { return false; }
+
+                RunObjRef* pRunObjRef = FindRunObjRef(pRunnable->GetRunObj());
+                if (NULL == pRunObjRef) { return false; }
+                if (pRunObjRef->isReleased) { return false; }
+
+                return true;
+            }
+
             void UpdateRunObjRef(Runnable* pRunnable, long lRefCount)
             {
                 if (NULL == pRunnable) { return; }
@@ -766,9 +782,7 @@ namespace Spark
 
             void ExecuteRun( SparkThreadWork* pWorkThread, Runnable* pTask )
             {
-                RunObjRef* pRunObjRef = FindRunObjRef(pTask->GetRunObj());
-                if (NULL == pRunObjRef) { return; }
-                if (pRunObjRef->isReleased) { return; }
+                if (!IsRunObjValid(pTask)) { return; }
 
                 if (pTask)
                 {
