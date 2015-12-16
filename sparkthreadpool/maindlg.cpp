@@ -45,12 +45,22 @@ void CTestTaskRelease::TestDoAsync()
 
 void CTestTaskRelease::DoAsync1()
 {
+    if (m_pMainDlg)
+    {
+        int a = 100;
+        SPARK_MSG(CMainDlg, DoSendMsgToMainThread, m_pMainDlg, &SparkThreadPool::Instance(), true, &a);
+        m_pMainDlg->PrintText(L"CTestTaskRelease::DoAsync1");
+    }
     ::Sleep(12000);
     DoTest();
 }
 
 void CTestTaskRelease::DoAsync2()
 {
+    if (m_pMainDlg)
+    {
+        m_pMainDlg->PrintText(L"CTestTaskRelease::DoAsync2");
+    }
     ::Sleep(12000);
     DoTest();
 }

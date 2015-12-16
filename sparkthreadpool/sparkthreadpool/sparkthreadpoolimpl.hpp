@@ -50,6 +50,7 @@ namespace Spark
                 RunObjRef() : lRef(0l), isReleased(false) {}
                 long lRef;
                 bool isReleased;
+                SparkLock lockRunObjOpt;
             };
             class SparkThreadWork : public SparkThread
             {
@@ -454,10 +455,26 @@ namespace Spark
                 int nDeleteCount = 0;
 
                 ReleseRunObj(lpRunObj);
+                RunObjRef* pRunObjRef = FindRunObjRef(lpRunObj);
+                if (NULL != pRunObjRef)
+                {
+                    SparkLocker locker(pRunObjRef->lockRunObjOpt);
+                    nDeleteCount = DoDestroyTasksByRunObj(lpRunObj);
+                }
+                else
+                {
+                    nDeleteCount = DoDestroyTasksByRunObj(lpRunObj);
+                }
+                return nDeleteCount;
+            }
+
+            int DoDestroyTasksByRunObj(void* lpRunObj)
+            {
+                int nDeleteCount = 0;
 
                 nDeleteCount = DestroyWaitTasksByRunObj(lpRunObj);
                 nDeleteCount += DestroyRunTasksByRunObj(lpRunObj);
-                
+
                 // 再次检查有没有刚加入新的等待任务，
                 // 避免正在跑的任务完成后又添加新的任务
                 nDeleteCount += DestroyWaitTasksByRunObj(lpRunObj);
@@ -782,6 +799,11 @@ namespace Spark
 
             void ExecuteRun( SparkThreadWork* pWorkThread, Runnable* pTask )
             {
+                RunObjRef* pRunObjRef = FindRunObjRef(pTask->GetRunObj());
+                if (NULL == pRunObjRef) { return; }
+
+                SparkLocker locker(pRunObjRef->lockRunObjOpt);
+
                 if (!IsRunObjValid(pTask)) { return; }
 
                 if (pTask)

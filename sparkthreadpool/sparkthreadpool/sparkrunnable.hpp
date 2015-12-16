@@ -52,7 +52,7 @@ namespace Spark
         {
         public:
             virtual ~Runnable() {};
-            virtual void* GetRunObj() { return NULL; };
+            virtual void* GetRunObj() { return this; };
             virtual void ReleaseRunObj() {};
         };
 

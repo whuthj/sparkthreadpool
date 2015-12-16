@@ -75,7 +75,7 @@ protected:
 public:
     void PrintText(LPCTSTR format, ...);
 
-private:
+public:
     SPARK_ASYN_API(DoInWorkThread, int, a, int, b)
     void DoInWorkThread(int a, int b);
 
