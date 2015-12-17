@@ -7,7 +7,8 @@ namespace Spark
 {
     namespace Thread
     {
-        static const int TASK_HANDLE_MSG_ID = WM_APP + 1001;
+        static const int TASK_HANDLE_SEND_MSG_ID = WM_APP + 1001;
+        static const int TASK_HANDLE_POST_MSG_ID = WM_APP + 1002;
         static const LPCWSTR SPARK_MSG_WND_CLASS_NAME = L"SparkMsgWnd";
         
         class SparkMsgWnd
@@ -41,7 +42,7 @@ namespace Spark
                 //LRESULT hr = ::SendMessage(m_hWnd, message, wParam, lParam);
                 
                 DWORD dwResult;
-                LRESULT hr = ::SendMessageTimeout(m_hWnd, message, wParam, lParam, SMTO_ABORTIFHUNG | SMTO_BLOCK, uTimeout, &dwResult);
+                LRESULT hr = ::SendMessageTimeout(m_hWnd, message, wParam, lParam, SMTO_NORMAL, uTimeout, &dwResult);
 
                 return hr;
             }
@@ -147,9 +148,15 @@ namespace Spark
 
             LRESULT ProcessMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
             {
-                if (uMsg == TASK_HANDLE_MSG_ID)
+                bHandled = TRUE;
+
+                if (uMsg == TASK_HANDLE_SEND_MSG_ID)
                 {
-                    OnTaskHandleMsg(uMsg, wParam, lParam, bHandled);
+                    OnTaskHandleSendMsg(uMsg, wParam, lParam, bHandled);
+                }
+                else if (uMsg == TASK_HANDLE_POST_MSG_ID)
+                {
+                    OnTaskHandlePostMsg(uMsg, wParam, lParam, bHandled);
                 }
                 else if (uMsg == WM_TIMER)
                 {
@@ -159,24 +166,26 @@ namespace Spark
                 return S_OK;
             }
 
-            LRESULT OnTaskHandleMsg(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
+            LRESULT OnTaskHandlePostMsg(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
             {
                 Runnable* pRunnable = (Runnable *)wParam;
-                bool* bIsHandled = (bool*)lParam;
-                if (bIsHandled) 
-                { 
-                    *bIsHandled = true; 
-                }
 
                 if (pRunnable)
                 {
                     pRunnable->Run();
-
-                    if (pRunnable->IsBeHosted())
-                    {
-                        pRunnable->Release();
-                    }
+                    SAFE_HOST_RELEASE(pRunnable);
                 }
+
+                return 0;
+            }
+
+            LRESULT OnTaskHandleSendMsg(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
+            {
+                Runnable* pRunnable = (Runnable *)wParam;
+                bool* bIsHandled = (bool*)lParam;
+
+                if (pRunnable) { pRunnable->Run(); }
+                if (bIsHandled) { *bIsHandled = true; }
 
                 return 0;
             }

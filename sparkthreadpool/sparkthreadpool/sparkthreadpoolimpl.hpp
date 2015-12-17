@@ -182,40 +182,34 @@ namespace Spark
             bool SwitchToWndThread(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam = NULL, bool bIsSendMsg = false)
             {
                 Runnable* pTask = Spark::Thread::CreateRunnable(pObj, pFun, lpParam);
-
-                RUNNABLE_PTR_HOST_ADDREF(pTask);
-
                 return SwitchToWndThread(pTask, bIsSendMsg);
             }
 
             bool SwitchToWndThread(Runnable* pTask, bool bIsSendMsg = false)
             {
-                if (!m_msgWnd.IsWindow())
-                {
-                    SAFE_HOST_RELEASE(pTask);
-                    return false;
-                }
+                if (!m_msgWnd.IsWindow()){ return false; }
                 if (!bIsSendMsg)
                 {
-                    m_msgWnd.PostMessage(TASK_HANDLE_MSG_ID, (WPARAM)pTask);
+                    RUNNABLE_PTR_HOST_ADDREF(pTask);
+                    m_msgWnd.PostMessage(TASK_HANDLE_POST_MSG_ID, (WPARAM)pTask);
                     return true;
                 }
 
+                bool bIsHandled = false;
                 for (;;)
                 {
-                    bool bIsHandled = false;
-                    LRESULT hr = m_msgWnd.SendMessage(TASK_HANDLE_MSG_ID, (WPARAM)pTask, (LPARAM)&bIsHandled);
+                    LRESULT hr = m_msgWnd.SendMessage(TASK_HANDLE_SEND_MSG_ID, (WPARAM)pTask, (LPARAM)&bIsHandled);
                     if (bIsHandled)
                     {
                         break;
                     }
                     if (!IsRunObjValid(pTask))
                     {
-                        SAFE_HOST_RELEASE(pTask);
-                        return false;
+                        break;
                     }
                 }
 
+                delete pTask;
                 return true;
             }
 
