@@ -195,11 +195,6 @@ namespace Spark
                     SAFE_HOST_RELEASE(pTask);
                     return false;
                 }
-                if (!IsRunObjValid(pTask))
-                {
-                    SAFE_HOST_RELEASE(pTask);
-                    return false;
-                }
                 if (!bIsSendMsg)
                 {
                     m_msgWnd.PostMessage(TASK_HANDLE_MSG_ID, (WPARAM)pTask);
@@ -209,7 +204,7 @@ namespace Spark
                 for (;;)
                 {
                     LRESULT hr = m_msgWnd.SendMessage(TASK_HANDLE_MSG_ID, (WPARAM)pTask);
-                    if (SUCCEEDED(hr))
+                    if (hr)
                     {
                         break;
                     }

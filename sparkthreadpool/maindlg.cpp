@@ -117,6 +117,7 @@ BOOL CMainDlg::OnInitDialog(CWindow wndFocus, LPARAM lInitParam)
     SetWindowText(L"SparkThreadPool测试");
     SetDlgItemText(IDC_BUTTON_TEST, L"异步执行");
 
+    DoTimerLog();
     m_timerLog.StartTimer(this, &CMainDlg::DoTimerLog, 1000);
 
     return TRUE;
@@ -236,6 +237,7 @@ void CMainDlg::DoSendMsgToMainThread(void* lpParam)
 {
     int* lpTmp = (int*)lpParam;
     *lpTmp = 1234;
+    ::Sleep(1000);
 }
 
 void CMainDlg::DoPostMsgToMainThread(void* lpParam)
