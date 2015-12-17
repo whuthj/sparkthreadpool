@@ -159,9 +159,14 @@ namespace Spark
                 return S_OK;
             }
 
-            LRESULT OnTaskHandleMsg(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+            LRESULT OnTaskHandleMsg(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
             {
                 Runnable* pRunnable = (Runnable *)wParam;
+                bool* bIsHandled = (bool*)lParam;
+                if (bIsHandled) 
+                { 
+                    *bIsHandled = true; 
+                }
 
                 if (pRunnable)
                 {

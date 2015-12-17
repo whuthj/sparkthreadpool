@@ -203,8 +203,9 @@ namespace Spark
 
                 for (;;)
                 {
-                    LRESULT hr = m_msgWnd.SendMessage(TASK_HANDLE_MSG_ID, (WPARAM)pTask);
-                    if (hr)
+                    bool bIsHandled = false;
+                    LRESULT hr = m_msgWnd.SendMessage(TASK_HANDLE_MSG_ID, (WPARAM)pTask, (LPARAM)&bIsHandled);
+                    if (bIsHandled)
                     {
                         break;
                     }
