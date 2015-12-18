@@ -181,8 +181,14 @@ namespace Spark
             template<typename T, typename ParamType>
             bool SwitchToWndThread(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam = NULL, bool bIsSendMsg = false)
             {
-                Runnable* pTask = Spark::Thread::CreateRunnable(pObj, pFun, lpParam);
-                return SwitchToWndThread(pTask, bIsSendMsg);
+                if (!bIsSendMsg)
+                {
+                    Runnable* pTask = Spark::Thread::CreateRunnable(pObj, pFun, lpParam);
+                    return SwitchToWndThread(pTask, bIsSendMsg);
+                }
+
+                MemberFunPtrRunnable<T, ParamType> task(pObj, pFun, lpParam);
+                return SwitchToWndThread(&task, bIsSendMsg);
             }
 
             bool SwitchToWndThread(Runnable* pTask, bool bIsSendMsg = false)
@@ -195,6 +201,7 @@ namespace Spark
                     return true;
                 }
 
+                UpdateRunObjRef(pTask, 1);
                 bool bIsHandled = false;
                 for (;;)
                 {
@@ -208,8 +215,7 @@ namespace Spark
                         break;
                     }
                 }
-
-                delete pTask;
+                UpdateRunObjRef(pTask, -1);
                 return true;
             }
 

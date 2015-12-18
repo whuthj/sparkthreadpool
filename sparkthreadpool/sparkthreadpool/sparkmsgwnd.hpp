@@ -36,7 +36,7 @@ namespace Spark
                 return m_hWnd;
             }
 
-            LRESULT SendMessage(UINT message, WPARAM wParam = 0, LPARAM lParam = 0, UINT uTimeout = 1000) throw()
+            LRESULT SendMessage(UINT message, WPARAM wParam = 0, LPARAM lParam = 0, UINT uTimeout = 2000) throw()
             {
                 ATLASSERT(::IsWindow(m_hWnd));
                 //LRESULT hr = ::SendMessage(m_hWnd, message, wParam, lParam);

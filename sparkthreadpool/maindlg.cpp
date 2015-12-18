@@ -237,7 +237,6 @@ void CMainDlg::DoSendMsgToMainThread(void* lpParam)
 {
     int* lpTmp = (int*)lpParam;
     *lpTmp = 1234;
-    ::Sleep(1000);
 }
 
 void CMainDlg::DoPostMsgToMainThread(void* lpParam)
