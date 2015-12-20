@@ -699,10 +699,8 @@ namespace Spark
             {
                 int nTasksCount = 0;
 
-                {
-                    SparkLocker locker(m_lockTasks);
-                    nTasksCount = m_tasks.size();
-                }
+                SparkLocker locker(m_lockTasks);
+                nTasksCount = m_tasks.size();
 
                 if (nTasksCount > m_nMinThreadNum * m_nMaxPendingTasks)
                 {
@@ -721,10 +719,8 @@ namespace Spark
             {
                 int nThreadPoolCount = 0;
 
-                {
-                    SparkLocker locker(m_lockThreadPool);
-                    nThreadPoolCount = m_threadPool.size();
-                }
+                SparkLocker locker(m_lockThreadPool);
+                nThreadPoolCount = m_threadPool.size();
 
                 if (nThreadPoolCount == m_nMaxThreadNum)
                 {
