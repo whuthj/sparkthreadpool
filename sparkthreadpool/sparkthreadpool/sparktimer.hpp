@@ -135,7 +135,7 @@ namespace Spark
                 m_lTimerId = -1;
             }
 
-            template<typename T, typename ParamType = void*>
+            template<typename T, typename ParamType>
             bool StartTimer(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam, UINT nElapse, int nRunCount = 0)
             {
                 if (nRunCount < 0) { return false; }
@@ -169,7 +169,7 @@ namespace Spark
                 return true;
             }
 
-            template<typename T, typename ParamType = void*>
+            template<typename T, typename ParamType>
             static long Schedule(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam, UINT nElapse, int nRunCount = 0)
             {
                 SparkTimerTask* pTask = CreateTimerTask<T, ParamType>(pObj, pFun, lpParam);
