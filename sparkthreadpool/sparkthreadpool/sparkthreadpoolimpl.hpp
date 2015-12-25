@@ -374,6 +374,13 @@ namespace Spark
 
             bool AddWorkThread()
             {
+                SparkLocker locker(m_lockThreadPool);
+
+                if (CompareThreadCountWithMax() >= 0)
+                {
+                    return false;
+                }
+
                 SparkThreadWork* pWorker = new SparkThreadWork(this);
                 if (NULL == pWorker)
                 {
@@ -383,10 +390,7 @@ namespace Spark
                 pWorker->Start();
                 int nThreadId = pWorker->GetThreadId();
 
-                {
-                    SparkLocker locker(m_lockThreadPool);
-                    m_threadPool.insert(std::make_pair(nThreadId, pWorker));
-                }
+                m_threadPool.insert(std::make_pair(nThreadId, pWorker));
                 
                 return true;
             }
