@@ -702,16 +702,17 @@ namespace Spark
             bool IsShouldResizePool()
             {
                 int nTasksCount = 0;
+                int nThreadPoolCount = 0;
 
-                SparkLocker locker(m_lockTasks);
-                nTasksCount = m_tasks.size();
+                SparkLocker locker(m_lockThreadPool);
+                nThreadPoolCount = m_threadPool.size();
 
-                if (nTasksCount > m_nMinThreadNum * m_nMaxPendingTasks)
                 {
-                    return true;
+                    SparkLocker locker(m_lockTasks);
+                    nTasksCount = m_tasks.size();
                 }
 
-                if (0 == m_nMinThreadNum)
+                if (nTasksCount > nThreadPoolCount * m_nMaxPendingTasks)
                 {
                     return true;
                 }
