@@ -1,4 +1,9 @@
-﻿#pragma once
+﻿/*
+ * Author: hujun
+ * Email: whuthj@163.com
+ * Website: https://github.com/whuthj/sparkthreadpool
+*/
+#pragma once
 
 /*concatenate two arguments*/
 #define CONCAT(arg1, arg2)		CONCAT1(arg1, arg2)

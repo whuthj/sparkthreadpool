@@ -1,4 +1,9 @@
-﻿#pragma once
+﻿/*
+ * Author: hujun
+ * Email: whuthj@163.com
+ * Website: https://github.com/whuthj/sparkthreadpool
+*/
+#pragma once
 
 #include <map>
 #include <list>
