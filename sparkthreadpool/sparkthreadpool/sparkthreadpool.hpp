@@ -106,6 +106,12 @@ namespace Spark
                 return m_threadPoolImpl.Init(nMinThreadNum, nMaxThreadNum, nMaxPendingTasks, nKeepAliveTime);
             }
 
+            bool Init()
+            {
+                static int _s_cpu_num = _GetProcessNumber();
+                return m_threadPoolImpl.Init(_s_cpu_num, _s_cpu_num * 2);
+            }
+
             // 确保在界面线程调用
             bool InitMsgWnd()
             {
@@ -183,6 +189,14 @@ namespace Spark
             int GetTaskCount()
             {
                 return m_threadPoolImpl.GetTaskCount();
+            }
+
+        private:
+            inline int _GetProcessNumber()
+            {
+                SYSTEM_INFO info;
+                GetSystemInfo(&info);
+                return (int)info.dwNumberOfProcessors;
             }
 
         private:

@@ -287,6 +287,14 @@
 					RelativePath=".\sparkthreadpool\sparktimertask.hpp"
 					>
 				</File>
+				<File
+					RelativePath=".\sparkthreadpool\sparkweakptr.hpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="utils"
+				>
 			</Filter>
 		</Filter>
 	</Files>

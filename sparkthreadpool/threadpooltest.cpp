@@ -10,10 +10,10 @@ int APIENTRY _tWinMain( HINSTANCE hInstance,
                       LPTSTR    lpCmdLine,
                       int       nCmdShow)
 {
-	UNREFERENCED_PARAMETER(hPrevInstance);
-	UNREFERENCED_PARAMETER(lpCmdLine);
+    UNREFERENCED_PARAMETER(hPrevInstance);
+    UNREFERENCED_PARAMETER(lpCmdLine);
 
-    SparkThreadPool::Instance().Init(4, 20, 5, 10000);
+    SparkThreadPool::Instance().Init();
 
     int nRet = 0;
     {

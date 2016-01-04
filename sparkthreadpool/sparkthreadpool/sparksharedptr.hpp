@@ -1,5 +1,7 @@
 #pragma once
 
+#include "sparkweakptr.hpp"
+
 namespace Spark
 {
     namespace Memory
@@ -7,6 +9,7 @@ namespace Spark
         template<typename T>
         class SparkSharedPtr
         {
+            friend class SparkWeakPtr<T>;
         public:
             SparkSharedPtr() : m_ptr(NULL), m_plRef(NULL)
             {
