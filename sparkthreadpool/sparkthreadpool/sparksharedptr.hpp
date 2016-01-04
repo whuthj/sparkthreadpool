@@ -16,15 +16,14 @@ namespace Spark
         {
             friend class SparkWeakPtr<T>;
         public:
-            SparkSharedPtr() : m_ptr(NULL), m_plRef(NULL), m_plWeakRef(NULL)
+            SparkSharedPtr() : m_ptr(NULL), m_pRefCount(NULL)
             {
 
             }
 
-            SparkSharedPtr(T* ptr) : m_ptr(ptr), m_plRef(NULL), m_plWeakRef(NULL)
+            SparkSharedPtr(T* ptr) : m_ptr(ptr), m_pRefCount(NULL)
             {
-                m_plRef = new long(1l);
-                m_plWeakRef = new long(0l);
+                m_pRefCount = new _SparkPtrRefCount();
             }
 
             SparkSharedPtr(const SparkSharedPtr& t)
@@ -54,7 +53,7 @@ namespace Spark
 
             long use_count()
             {
-                return m_plRef == NULL ? 0 : *m_plRef;
+                return m_pRefCount == NULL ? 0 : m_pRefCount->use_count();
             }
 
             T& operator*() { return *m_ptr; }
@@ -63,64 +62,64 @@ namespace Spark
         private:
             void _ReleaseRefPtr()
             {
-                if (NULL == m_plRef)
+                if (NULL == m_pRefCount)
                 {
                     return;
                 }
 
-                if (0 == ::InterlockedDecrement((long *)m_plRef))
-                {
-                    if (m_ptr)
-                    {
-                        delete m_ptr;
-                        m_ptr = NULL;
-                    }
+               if (0 < m_pRefCount->DecRef())
+               {
+                    return;
+               }
 
-                    if (m_plRef)
-                    {
-                        delete m_plRef;
-                        m_plRef = NULL;
-                    }
+                if (m_ptr)
+                {
+                    delete m_ptr;
+                    m_ptr = NULL;
+                }
+
+                if (m_pRefCount->TryRelease())
+                {
+                    m_pRefCount = NULL;
                 }
             }
 
-            void _AddRefForPtr(const SparkSharedPtr& t)
+            bool _AddRefForPtr(const SparkSharedPtr& t)
             {
-                if (NULL == t.m_plRef)
+                if (NULL == t.m_pRefCount)
                 {
-                    return;
+                    return false;
                 }
 
                 m_ptr = t.m_ptr;
-                m_plRef = t.m_plRef;
-                ::InterlockedIncrement((long *)m_plRef);
+                m_pRefCount = t.m_pRefCount;
+                m_pRefCount->IncRef();
+
+                return true;
             }
 
-            void _AddRefForPtr(const SparkWeakPtr<T>& t)
+            bool _AddRefForPtr(const SparkWeakPtr<T>& t)
             {
-                if (NULL == t.m_plRef)
+                if (NULL != t.m_pRefCount && !t.m_pRefCount->expired())
                 {
-                    return;
+                    m_ptr = t.m_ptr;
+                    m_pRefCount = t.m_pRefCount;
+                    m_pRefCount->IncRef();
+
+                    return true;
                 }
 
-                m_ptr = t.m_ptr;
-                m_plRef = t.m_plRef;
-                ::InterlockedIncrement((long *)m_plRef);
+                return false;
             }
 
             void _InitAndAddWeakRef(SparkWeakPtr<T>& weak)
             {
-                ::InterlockedIncrement((long *)m_plWeakRef);
-
-                weak.m_plWeakRef = m_plWeakRef;
-                weak.m_plRef = m_plRef;
-                weak.m_ptr = m_ptr;
+                m_pRefCount->IncWeakRef();
+                weak.m_pRefCount = m_pRefCount;
             }
 
          private:
-            long* m_plRef;
-            long* m_plWeakRef;
-
+           _SparkPtrRefCount* m_pRefCount;
             T* m_ptr;
         };
     }

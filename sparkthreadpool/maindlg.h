@@ -83,7 +83,7 @@ public:
     void DoInMainThread(CString strText);
 
     void DoAsync();
-    void DoAsyncEx(SparkSharedPtr<CTestTaskRelease> param);
+    void DoAsyncEx(SparkWeakPtr<CTestTaskRelease> param);
     void DoAsyncEx_1(SparkSharedPtr<CTestTaskRelease> param);
 
     SPARK_ASYN_API(DoAsyncEx_2, SparkSharedPtr<CTestTaskRelease>, testTaskRelease)

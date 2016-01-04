@@ -145,10 +145,12 @@ LRESULT CMainDlg::OnBnClickedButtonTest(BOOL& /*bHandled*/)
     SparkSharedPtr<CTestTaskRelease> testTaskRelease(new CTestTaskRelease(this));
     testTaskRelease->TestDoAsync();
 
+    SparkWeakPtr<CTestTaskRelease> weakTaskRelease(testTaskRelease);
+
     SPARK_INSTANCE_ASYN_EX(CMainDlg, DoAsyncEx_2, testTaskRelease);
 
     //SparkThreadPool::Instance().Execute(this, &CMainDlg::DoAsyncEx, testTaskRelease);
-    SPARK_PARAM_INSTANCE_ASYN(CMainDlg, DoAsyncEx, SparkSharedPtr<CTestTaskRelease>, testTaskRelease);
+    SPARK_PARAM_INSTANCE_ASYN(CMainDlg, DoAsyncEx, SparkWeakPtr<CTestTaskRelease>, weakTaskRelease);
     SPARK_INSTANCE_ASYN_EX(CMainDlg, DoAsyncEx_3);
     SPARK_PARAM_INSTANCE_ASYN(CMainDlg, DoAsyncEx_4, double, 1234.1234);
 
@@ -204,13 +206,17 @@ void CMainDlg::DoAsync()
     int b = 1000;
 }
 
-void CMainDlg::DoAsyncEx(SparkSharedPtr<CTestTaskRelease> param)
+void CMainDlg::DoAsyncEx(SparkWeakPtr<CTestTaskRelease> param)
 {
-    ::Sleep(2000);
-    SparkSharedPtr<CTestTaskRelease> test = param;
-    SparkThread tWork;
-    tWork.Start(this, &CMainDlg::DoAsyncEx_1, test);
-    tWork.Join();
+    ::Sleep(1000);
+
+    if (!param.expired())
+    {
+        SparkSharedPtr<CTestTaskRelease> test(param);
+        SparkThread tWork;
+        tWork.Start(this, &CMainDlg::DoAsyncEx_1, test);
+        tWork.Join();
+    }
 }
 
 void CMainDlg::DoAsyncEx_1(SparkSharedPtr<CTestTaskRelease> param)
