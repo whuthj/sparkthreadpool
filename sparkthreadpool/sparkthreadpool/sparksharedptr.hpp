@@ -16,17 +16,23 @@ namespace Spark
         {
             friend class SparkWeakPtr<T>;
         public:
-            SparkSharedPtr() : m_ptr(NULL), m_plRef(NULL)
+            SparkSharedPtr() : m_ptr(NULL), m_plRef(NULL), m_plWeakRef(NULL)
             {
 
             }
 
-            SparkSharedPtr(T* ptr) : m_ptr(ptr), m_plRef(NULL)
+            SparkSharedPtr(T* ptr) : m_ptr(ptr), m_plRef(NULL), m_plWeakRef(NULL)
             {
                 m_plRef = new long(1l);
+                m_plWeakRef = new long(0l);
             }
 
             SparkSharedPtr(const SparkSharedPtr& t)
+            {
+                _AddRefForPtr(t);
+            }
+
+            SparkSharedPtr(const SparkWeakPtr<T>& t)
             {
                 _AddRefForPtr(t);
             }
@@ -48,12 +54,7 @@ namespace Spark
 
             long use_count()
             {
-                if (NULL == m_plRef)
-                {
-                    return 0;
-                }
-
-                return static_cast<long>(*m_plRef);
+                return m_plRef == NULL ? 0 : *m_plRef;
             }
 
             T& operator*() { return *m_ptr; }
@@ -95,8 +96,31 @@ namespace Spark
                 ::InterlockedIncrement((long *)m_plRef);
             }
 
+            void _AddRefForPtr(const SparkWeakPtr<T>& t)
+            {
+                if (NULL == t.m_plRef)
+                {
+                    return;
+                }
+
+                m_ptr = t.m_ptr;
+                m_plRef = t.m_plRef;
+                ::InterlockedIncrement((long *)m_plRef);
+            }
+
+            void _InitAndAddWeakRef(SparkWeakPtr<T>& weak)
+            {
+                ::InterlockedIncrement((long *)m_plWeakRef);
+
+                weak.m_plWeakRef = m_plWeakRef;
+                weak.m_plRef = m_plRef;
+                weak.m_ptr = m_ptr;
+            }
+
          private:
             long* m_plRef;
+            long* m_plWeakRef;
+
             T* m_ptr;
         };
     }
