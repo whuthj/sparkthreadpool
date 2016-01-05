@@ -50,6 +50,36 @@ private:
     CMainDlg* m_pMainDlg;
 };
 
+class Woman;
+class Man{  
+private:  
+    SparkSharedPtr<Woman> _wife;  
+public:  
+    void setWife(SparkSharedPtr<Woman> woman){  
+        _wife = woman;  
+    }  
+
+    void doSomthing(){  
+        
+    }  
+
+    ~Man(){  
+        
+    }  
+};  
+
+class Woman{  
+private:  
+    SparkWeakPtr<Man> _husband;  
+public:  
+    void setHusband(SparkSharedPtr<Man> man){  
+        _husband = man;
+    }  
+    ~Woman(){  
+        
+    }  
+};  
+
 class CMainDlg : public CDialogImpl<CMainDlg>
 {
 public:

@@ -1,16 +1,34 @@
 ﻿#include "stdafx.h"
 #include "maindlg.h"
 
+void DebugString(LPCTSTR format, ...)
+{
+    if (format)
+    {
+        va_list args;
+        va_start(args, format);
+        CString strText = L"[SparkThreadPool]";
+        strText.AppendFormatV(format, args);
+        va_end(args);
+
+        ::OutputDebugString(strText);
+    }
+}
+
 CTestTaskRelease::CTestTaskRelease()
 {
     m_pTest = new int(123);
     m_pMainDlg = NULL;
+
+    DebugString(L"CTestTaskRelease \n");
 }
 
 CTestTaskRelease::CTestTaskRelease(CMainDlg* pDlg)
 {
     m_pTest = new int(123);
     m_pMainDlg = pDlg;
+
+    DebugString(L"CTestTaskRelease \n");
 }
 
 CTestTaskRelease::~CTestTaskRelease()
@@ -33,6 +51,8 @@ CTestTaskRelease::~CTestTaskRelease()
     {
         m_pMainDlg->PrintText(L"CTestTaskRelease::~CTestTaskRelease End(%d)", dwCost);
     }
+
+    DebugString(L"~CTestTaskRelease \n");
 }
 
 void CTestTaskRelease::TestDoAsync()
@@ -119,6 +139,11 @@ BOOL CMainDlg::OnInitDialog(CWindow wndFocus, LPARAM lInitParam)
 
     DoTimerLog();
     m_timerLog.StartTimer(this, &CMainDlg::DoTimerLog, 1000);
+
+    SparkSharedPtr<Man> m(new Man());  
+    SparkSharedPtr<Woman> w(new Woman());  
+    m->setWife(w);
+    w->setHusband(m);
 
     return TRUE;
 }
@@ -274,7 +299,7 @@ void CMainDlg::DoInMainThread(CString strText)
     strText.AppendFormat(L"\r\n输出日志运行线程ID：%d\r\n\r\n", ::GetCurrentThreadId());
     CString strLog;
     GetDlgItemText(IDC_STATIC_TEXT, strLog);
-    OutputDebugString(strLog);
+    //OutputDebugString(strLog);
     
     if (_s_nLogCount++ > 100)
     {

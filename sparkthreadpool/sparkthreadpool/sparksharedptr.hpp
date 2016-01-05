@@ -67,20 +67,20 @@ namespace Spark
                     return;
                 }
 
-               if (0 < m_pRefCount->DecRef())
-               {
-                    return;
-               }
-
-                if (m_ptr)
+                if (0 == m_pRefCount->DecRef())
                 {
-                    delete m_ptr;
-                    m_ptr = NULL;
-                }
+                    if (m_ptr)
+                    {
+                        delete m_ptr;
+                        m_ptr = NULL;
+                    }
 
-                if (m_pRefCount->TryRelease())
-                {
-                    m_pRefCount = NULL;
+                    // 0 >= 是因为可能弱引用没被用过，可能减到-1 
+                    if (0 >= m_pRefCount->DecWeakRef())
+                    {
+                        delete m_pRefCount;
+                        m_pRefCount = NULL;
+                    }
                 }
             }
 
@@ -116,6 +116,7 @@ namespace Spark
             {
                 m_pRefCount->IncWeakRef();
                 weak.m_pRefCount = m_pRefCount;
+                weak.m_ptr = m_ptr;
             }
 
          private:

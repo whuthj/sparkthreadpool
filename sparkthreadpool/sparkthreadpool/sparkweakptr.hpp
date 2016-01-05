@@ -14,15 +14,25 @@ namespace Spark
         class _SparkPtrRefCount
         {
         public:
-            _SparkPtrRefCount() : m_plRef(NULL), m_plWeakRef(NULL)
+            _SparkPtrRefCount() : m_lRef(0l), m_lWeakRef(0l)
             {
-                m_plRef = new long(1l);
-                m_plWeakRef = new long(0l);
+                IncRef();
+                MyDebugString(L"new _SparkPtrRefCount \n");
+            }
+
+            virtual ~_SparkPtrRefCount()
+            {
+                MyDebugString(L"delete _SparkPtrRefCount \n");
             }
 
             long use_count()
             {
-                return m_plRef == NULL ? 0 : *m_plRef;
+                return m_lRef;
+            }
+
+            long use_weak_count()
+            {
+                return m_lWeakRef;
             }
 
             bool expired()
@@ -32,83 +42,42 @@ namespace Spark
 
             long IncRef()
             {
-                if (NULL == m_plRef)
-                {
-                    return -1;
-                }
-
-                return ::InterlockedIncrement((long *)m_plRef);
-            }
-
-            long DecRef()
-            {
-                if (NULL == m_plRef)
-                {
-                    return -1;
-                }
-
-                 return ::InterlockedDecrement((long *)m_plRef);
+                return ::InterlockedIncrement(&m_lRef);
             }
 
             long IncWeakRef()
             {
-                if (NULL == m_plWeakRef)
-                {
-                    return -1;
-                }
-
-                ::InterlockedIncrement((long *)m_plWeakRef);
+                return ::InterlockedIncrement(&m_lWeakRef);
             }
 
             long DecWeakRef()
             {
-                if (NULL == m_plWeakRef)
-                {
-                    return -1;
-                }
-
-                return ::InterlockedDecrement((long *)m_plWeakRef);
+                return ::InterlockedDecrement(&m_lWeakRef);
             }
 
-            void ReleaseRef()
+            long DecRef()
             {
-                if (m_plRef)
-                {
-                    delete m_plRef;
-                    m_plRef = NULL;
-                }
-            }
-
-            bool TryRelease()
-            {
-                if (NULL == m_plWeakRef)
-                {
-                    return false;
-                }
-
-                if (0 != use_count())
-                {
-                    return false;
-                }
-
-                if (0 == DecWeakRef())
-                {
-                    if (m_plWeakRef)
-                    {
-                        delete m_plWeakRef;
-                        m_plWeakRef = NULL;
-                    }
-
-                    delete this;
-                    return true;
-                }
-
-                return false;
+                return ::InterlockedDecrement(&m_lRef);
             }
 
         private:
-            long* m_plRef;
-            long* m_plWeakRef;
+            void MyDebugString(LPCTSTR format, ...)
+            {
+                if (format)
+                {
+                    va_list args;
+                    va_start(args, format);
+                    CString strText = L"[SparkThreadPool]";
+                    strText.AppendFormatV(format, args);
+                    va_end(args);
+
+                    ::OutputDebugString(strText);
+                }
+            }
+
+        private:
+            volatile long m_lRef;
+            volatile long m_lWeakRef;
         };
 
         template<typename T>
@@ -120,9 +89,34 @@ namespace Spark
             {
             }
 
+            SparkWeakPtr(SparkWeakPtr& t)
+            {
+                _AddRefForPtr(t);
+            }
+
             SparkWeakPtr(SparkSharedPtr<T>& t)
             {
-                _InitRef(t);
+                _AddRefForPtr(t);
+            }
+
+            SparkWeakPtr& operator = (SparkWeakPtr& t)
+            {
+                if (t.m_ptr != m_ptr)
+                {
+                    _ReleaseRefPtr();
+                    _AddRefForPtr(t);
+                }
+                return *this;
+            }
+
+            SparkWeakPtr& operator = (SparkSharedPtr<T>& t)
+            {
+                if (t.m_ptr != m_ptr)
+                {
+                    _ReleaseRefPtr();
+                    _AddRefForPtr(t);
+                }
+                return *this;
             }
 
             virtual ~SparkWeakPtr()
@@ -146,16 +140,20 @@ namespace Spark
             {
                 if (NULL == m_pRefCount)
                 {
-                    return ;
+                    return;
                 }
 
-                if (m_pRefCount->TryRelease())
+                if (0 >= m_pRefCount->DecWeakRef())
                 {
-                    m_pRefCount = NULL;
+                    if (expired())
+                    {
+                        delete m_pRefCount;
+                        m_pRefCount = NULL;
+                    }
                 }
             }
 
-            void _InitRef(SparkSharedPtr<T>& t)
+            void _AddRefForPtr(SparkSharedPtr<T>& t)
             {
                 if (NULL == t.m_pRefCount)
                 {
@@ -163,6 +161,19 @@ namespace Spark
                 }
 
                 t._InitAndAddWeakRef(*this);
+                m_pRefCount->IncWeakRef();
+            }
+
+            void _AddRefForPtr(SparkWeakPtr& t)
+            {
+                if (NULL == t.m_pRefCount)
+                {
+                    return;
+                }
+
+                m_pRefCount = t.m_pRefCount;
+                m_pRefCount->IncWeakRef();
+                m_ptr = t.m_ptr;
             }
 
         private:
