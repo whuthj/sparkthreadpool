@@ -15,6 +15,15 @@ void DebugString(LPCTSTR format, ...)
     }
 }
 
+void Man::doSomthing()
+{
+    if (!_wife.expired())
+    {
+        SparkSharedPtr<Woman> woman(_wife);
+        woman->doSomthing();
+    }
+}
+
 CTestTaskRelease::CTestTaskRelease()
 {
     m_pTest = new int(123);
@@ -144,6 +153,7 @@ BOOL CMainDlg::OnInitDialog(CWindow wndFocus, LPARAM lInitParam)
     SparkSharedPtr<Woman> w(new Woman());  
     m->setWife(w);
     w->setHusband(m);
+    m->doSomthing();
 
     return TRUE;
 }
@@ -235,9 +245,9 @@ void CMainDlg::DoAsyncEx(SparkWeakPtr<CTestTaskRelease> param)
 {
     ::Sleep(1000);
 
-    if (!param.expired())
+    SparkSharedPtr<CTestTaskRelease> test(param);
+    if (test)
     {
-        SparkSharedPtr<CTestTaskRelease> test(param);
         SparkThread tWork;
         tWork.Start(this, &CMainDlg::DoAsyncEx_1, test);
         tWork.Join();

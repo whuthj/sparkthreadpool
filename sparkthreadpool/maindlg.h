@@ -51,17 +51,16 @@ private:
 };
 
 class Woman;
+
 class Man{  
 private:  
-    SparkSharedPtr<Woman> _wife;  
+    SparkWeakPtr<Woman> _wife;  
 public:  
     void setWife(SparkSharedPtr<Woman> woman){  
         _wife = woman;  
     }  
 
-    void doSomthing(){  
-        
-    }  
+    void doSomthing();  
 
     ~Man(){  
         
@@ -75,6 +74,11 @@ public:
     void setHusband(SparkSharedPtr<Man> man){  
         _husband = man;
     }  
+
+    void doSomthing(){  
+        
+    }  
+
     ~Woman(){  
         
     }  

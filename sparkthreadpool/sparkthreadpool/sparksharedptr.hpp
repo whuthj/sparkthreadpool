@@ -56,8 +56,14 @@ namespace Spark
                 return m_pRefCount == NULL ? 0 : m_pRefCount->use_count();
             }
 
+            bool expired()
+            {
+                return m_pRefCount == NULL ? true : m_pRefCount->expired();
+            }
+
             T& operator*() { return *m_ptr; }
             T* operator->() { return m_ptr; }
+            operator T* () { return m_ptr; }
 
         private:
             void _ReleaseRefPtr()
@@ -108,6 +114,9 @@ namespace Spark
 
                     return true;
                 }
+
+                m_ptr = NULL;
+                m_pRefCount = NULL;
 
                 return false;
             }
