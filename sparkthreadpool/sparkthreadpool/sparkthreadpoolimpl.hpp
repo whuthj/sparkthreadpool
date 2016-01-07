@@ -103,7 +103,7 @@ namespace Spark
             };
 
         public:
-            SparkThreadPoolImpl() : m_bIsInit(false)
+            SparkThreadPoolImpl() : m_bIsInit(0l)
                                   , m_nMinThreadNum(0)
                                   , m_nMaxThreadNum(0)
                                   , m_nMaxPendingTasks(0)
@@ -124,10 +124,13 @@ namespace Spark
         public:
             bool Init(int nMinThreadNum, int nMaxThreadNum, int nMaxPendingTasks = 1, int nKeepAliveTime = KEEP_ALIVE_TIME)
             {
-                if (m_bIsInit)
+                if (0 == ::InterlockedDecrement(&m_bIsInit))
                 {
+                    ::InterlockedIncrement(&m_bIsInit);
                     return false;
                 }
+                ::InterlockedIncrement(&m_bIsInit);
+
                 if (!IsInitParamValid(nMinThreadNum, nMaxPendingTasks, nMaxThreadNum))
                 {
                     return false;
@@ -146,7 +149,7 @@ namespace Spark
                 bCreate = CreateInitThreads(nMinThreadNum);
                 FAILED_THEN_UNINIT_AND_RETURN(bCreate);
 
-                m_bIsInit = true;
+                ::InterlockedIncrement(&m_bIsInit);
 
                 return true;
             }
@@ -172,9 +175,12 @@ namespace Spark
 
             void UnInit(DWORD dwPerWaitMilliseconds = 100)
             {
+                SparkLocker locker(m_lockUnint);
+
+                HandleUnInitData();
                 SetExitEvent();
 
-                DestroyCleanerThread();
+                DestroyCleanerThread(dwPerWaitMilliseconds);
                 DestroyThreadPool(dwPerWaitMilliseconds);
                 DestroyTasks();
                 DestroyRunTasks();
@@ -269,13 +275,17 @@ namespace Spark
             bool Execute(Runnable * pRunnable, 
                 SparkRunnableType emRunnableType = emSRType_Schedule_Post)
             {
+                SparkLocker locker(m_lockUnint);
+
                 if (NULL == pRunnable) return false;
 
-                if (!m_bIsInit)
+                if (-1 == ::InterlockedDecrement(&m_bIsInit))
                 {
+                    ::InterlockedIncrement(&m_bIsInit);
                     SAFE_HOST_RELEASE(pRunnable);
                     return false;
                 }
+                ::InterlockedIncrement(&m_bIsInit);
 
                 if (!IsShouldResizePool() || emSRType_Post == emRunnableType)
                 {
@@ -400,11 +410,11 @@ namespace Spark
                 return true;
             }
 
-            void DestroyCleanerThread()
+            void DestroyCleanerThread(DWORD dwPerWaitMilliseconds = 1000)
             {
                 if (m_pCleanerThread)
                 {
-                    m_pCleanerThread->Terminate(1000, 0);
+                    m_pCleanerThread->Terminate(dwPerWaitMilliseconds);
                     delete m_pCleanerThread;
                     m_pCleanerThread = NULL;
                 }
@@ -421,7 +431,7 @@ namespace Spark
                         SparkThreadWork* pWorker = itr->second;
                         if (NULL != pWorker)
                         {
-                            pWorker->Terminate(dwPerWaitMilliseconds, 0);
+                            pWorker->Terminate(dwPerWaitMilliseconds);
                             delete pWorker;
                             pWorker = NULL;
                         }
@@ -439,7 +449,7 @@ namespace Spark
                         SparkThreadWork* pWorker = itr->second;
                         if (NULL != pWorker)
                         {
-                            pWorker->Terminate(dwPerWaitMilliseconds, 0);
+                            pWorker->Terminate(dwPerWaitMilliseconds);
                             delete pWorker;
                             pWorker = NULL;
                         }
@@ -549,6 +559,7 @@ namespace Spark
                     if (lpRunObj == pRunnable->GetRunObj())
                     {
                         SAFE_RELEASE_RUN_OBJ(pRunnable);
+                        SAFE_HOST_RELEASE(pRunnable);
                         itr = m_tasks.erase(itr);
                         nDeleteCount++;
                         continue;
@@ -885,7 +896,7 @@ namespace Spark
                         continue;
                     }
 
-                    pThread->Terminate(500, 0);
+                    pThread->Terminate(500);
                     pThread->AddWorkRef();
                     delete pThread;
                     itr = trashThread.erase(itr);
@@ -936,6 +947,14 @@ namespace Spark
                 }
             }
 
+            void HandleUnInitData()
+            {
+                if (-1 == ::InterlockedDecrement(&m_bIsInit))
+                {
+                    ::InterlockedIncrement(&m_bIsInit);
+                }
+            }
+
             void SetExitEvent()
             {
                 if (m_hExitEvt)
@@ -974,7 +993,7 @@ namespace Spark
             typedef ThreadPool::iterator ThreadPoolItr;
             typedef ObjRefMap::iterator ObjRefMapItr;
 
-            bool m_bIsInit;
+            volatile long m_bIsInit;
             int m_nMinThreadNum;
             int m_nMaxThreadNum;
             int m_nMaxPendingTasks;
@@ -998,6 +1017,7 @@ namespace Spark
             SparkLock m_lockTasks;
             SparkLock m_lockRunTasks;
             SparkLock m_lockObjRefMap;
+            SparkLock m_lockUnint;
 
         };
 

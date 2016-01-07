@@ -173,7 +173,7 @@ namespace Spark
                 return ::WaitForSingleObject(m_handle, dwMilliseconds);
             }
 
-            bool Terminate(DWORD dwWaitMilliseconds = 100, DWORD dwExitCode = 0)
+            bool Terminate(DWORD dwWaitMilliseconds = 100, DWORD dwExitCode = 1000)
             {
                 bool bIsTerminate = false;
 
