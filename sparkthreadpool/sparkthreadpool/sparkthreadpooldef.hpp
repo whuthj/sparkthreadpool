@@ -17,7 +17,7 @@
 
 #define SPARK_ASYN_API(F, ...)\
 struct tag_dd_##F : public tag_dd_base{ FIELD(__VA_ARGS__); }; \
-void asyn_##F(void* arg){ tag_dd_##F* __p__ = (tag_dd_##F*)arg; F(EXPAND(__VA_ARGS__)); delete __p__; }
+void asyn_##F(tag_dd_##F arg){ tag_dd_##F* __p__ = (tag_dd_##F*)&arg; F(EXPAND(__VA_ARGS__)); }
 
 struct tag_dd_base { virtual ~tag_dd_base() {} };
 
@@ -124,10 +124,10 @@ struct tag_dd_base { virtual ~tag_dd_base() {} };
     Spark::Thread::SparkThreadPool* pThreadPool = LP_POOL; \
     if (pThreadPool)\
     {\
-        tag_dd_##F* __p__ = new (std::nothrow) tag_dd_##F; \
+        tag_dd_##F  __p; \
+        tag_dd_##F* __p__ = &__p; \
         ASSIGN(__VA_ARGS__); \
-        bool br = pThreadPool->Execute<T>(LP_OBJ, &T::asyn_##F, (void*)__p__, TYPE); \
-        if (!br){ delete __p__; }\
+        pThreadPool->Execute<T, tag_dd_##F>(LP_OBJ, &T::asyn_##F, __p, TYPE); \
     }\
 }
 
@@ -144,9 +144,9 @@ struct tag_dd_base { virtual ~tag_dd_base() {} };
     Spark::Thread::SparkThreadPool* pThreadPool = LP_POOL; \
     if (pThreadPool)\
     {\
-        tag_dd_##F* __p__ = new (std::nothrow) tag_dd_##F;ASSIGN(__VA_ARGS__);\
-        bool br = pThreadPool->SwitchToWndThread<T>(LP_OBJ, &T::asyn_##F, (void*)__p__, IS_SEND_MSG);\
-        if (!br){ delete __p__; }\
+        tag_dd_##F __p; \
+        tag_dd_##F* __p__ = &__p; ASSIGN(__VA_ARGS__);\
+        pThreadPool->SwitchToWndThread<T, tag_dd_##F>(LP_OBJ, &T::asyn_##F, __p, IS_SEND_MSG);\
     }\
 }
 

@@ -194,13 +194,7 @@ namespace Spark
 
             void ReleaseRunnable()
             {
-                if (NULL == m_pRunnable) 
-                    return;
-
-                if (m_pRunnable->IsBeHosted())
-                {
-                    m_pRunnable->Release();
-                }
+                SAFE_HOST_RELEASE(m_pRunnable);
             }
 
             void CloseHandle()

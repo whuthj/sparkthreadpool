@@ -138,8 +138,8 @@ namespace Spark
                 return m_threadPoolImpl.DestroyThisTasks(lpThis);
             }
 
-            template<typename T>
-            bool SwitchToWndThread(T* pObj, void(T::*pFun)(void*), void* lpParam = NULL, bool bIsSendMsg = false)
+            template<typename T, typename ParamType>
+            bool SwitchToWndThread(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam = NULL, bool bIsSendMsg = false)
             {
                 return m_threadPoolImpl.SwitchToWndThread(pObj, pFun, lpParam, bIsSendMsg);
             }
