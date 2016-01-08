@@ -21,7 +21,7 @@ int APIENTRY _tWinMain( HINSTANCE hInstance,
         nRet = dlgMain.DoModal();
     }
 
-    SparkThreadPool::Instance().UnInit();
+    SparkThreadPool::Instance().UnInit(INFINITE);
 
     return nRet;
 }

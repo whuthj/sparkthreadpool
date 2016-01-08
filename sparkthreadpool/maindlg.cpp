@@ -1,20 +1,6 @@
 ﻿#include "stdafx.h"
 #include "maindlg.h"
 
-void DebugString(LPCTSTR format, ...)
-{
-    if (format)
-    {
-        va_list args;
-        va_start(args, format);
-        CString strText = L"[SparkThreadPool]";
-        strText.AppendFormatV(format, args);
-        va_end(args);
-
-        ::OutputDebugString(strText);
-    }
-}
-
 void Man::doSomthing()
 {
     if (!_wife.expired())
@@ -29,7 +15,7 @@ CTestTaskRelease::CTestTaskRelease()
     m_pTest = new int(123);
     m_pMainDlg = NULL;
 
-    DebugString(L"CTestTaskRelease \n");
+    SparkUtils::DebugString(L"CTestTaskRelease \n");
 }
 
 CTestTaskRelease::CTestTaskRelease(CMainDlg* pDlg)
@@ -37,11 +23,12 @@ CTestTaskRelease::CTestTaskRelease(CMainDlg* pDlg)
     m_pTest = new int(123);
     m_pMainDlg = pDlg;
 
-    DebugString(L"CTestTaskRelease \n");
+    SparkUtils::DebugString(L"CTestTaskRelease \n");
 }
 
 CTestTaskRelease::~CTestTaskRelease()
 {
+    SparkUtils::DebugString(L"~Start CTestTaskRelease \n");
     if (m_pMainDlg)
     {
         m_pMainDlg->PrintText(L"CTestTaskRelease::~CTestTaskRelease Start");
@@ -61,7 +48,7 @@ CTestTaskRelease::~CTestTaskRelease()
         m_pMainDlg->PrintText(L"CTestTaskRelease::~CTestTaskRelease End(%d)", dwCost);
     }
 
-    DebugString(L"~CTestTaskRelease \n");
+    SparkUtils::DebugString(L"~CTestTaskRelease \n");
 }
 
 void CTestTaskRelease::TestDoAsync()

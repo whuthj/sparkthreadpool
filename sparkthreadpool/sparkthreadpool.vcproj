@@ -288,6 +288,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\sparkthreadpool\sparkutils.hpp"
+					>
+				</File>
+				<File
 					RelativePath=".\sparkthreadpool\sparkweakptr.hpp"
 					>
 				</File>

@@ -5,6 +5,10 @@
 */
 #pragma once
 
+#include "sparkutils.hpp"
+
+using namespace Spark::Thread;
+
 namespace Spark
 {
     namespace Memory
@@ -17,12 +21,12 @@ namespace Spark
             _SparkPtrRefCount() : m_lRef(0l), m_lWeakRef(0l)
             {
                 IncRef();
-                MyDebugString(L"new _SparkPtrRefCount \n");
+                SparkUtils::DebugString(L"new _SparkPtrRefCount \n");
             }
 
             virtual ~_SparkPtrRefCount()
             {
-                MyDebugString(L"delete _SparkPtrRefCount \n");
+                SparkUtils::DebugString(L"delete _SparkPtrRefCount \n");
             }
 
             long use_count()
@@ -58,21 +62,6 @@ namespace Spark
             long DecRef()
             {
                 return ::InterlockedDecrement(&m_lRef);
-            }
-
-        private:
-            void MyDebugString(LPCTSTR format, ...)
-            {
-                if (format)
-                {
-                    va_list args;
-                    va_start(args, format);
-                    CString strText = L"[SparkThreadPool]";
-                    strText.AppendFormatV(format, args);
-                    va_end(args);
-
-                    ::OutputDebugString(strText);
-                }
             }
 
         private:

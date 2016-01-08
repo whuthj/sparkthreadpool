@@ -18,22 +18,24 @@ namespace Spark
         public:
             SparkSharedPtr() : m_ptr(NULL), m_pRefCount(NULL)
             {
-
             }
 
             SparkSharedPtr(T* ptr) : m_ptr(ptr), m_pRefCount(NULL)
             {
                 m_pRefCount = new _SparkPtrRefCount();
+                SparkUtils::DebugString(L"%d, new SparkSharedPtr \n", this);
             }
 
             SparkSharedPtr(const SparkSharedPtr& t)
             {
                 _AddRefForPtr(t);
+                SparkUtils::DebugString(L"%d, copy new SparkSharedPtr \n", this);
             }
 
             SparkSharedPtr(const SparkWeakPtr<T>& t)
             {
                 _AddRefForPtr(t);
+                SparkUtils::DebugString(L"%d, weak, new SparkSharedPtr \n", this);
             }
 
             SparkSharedPtr& operator = (const SparkSharedPtr& t)
@@ -43,11 +45,13 @@ namespace Spark
                     _ReleaseRefPtr();
                     _AddRefForPtr(t);
                 }
+                SparkUtils::DebugString(L"%d, new SparkSharedPtr \n", this);
                 return *this;
             }
 
             virtual ~SparkSharedPtr()
             {
+                SparkUtils::DebugString(L"%d, delete SparkSharedPtr \n", this);
                 _ReleaseRefPtr();
             }
 
