@@ -77,6 +77,12 @@
     <ClInclude Include="sparkthreadpool\sparksharedptr.hpp">
       <Filter>src\sparkthreadpool</Filter>
     </ClInclude>
+    <ClInclude Include="sparkthreadpool\sparkutils.hpp">
+      <Filter>src\sparkthreadpool</Filter>
+    </ClInclude>
+    <ClInclude Include="sparkthreadpool\sparkweakptr.hpp">
+      <Filter>src\sparkthreadpool</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

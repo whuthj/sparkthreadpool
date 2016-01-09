@@ -11,7 +11,7 @@ using namespace Spark::Thread;
 
 namespace Spark
 {
-    namespace Memory
+    namespace Thread
     {
         template<class T> class SparkSharedPtr;
 

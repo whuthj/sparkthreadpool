@@ -14,4 +14,3 @@
 #include "sparkthreadpool\sparksharedptr.hpp"
 
 using namespace Spark::Thread;
-using namespace Spark::Memory;

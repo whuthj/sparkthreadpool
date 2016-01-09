@@ -10,6 +10,26 @@ void Man::doSomthing()
     }
 }
 
+CTest::~CTest()
+{
+    SparkUtils::DebugString(L"~CTest \n");
+}
+
+void CTest::TestDoAsync()
+{
+    SparkThreadPool::Instance().Execute(GetSelfSharedPtr(), &CTest::DoAsync1);
+}
+
+void CTest::DoAsync1()
+{
+    ::Sleep(12000);
+}
+
+SparkSharedPtr<CTest> CTest::GetSelfSharedPtr()
+{
+    return SharedFromThis();
+}
+
 CTestTaskRelease::CTestTaskRelease()
 {
     m_pTest = new int(123);
@@ -142,6 +162,11 @@ BOOL CMainDlg::OnInitDialog(CWindow wndFocus, LPARAM lInitParam)
     w->setHusband(m);
     m->doSomthing();
 
+    SparkSharedPtr<CTest> test(new CTest);
+    test->TestDoAsync();
+
+    SPARK_PARAM_INSTANCE_ASYN(CMainDlg, DoAsyncEx_5, SparkSharedPtr<CTest>, test);
+
     return TRUE;
 }
 
@@ -259,6 +284,11 @@ void CMainDlg::DoAsyncEx_3()
 void CMainDlg::DoAsyncEx_4(double value)
 {
 
+}
+
+void CMainDlg::DoAsyncEx_5(SparkSharedPtr<CTest> param)
+{
+    ::Sleep(15000);
 }
 
 void CMainDlg::DoSendMsgToMainThread(void* lpParam)

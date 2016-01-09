@@ -91,6 +91,8 @@
     <ClInclude Include="sparkthreadpool\sparkthreadpoolimpl.hpp" />
     <ClInclude Include="sparkthreadpool\sparktimer.hpp" />
     <ClInclude Include="sparkthreadpool\sparktimertask.hpp" />
+    <ClInclude Include="sparkthreadpool\sparkutils.hpp" />
+    <ClInclude Include="sparkthreadpool\sparkweakptr.hpp" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="threadpooltest.h" />
     <ClInclude Include="stdafx.h" />

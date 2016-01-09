@@ -9,8 +9,31 @@
 
 namespace Spark
 {
-    namespace Memory
+    namespace Thread
     {
+        template<class T> class SparkSharedPtr;
+
+        template<typename T>
+        class SparkEnableSharedFromThis
+        {
+            friend class SparkSharedPtr<T>;
+        public:
+            SparkSharedPtr<T> SharedFromThis()
+            {
+                return SparkSharedPtr<T>(m_weakPtr);
+            }
+
+        private:
+            void _InternalAcceptOwner(SparkSharedPtr<T>& t)
+            {
+                m_weakPtr = t;
+            }
+
+        private:
+            SparkWeakPtr<T> m_weakPtr;
+
+        };
+
         template<typename T>
         class SparkSharedPtr
         {
@@ -23,6 +46,7 @@ namespace Spark
             SparkSharedPtr(T* ptr) : m_ptr(ptr), m_pRefCount(NULL)
             {
                 m_pRefCount = new _SparkPtrRefCount();
+                _EnableSharedFromThis(ptr);
                 SparkUtils::DebugString(L"%d, new SparkSharedPtr \n", this);
             }
 
@@ -70,6 +94,16 @@ namespace Spark
             operator T* () { return m_ptr; }
 
         private:
+            inline void _EnableSharedFromThis(SparkEnableSharedFromThis<T>* ptr)
+            {
+                if (ptr) { ptr->_InternalAcceptOwner(*this); }
+            }
+
+            inline void _EnableSharedFromThis(...)
+            {
+
+            }
+
             void _ReleaseRefPtr()
             {
                 if (NULL == m_pRefCount)

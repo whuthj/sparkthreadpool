@@ -2,6 +2,7 @@
 
 #include "threadpooltest.h"
 #include "sparkthreadpool\sparktimer.hpp"
+#include "sparkthreadpool\sparksharedptr.hpp"
 
 #define MY_COMMAND_HANDLER(id, code, func) \
 if (uMsg == WM_COMMAND && id == LOWORD(wParam) && code == HIWORD(wParam)) \
@@ -48,6 +49,17 @@ public:
 private:
     int* m_pTest;
     CMainDlg* m_pMainDlg;
+};
+
+class CTest : public SparkEnableSharedFromThis<CTest>
+{
+public:
+    virtual ~CTest();
+    void TestDoAsync();
+    void DoAsync1();
+
+private:
+    SparkSharedPtr<CTest> GetSelfSharedPtr();
 };
 
 class Woman;
@@ -127,6 +139,7 @@ public:
     void DoAsyncEx_3();
 
     void DoAsyncEx_4(double value);
+    void DoAsyncEx_5(SparkSharedPtr<CTest> param);
 
     void DoSendMsgToMainThread(void* lpParam);
     void DoPostMsgToMainThread(void* lpParam);
