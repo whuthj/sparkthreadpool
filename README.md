@@ -5,9 +5,34 @@ c++98/03 windows threadpool
 
 1.线程池安全回调解决方案
 
-SPARK_INSTANCE_DESTROY_TASKS(this);
+    1.1 SPARK_INSTANCE_DESTROY_TASKS(this);
 
-类析构时调用，安全结束运行的线程任务
+        类析构时调用，安全结束运行的线程任务
+    
+    1.2 智能指针
+        
+        class CTest : public SparkEnableSharedFromThis<CTest>
+        {
+        public:
+            virtual ~CTest() {}
+            void TestDoAsync()
+            {
+                SparkThreadPool::Instance().Execute(GetSelfSharedPtr(), &CTest::DoAsync1);
+            }
+            void DoAsync1()
+            {
+                ::Sleep(12000);
+            }
+        
+        private:
+            SparkSharedPtr<CTest> GetSelfSharedPtr()
+            {
+                return SharedFromThis();
+            }
+        };
+        
+        SparkSharedPtr<CTest> test(new CTest);
+        test->TestDoAsync();
 
 2.添加UI定时器的使用
 
