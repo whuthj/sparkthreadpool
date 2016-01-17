@@ -37,7 +37,7 @@ struct tag_dd_base { virtual ~tag_dd_base() {} };
 #define SPARK_ASYN(T, F, LP_OBJ, LP_POOL, TYPE, PARAM)\
 {\
     Spark::Thread::SparkThreadPool* pPool = LP_POOL; \
-    if (pPool){pPool->Execute<T>(LP_OBJ, &T::F, (void*)PARAM, TYPE);}\
+    if (pPool){pPool->Execute<T, void>(LP_OBJ, &T::F, (void*)PARAM, TYPE);}\
 }
 
 #define SPARK_POST_ASYN(T, F, LP_OBJ, LP_POOL, PARAM)\
@@ -79,7 +79,7 @@ struct tag_dd_base { virtual ~tag_dd_base() {} };
 #define SPARK_PARAM_ASYN(T, F, PARAM_TYPE, LP_OBJ, LP_POOL, TYPE, PARAM)\
 {\
     Spark::Thread::SparkThreadPool* pPool = LP_POOL; \
-    if (pPool){pPool->Execute<T, PARAM_TYPE>(LP_OBJ, &T::F, PARAM, TYPE);}\
+    if (pPool){pPool->Execute<T, void, PARAM_TYPE>(LP_OBJ, &T::F, PARAM, TYPE);}\
 }
 
 #define SPARK_PARAM_POST_ASYN(T, F, PARAM_TYPE, LP_OBJ, LP_POOL, PARAM)\
@@ -127,7 +127,7 @@ struct tag_dd_base { virtual ~tag_dd_base() {} };
         tag_dd_##F  __p; \
         tag_dd_##F* __p__ = &__p; \
         ASSIGN(__VA_ARGS__); \
-        pThreadPool->Execute<T, tag_dd_##F>(LP_OBJ, &T::asyn_##F, __p, TYPE); \
+        pThreadPool->Execute<T, void, tag_dd_##F>(LP_OBJ, &T::asyn_##F, __p, TYPE); \
     }\
 }
 
@@ -146,7 +146,7 @@ struct tag_dd_base { virtual ~tag_dd_base() {} };
     {\
         tag_dd_##F __p; \
         tag_dd_##F* __p__ = &__p; ASSIGN(__VA_ARGS__);\
-        pThreadPool->SwitchToWndThread<T, tag_dd_##F>(LP_OBJ, &T::asyn_##F, __p, IS_SEND_MSG);\
+        pThreadPool->SwitchToWndThread<T, void, tag_dd_##F>(LP_OBJ, &T::asyn_##F, __p, IS_SEND_MSG);\
     }\
 }
 

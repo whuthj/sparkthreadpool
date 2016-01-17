@@ -8,6 +8,7 @@
 #include <windows.h>
 #include <process.h>
 #include "sparklock.hpp"
+#include "sparkfunction.hpp"
 
 /*
 使用示例
@@ -21,6 +22,47 @@ tWork.Join();
 */
 
 #pragma warning(disable:4800)
+
+#define DECLARE_EXECUTE_PARAMS(...) __VA_ARGS__
+#define DECLARE_EXECUTE_TPYE(...) __VA_ARGS__
+#define DECLARE_EXECUTE_ARGS(...) __VA_ARGS__
+#define DECLARE_EXECUTE_VAR(...) __VA_ARGS__
+
+#define DECLARE_SPARK_THREAD_FUNCTION(ptype, classparam, args, var)\
+        template<typename obj_type, typename ret_type, classparam>\
+        bool SetRunnable(obj_type* pObj, ret_type(obj_type::*pFun)(args), args)\
+        {\
+            m_pRunnable = Spark::Thread::CreateRunnableEx(pObj, pFun, var);\
+            RUNNABLE_PTR_HOST_ADDREF(m_pRunnable);\
+            return true;\
+        }\
+        template<typename obj_type, typename ret_type, classparam>\
+        bool SetRunnable(SparkSharedPtr<obj_type> sharedObj, ret_type(obj_type::*pFun)(args), args)\
+        {\
+            m_pRunnable =  = Spark::Thread::CreateRunnableEx(sharedObj, pFun, var);\
+            RUNNABLE_PTR_HOST_ADDREF(m_pRunnable);\
+            return true;\
+        }\
+        template<typename obj_type, typename ret_type, classparam>\
+        bool SingletonStart(obj_type* pObj, ret_type(obj_type::*pFun)(args), args)\
+        {\
+            SparkLocker locker(m_lockStart);\
+            if (!IsAlive())\
+            {\
+                CloseHandle();\
+                return Start(pObj, pFun, var);\
+            }\
+            return false;\
+        }\
+        template<typename obj_type, typename ret_type, classparam>\
+        bool Start(obj_type* pObj, ret_type(obj_type::*pFun)(args), args)\
+        {\
+            if (SetRunnable(pObj, pFun, var))\
+            {\
+                return Start();\
+            }\
+            return false;\
+        }\
 
 namespace Spark
 {
@@ -53,21 +95,15 @@ namespace Spark
             }
 
         public:
-            template<typename T, typename ParamType>
-            bool SetRunnable(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam = NULL)
-            {
-                m_pRunnable = Spark::Thread::CreateRunnable(pObj, pFun, lpParam);
-
-                if (NULL == m_pRunnable)
-                {
-                    return false;
-                }
-
-                m_pRunnable->SetBeHosted(true);
-                m_pRunnable->AddRef();
-
-                return true;
-            }
+            DECLARE_SPARK_THREAD_FUNCTION(DECLARE_EXECUTE_PARAMS(arg0_type), DECLARE_EXECUTE_TPYE(typename arg0_type), DECLARE_EXECUTE_ARGS(arg0_type a0), DECLARE_EXECUTE_VAR(a0));
+            DECLARE_SPARK_THREAD_FUNCTION(DECLARE_EXECUTE_PARAMS(arg0_type, arg1_type), DECLARE_EXECUTE_TPYE(typename arg0_type, typename arg1_type), DECLARE_EXECUTE_ARGS(arg0_type a0, arg1_type a1), DECLARE_EXECUTE_VAR(a0, a1));
+            DECLARE_SPARK_THREAD_FUNCTION(DECLARE_EXECUTE_PARAMS(arg0_type, arg1_type, arg2_type), DECLARE_EXECUTE_TPYE(typename arg0_type, typename arg1_type, typename arg2_type), DECLARE_EXECUTE_ARGS(arg0_type a0, arg1_type a1, arg2_type a2), DECLARE_EXECUTE_VAR(a0, a1, a2));
+            DECLARE_SPARK_THREAD_FUNCTION(DECLARE_EXECUTE_PARAMS(arg0_type, arg1_type, arg2_type, arg3_type), DECLARE_EXECUTE_TPYE(typename arg0_type, typename arg1_type, typename arg2_type, typename arg3_type), DECLARE_EXECUTE_ARGS(arg0_type a0, arg1_type a1, arg2_type a2, arg3_type a3), DECLARE_EXECUTE_VAR(a0, a1, a2, a3));
+            DECLARE_SPARK_THREAD_FUNCTION(DECLARE_EXECUTE_PARAMS(arg0_type, arg1_type, arg2_type, arg3_type, arg4_type), DECLARE_EXECUTE_TPYE(typename arg0_type, typename arg1_type, typename arg2_type, typename arg3_type, typename arg4_type), DECLARE_EXECUTE_ARGS(arg0_type a0, arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4), DECLARE_EXECUTE_VAR(a0, a1, a2, a3, a4));
+            DECLARE_SPARK_THREAD_FUNCTION(DECLARE_EXECUTE_PARAMS(arg0_type, arg1_type, arg2_type, arg3_type, arg4_type, arg5_type), DECLARE_EXECUTE_TPYE(typename arg0_type, typename arg1_type, typename arg2_type, typename arg3_type, typename arg4_type, typename arg5_type), DECLARE_EXECUTE_ARGS(arg0_type a0, arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5), DECLARE_EXECUTE_VAR(a0, a1, a2, a3, a4, a5));
+            DECLARE_SPARK_THREAD_FUNCTION(DECLARE_EXECUTE_PARAMS(arg0_type, arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type), DECLARE_EXECUTE_TPYE(typename arg0_type, typename arg1_type, typename arg2_type, typename arg3_type, typename arg4_type, typename arg5_type, typename arg6_type), DECLARE_EXECUTE_ARGS(arg0_type a0, arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5, arg6_type a6), DECLARE_EXECUTE_VAR(a0, a1, a2, a3, a4, a5, a6));
+            DECLARE_SPARK_THREAD_FUNCTION(DECLARE_EXECUTE_PARAMS(arg0_type, arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type), DECLARE_EXECUTE_TPYE(typename arg0_type, typename arg1_type, typename arg2_type, typename arg3_type, typename arg4_type, typename arg5_type, typename arg6_type, typename arg7_type), DECLARE_EXECUTE_ARGS(arg0_type a0, arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5, arg6_type a6, arg7_type a7), DECLARE_EXECUTE_VAR(a0, a1, a2, a3, a4, a5, a6, a7));
+            DECLARE_SPARK_THREAD_FUNCTION(DECLARE_EXECUTE_PARAMS(arg0_type, arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type, arg8_type), DECLARE_EXECUTE_TPYE(typename arg0_type, typename arg1_type, typename arg2_type, typename arg3_type, typename arg4_type, typename arg5_type, typename arg6_type, typename arg7_type, typename arg8_type), DECLARE_EXECUTE_ARGS(arg0_type a0, arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5, arg6_type a6, arg7_type a7, arg8_type a8), DECLARE_EXECUTE_VAR(a0, a1, a2, a3, a4, a5, a6, a7, a8));
 
             bool SetRunnable(void(*pFun)(void*), void* lpParam = NULL)
             {
@@ -84,20 +120,6 @@ namespace Spark
                 return true;
             }
 
-            template<typename T, typename ParamType>
-            bool SingletonStart(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam = NULL)
-            {
-                SparkLocker locker(m_lockStart);
-
-                if (!IsAlive())
-                {
-                    CloseHandle();
-                    return Start(pObj, pFun, lpParam);
-                }
-
-                return false;
-            }
-
             bool SingletonStart(void(*pFun)(void*), void* lpParam = NULL)
             {
                 SparkLocker locker(m_lockStart);
@@ -111,6 +133,16 @@ namespace Spark
                 return false;
             }
 
+            bool Start(void(*pFun)(void*), void* lpParam = NULL)
+            {
+                if (SetRunnable(pFun, lpParam))
+                {
+                    return Start();
+                }
+
+                return false;
+            }
+
             bool SingletonStart()
             {
                 SparkLocker locker(m_lockStart);
@@ -118,27 +150,6 @@ namespace Spark
                 if (!IsAlive())
                 {
                     CloseHandle();
-                    return Start();
-                }
-
-                return false;
-            }
-
-            template<typename T, typename ParamType>
-            bool Start(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam = NULL)
-            {
-                if (SetRunnable(pObj, pFun, lpParam))
-                {
-                    return Start();
-                }
-
-                return false;
-            }
-
-            bool Start(void(*pFun)(void*), void* lpParam = NULL)
-            {
-                if (SetRunnable(pFun, lpParam))
-                {
                     return Start();
                 }
 

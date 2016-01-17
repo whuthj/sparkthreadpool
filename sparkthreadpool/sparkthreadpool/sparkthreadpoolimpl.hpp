@@ -189,25 +189,11 @@ namespace Spark
                 CloseHandles();
             }
 
-            template<typename T, typename ParamType>
-            bool SwitchToWndThread(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam = NULL, bool bIsSendMsg = false)
-            {
-                if (!bIsSendMsg)
-                {
-                    Runnable* pTask = Spark::Thread::CreateRunnable(pObj, pFun, lpParam);
-                    return SwitchToWndThread(pTask, bIsSendMsg);
-                }
-
-                MemberFunPtrRunnable<T, ParamType> task(pObj, pFun, lpParam);
-                return SwitchToWndThread(&task, bIsSendMsg);
-            }
-
             bool SwitchToWndThread(Runnable* pTask, bool bIsSendMsg = false)
             {
                 if (!m_msgWnd.IsWindow()){ return false; }
                 if (!bIsSendMsg)
                 {
-                    RUNNABLE_PTR_HOST_ADDREF(pTask);
                     m_msgWnd.PostMessage(TASK_HANDLE_POST_MSG_ID, (WPARAM)pTask);
                     return true;
                 }
@@ -228,70 +214,6 @@ namespace Spark
                 }
                 UpdateRunObjRef(pTask, -1);
                 return true;
-            }
-
-            template<typename T, typename ParamType>
-            bool Execute(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam = NULL,
-                SparkRunnableType emRunnableType = emSRType_Schedule_Post)
-            {
-                Runnable* pTask = Spark::Thread::CreateRunnable(pObj, pFun, lpParam);
-
-                RUNNABLE_PTR_HOST_ADDREF(pTask);
-                
-                return Execute(pTask, emRunnableType);
-            }
-
-            template<typename T>
-            bool Execute(T* pObj, void(T::*pFun)(),
-                SparkRunnableType emRunnableType = emSRType_Schedule_Post)
-            {
-                Runnable* pTask = Spark::Thread::CreateRunnable(pObj, pFun);
-
-                RUNNABLE_PTR_HOST_ADDREF(pTask);
-
-                return Execute(pTask, emRunnableType);
-            }
-
-            template<typename T, typename ParamType>
-            bool Execute(SparkSharedPtr<T> pObj, void(T::*pFun)(ParamType), ParamType lpParam = NULL,
-                SparkRunnableType emRunnableType = emSRType_Schedule_Post)
-            {
-                Runnable* pTask = Spark::Thread::CreateRunnable(pObj, pFun, lpParam);
-
-                RUNNABLE_PTR_HOST_ADDREF(pTask);
-
-                return Execute(pTask, emRunnableType);
-            }
-
-            template<typename T>
-            bool Execute(SparkSharedPtr<T> pObj, void(T::*pFun)(),
-                SparkRunnableType emRunnableType = emSRType_Schedule_Post)
-            {
-                Runnable* pTask = Spark::Thread::CreateRunnable(pObj, pFun);
-
-                RUNNABLE_PTR_HOST_ADDREF(pTask);
-
-                return Execute(pTask, emRunnableType);
-            }
-
-            bool Execute(void(*pFun)(void*), void* lpParam = NULL, 
-                SparkRunnableType emRunnableType = emSRType_Schedule_Post)
-            {
-                Runnable* pTask = Spark::Thread::CreateRunnable(pFun, lpParam);
-
-                RUNNABLE_PTR_HOST_ADDREF(pTask);
-
-                return Execute(pTask, emRunnableType);
-            }
-
-            bool Execute(void(*pFun)(),
-                SparkRunnableType emRunnableType = emSRType_Schedule_Post)
-            {
-                Runnable* pTask = Spark::Thread::CreateRunnable(pFun);
-
-                RUNNABLE_PTR_HOST_ADDREF(pTask);
-
-                return Execute(pTask, emRunnableType);
             }
 
             bool Execute(Runnable * pRunnable, 
@@ -386,7 +308,7 @@ namespace Spark
                         return false;
                     }
 
-                    m_pCleanerThread->SetRunnable(this, &SparkThreadPoolImpl::CleanerRun);
+                    m_pCleanerThread->SetRunnable<SparkThreadPoolImpl, void, void*>(this, &SparkThreadPoolImpl::CleanerRun, NULL);
                     m_pCleanerThread->Start();
                 }
 

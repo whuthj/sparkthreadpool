@@ -56,8 +56,7 @@ class CTest : public SparkEnableSharedFromThis<CTest>
 public:
     virtual ~CTest();
     void TestDoAsync();
-    void DoAsync1();
-
+    void DoAsync1(int a, float b);
 private:
     SparkSharedPtr<CTest> GetSelfSharedPtr();
 };
@@ -148,9 +147,11 @@ public:
     void DoTimer();
     void DoDelay(int value);
     void DoFunction(int a, float b, double c);
+    void DoFunction_1(int a, float b, double c, CMainDlg* lpPrama);
 
 private:
     SparkWndTimer m_timerLog;
     SparkWndTimer m_timer;
+    SparkThread m_tWork;
 
 };
