@@ -83,6 +83,9 @@
     <ClInclude Include="sparkthreadpool\sparkweakptr.hpp">
       <Filter>src\sparkthreadpool</Filter>
     </ClInclude>
+    <ClInclude Include="sparkthreadpool\sparkfunction.hpp">
+      <Filter>src\sparkthreadpool</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

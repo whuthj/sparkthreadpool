@@ -45,6 +45,23 @@ public:
 };
 
 */
+
+#define DECLARE_EXECUTE_PARAMS(...) __VA_ARGS__
+#define DECLARE_EXECUTE_TPYE(...) __VA_ARGS__
+#define DECLARE_EXECUTE_ARGS(...) __VA_ARGS__
+#define DECLARE_EXECUTE_VAR(...) __VA_ARGS__
+
+#define DECLARE_SPARK_EXECUTE(ptype, classparam, args, var)\
+        template<typename obj_type, typename ret_type, classparam>\
+        bool Execute(obj_type* pObj, ret_type(obj_type::*pFun)(args), args,\
+            SparkRunnableType emRunnableType = emSRType_Schedule_Post)\
+        {\
+            ThreadFunction<obj_type, ret_type(ptype)>* pTask = new ThreadFunction<obj_type, ret_type(ptype)>(pObj, pFun);\
+            pTask->SetValue(var);\
+            RUNNABLE_PTR_HOST_ADDREF(pTask);\
+            return m_threadPoolImpl.Execute(pTask, emRunnableType);\
+        }\
+
 namespace Spark
 {
     namespace Thread
@@ -149,12 +166,12 @@ namespace Spark
                 return m_threadPoolImpl.SwitchToWndThread(pTask, bIsSendMsg);
             }
 
-            template<typename T, typename ParamType>
+            /*template<typename T, typename ParamType>
             bool Execute(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam = NULL,
                 SparkRunnableType emRunnableType = emSRType_Schedule_Post)
             {
                 return m_threadPoolImpl.Execute(pObj, pFun, lpParam, emRunnableType);
-            }
+            }*/
 
             template<typename T>
             bool Execute(T* pObj, void(T::*pFun)(),
@@ -188,6 +205,16 @@ namespace Spark
             {
                 return m_threadPoolImpl.Execute(pRunnable, emRunnableType);
             }
+
+            DECLARE_SPARK_EXECUTE(DECLARE_EXECUTE_PARAMS(arg0_type), DECLARE_EXECUTE_TPYE(typename arg0_type), DECLARE_EXECUTE_ARGS(arg0_type a0), DECLARE_EXECUTE_VAR(a0));
+            DECLARE_SPARK_EXECUTE(DECLARE_EXECUTE_PARAMS(arg0_type, arg1_type), DECLARE_EXECUTE_TPYE(typename arg0_type, typename arg1_type), DECLARE_EXECUTE_ARGS(arg0_type a0, arg1_type a1), DECLARE_EXECUTE_VAR(a0, a1));
+            DECLARE_SPARK_EXECUTE(DECLARE_EXECUTE_PARAMS(arg0_type, arg1_type, arg2_type), DECLARE_EXECUTE_TPYE(typename arg0_type, typename arg1_type, typename arg2_type), DECLARE_EXECUTE_ARGS(arg0_type a0, arg1_type a1, arg2_type a2), DECLARE_EXECUTE_VAR(a0, a1, a2));
+            DECLARE_SPARK_EXECUTE(DECLARE_EXECUTE_PARAMS(arg0_type, arg1_type, arg2_type, arg3_type), DECLARE_EXECUTE_TPYE(typename arg0_type, typename arg1_type, typename arg2_type, typename arg3_type), DECLARE_EXECUTE_ARGS(arg0_type a0, arg1_type a1, arg2_type a2, arg3_type a3), DECLARE_EXECUTE_VAR(a0, a1, a2, a3));
+            DECLARE_SPARK_EXECUTE(DECLARE_EXECUTE_PARAMS(arg0_type, arg1_type, arg2_type, arg3_type, arg4_type), DECLARE_EXECUTE_TPYE(typename arg0_type, typename arg1_type, typename arg2_type, typename arg3_type, typename arg4_type), DECLARE_EXECUTE_ARGS(arg0_type a0, arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4), DECLARE_EXECUTE_VAR(a0, a1, a2, a3, a4));
+            DECLARE_SPARK_EXECUTE(DECLARE_EXECUTE_PARAMS(arg0_type, arg1_type, arg2_type, arg3_type, arg4_type, arg5_type), DECLARE_EXECUTE_TPYE(typename arg0_type, typename arg1_type, typename arg2_type, typename arg3_type, typename arg4_type, typename arg5_type), DECLARE_EXECUTE_ARGS(arg0_type a0, arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5), DECLARE_EXECUTE_VAR(a0, a1, a2, a3, a4, a5));
+            DECLARE_SPARK_EXECUTE(DECLARE_EXECUTE_PARAMS(arg0_type, arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type), DECLARE_EXECUTE_TPYE(typename arg0_type, typename arg1_type, typename arg2_type, typename arg3_type, typename arg4_type, typename arg5_type, typename arg6_type), DECLARE_EXECUTE_ARGS(arg0_type a0, arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5, arg6_type a6), DECLARE_EXECUTE_VAR(a0, a1, a2, a3, a4, a5, a6));
+            DECLARE_SPARK_EXECUTE(DECLARE_EXECUTE_PARAMS(arg0_type, arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type), DECLARE_EXECUTE_TPYE(typename arg0_type, typename arg1_type, typename arg2_type, typename arg3_type, typename arg4_type, typename arg5_type, typename arg6_type, typename arg7_type), DECLARE_EXECUTE_ARGS(arg0_type a0, arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5, arg6_type a6, arg7_type a7), DECLARE_EXECUTE_VAR(a0, a1, a2, a3, a4, a5, a6, a7));
+            DECLARE_SPARK_EXECUTE(DECLARE_EXECUTE_PARAMS(arg0_type, arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type, arg8_type), DECLARE_EXECUTE_TPYE(typename arg0_type, typename arg1_type, typename arg2_type, typename arg3_type, typename arg4_type, typename arg5_type, typename arg6_type, typename arg7_type, typename arg8_type), DECLARE_EXECUTE_ARGS(arg0_type a0, arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5, arg6_type a6, arg7_type a7, arg8_type a8), DECLARE_EXECUTE_VAR(a0, a1, a2, a3, a4, a5, a6, a7, a8));
 
         public:
             int GetMsgThreadId()

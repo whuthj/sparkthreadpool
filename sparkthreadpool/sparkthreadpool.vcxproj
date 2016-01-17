@@ -80,6 +80,7 @@
     <ClInclude Include="maindlg.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="sparkthreadpool\sparkasyndef.hpp" />
+    <ClInclude Include="sparkthreadpool\sparkfunction.hpp" />
     <ClInclude Include="sparkthreadpool\sparklock.hpp" />
     <ClInclude Include="sparkthreadpool\sparkmsgwnd.hpp" />
     <ClInclude Include="sparkthreadpool\sparkrunnable.hpp" />

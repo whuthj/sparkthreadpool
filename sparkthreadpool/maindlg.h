@@ -147,6 +147,7 @@ public:
     void DoTimerLog();
     void DoTimer();
     void DoDelay(int value);
+    void DoFunction(int a, float b, double c);
 
 private:
     SparkWndTimer m_timerLog;

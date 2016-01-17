@@ -1,5 +1,8 @@
 ﻿#include "stdafx.h"
 #include "maindlg.h"
+#include "sparkthreadpool/sparkfunction.hpp"
+
+//////////////////////////////////////////////////////////////////////////
 
 void Man::doSomthing()
 {
@@ -9,6 +12,8 @@ void Man::doSomthing()
         woman->doSomthing();
     }
 }
+
+//////////////////////////////////////////////////////////////////////////
 
 CTest::~CTest()
 {
@@ -29,6 +34,8 @@ SparkSharedPtr<CTest> CTest::GetSelfSharedPtr()
 {
     return SharedFromThis();
 }
+
+//////////////////////////////////////////////////////////////////////////
 
 CTestTaskRelease::CTestTaskRelease()
 {
@@ -167,6 +174,13 @@ BOOL CMainDlg::OnInitDialog(CWindow wndFocus, LPARAM lInitParam)
 
     SPARK_PARAM_INSTANCE_ASYN(CMainDlg, DoAsyncEx_5, SparkSharedPtr<CTest>, test);
 
+    SparkThreadPool::Instance().Execute(this, &CMainDlg::DoInWorkThread, 123, 123);
+    SparkThreadPool::Instance().Execute(this, &CMainDlg::DoAsyncEx_4, 123.45);
+    SparkThreadPool::Instance().Execute(this, &CMainDlg::DoFunction, 1, 2.1f, 3.12);
+
+    Runnable* pTask4 = CreateThreadRunnable(this, &CMainDlg::DoAsyncEx_3);
+    SparkThreadPool::Instance().Execute(pTask4);
+
     return TRUE;
 }
 
@@ -194,7 +208,8 @@ LRESULT CMainDlg::OnBnClickedButtonTest(BOOL& /*bHandled*/)
 
     SparkWeakPtr<CTestTaskRelease> weakTaskRelease(testTaskRelease);
 
-    SPARK_INSTANCE_ASYN_EX(CMainDlg, DoAsyncEx_2, testTaskRelease);
+    //SPARK_INSTANCE_ASYN_EX(CMainDlg, DoAsyncEx_2, testTaskRelease);
+    SparkThreadPool::Instance().Execute(this, &CMainDlg::DoAsyncEx_2, testTaskRelease);
 
     //SparkThreadPool::Instance().Execute(this, &CMainDlg::DoAsyncEx, testTaskRelease);
     SPARK_PARAM_INSTANCE_ASYN(CMainDlg, DoAsyncEx, SparkWeakPtr<CTestTaskRelease>, weakTaskRelease);
@@ -230,6 +245,11 @@ void CMainDlg::DoTimer()
 void CMainDlg::DoDelay(int value)
 {
     PrintText(L"DoDelay 延迟2s执行 value %d", value);
+}
+
+void CMainDlg::DoFunction(int a, float b, double c)
+{
+
 }
 
 void CMainDlg::DoAsync()
@@ -283,7 +303,7 @@ void CMainDlg::DoAsyncEx_3()
 
 void CMainDlg::DoAsyncEx_4(double value)
 {
-
+    ::Sleep(100);
 }
 
 void CMainDlg::DoAsyncEx_5(SparkSharedPtr<CTest> param)
