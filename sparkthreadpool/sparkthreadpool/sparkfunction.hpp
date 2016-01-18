@@ -8,12 +8,6 @@
 #include "sparkasyndef.hpp"
 #include "sparkrunnable.hpp"
 
-#define DECLARE_PARAMS(...) __VA_ARGS__
-#define DECLARE_TPYE(...) __VA_ARGS__
-#define DECLARE_ARGS(...) __VA_ARGS__
-#define DECLARE_ARGS_EX(...) __VA_ARGS__
-#define DECLARE_VAR(...) __VA_ARGS__
-
 #define F_ASSIGN_0(...)
 #define F_ASSIGN_1(v, ...)        m_args._##v = v
 #ifdef _MSC_VER
@@ -236,7 +230,7 @@ namespace Spark
             return pTask;
         }
 
-#define DECLARE_FUNCTION(ptype, classparam, args, argsex, var)\
+#define DECLARE_FUNCTION(ptype, classparam, args, args_ex, var)\
         template<typename ret_type, classparam>\
         class Function<ret_type (ptype)>\
         {\
@@ -270,7 +264,7 @@ namespace Spark
         class ThreadFunction<obj_type, ret_type (ptype)> : public Runnable\
         {\
         private:\
-            struct _args_data { FIELD(argsex); };\
+            struct _args_data { FIELD(args_ex); };\
             typedef ThreadFunction selftype;\
             typedef ret_type(obj_type::*RunFun)(args);\
         public:\
@@ -315,7 +309,7 @@ namespace Spark
                     ::InterlockedDecrement(&m_lWorkRef);\
                     return;\
                 }\
-                (m_pObj->*m_pFun)(F_EXPAND(argsex));\
+                (m_pObj->*m_pFun)(F_EXPAND(args_ex));\
                 ::InterlockedDecrement(&m_lWorkRef);\
             }\
         private:\
@@ -333,7 +327,7 @@ namespace Spark
         class SharedThreadFunction<obj_type, ret_type (ptype)> : public Runnable\
         {\
         private:\
-            struct _args_data { FIELD(argsex); };\
+            struct _args_data { FIELD(args_ex); };\
             typedef SharedThreadFunction selftype;\
             typedef ret_type(obj_type::*RunFun)(args);\
         public:\
@@ -378,7 +372,7 @@ namespace Spark
                     ::InterlockedDecrement(&m_lWorkRef);\
                     return;\
                 }\
-                (m_pObj->*m_pFun)(F_EXPAND(argsex));\
+                (m_pObj->*m_pFun)(F_EXPAND(args_ex));\
                 ::InterlockedDecrement(&m_lWorkRef);\
             }\
         private:\

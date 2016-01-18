@@ -149,3 +149,9 @@
 #endif
 #define MA2FAX_(N, args)		CONCAT(MA2FA_, N) args
 #define MA2FA(...)				MA2FAX_(__VA_ARGC_HALF__(__VA_ARGS__), (__VA_ARGS__))
+
+#define DECLARE_PARAMS(...) __VA_ARGS__
+#define DECLARE_TPYE(...) __VA_ARGS__
+#define DECLARE_ARGS(...) __VA_ARGS__
+#define DECLARE_ARGS_EX(...) __VA_ARGS__
+#define DECLARE_VAR(...) __VA_ARGS__

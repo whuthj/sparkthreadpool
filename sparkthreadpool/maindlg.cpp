@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "maindlg.h"
 #include "sparkthreadpool/sparkfunction.hpp"
+#include "sparkthreadpool/sparktuple.hpp"
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -185,6 +186,9 @@ BOOL CMainDlg::OnInitDialog(CWindow wndFocus, LPARAM lInitParam)
 
     ThreadFunction<CMainDlg, void (int, float, double)> fun(this, &CMainDlg::DoFunction);
     fun(1, 2.0f, 3.0);
+
+    Tuple<void(int, float)> t1(1, 2.0f);
+    tuple<int, float, double> t2;
 
     return TRUE;
 }
