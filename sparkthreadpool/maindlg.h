@@ -95,7 +95,7 @@ public:
     }  
 };  
 
-class CMainDlg : public CDialogImpl<CMainDlg>
+class CMainDlg : public CDialogImpl<CMainDlg>, public SparkEnableSharedFromThis<CMainDlg>
 {
 public:
     CMainDlg();

@@ -17,8 +17,8 @@ int APIENTRY _tWinMain( HINSTANCE hInstance,
 
     int nRet = 0;
     {
-        CMainDlg dlgMain;
-        nRet = dlgMain.DoModal();
+        SparkSharedPtr<CMainDlg> dlgMain(new CMainDlg);
+        nRet = dlgMain->DoModal();
     }
 
     SparkThreadPool::Instance().UnInit(INFINITE);

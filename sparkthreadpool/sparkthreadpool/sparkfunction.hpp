@@ -1,3 +1,8 @@
+/*
+ * Author: hujun
+ * Email: whuthj@163.com
+ * Website: https://github.com/whuthj/sparkthreadpool
+*/
 #pragma once;
 
 #include "sparkasyndef.hpp"
@@ -9,7 +14,6 @@
 #define DECLARE_ARGS_EX(...) __VA_ARGS__
 #define DECLARE_VAR(...) __VA_ARGS__
 
-//µÝ¹éÕ¹¿ªºê¸³Öµ
 #define F_ASSIGN_0(...)
 #define F_ASSIGN_1(v, ...)        m_args._##v = v
 #ifdef _MSC_VER

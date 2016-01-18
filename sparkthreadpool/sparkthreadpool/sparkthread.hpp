@@ -39,7 +39,7 @@ tWork.Join();
         template<typename obj_type, typename ret_type, classparam>\
         bool SetRunnable(SparkSharedPtr<obj_type> sharedObj, ret_type(obj_type::*pFun)(args), args)\
         {\
-            m_pRunnable =  = Spark::Thread::CreateRunnableEx(sharedObj, pFun, var);\
+            m_pRunnable = Spark::Thread::CreateRunnableEx(sharedObj, pFun, var);\
             RUNNABLE_PTR_HOST_ADDREF(m_pRunnable);\
             return true;\
         }\
@@ -55,9 +55,29 @@ tWork.Join();
             return false;\
         }\
         template<typename obj_type, typename ret_type, classparam>\
+        bool SingletonStart(SparkSharedPtr<obj_type> sharedObj, ret_type(obj_type::*pFun)(args), args)\
+        {\
+            SparkLocker locker(m_lockStart);\
+            if (!IsAlive())\
+            {\
+                CloseHandle();\
+                return Start(sharedObj, pFun, var);\
+            }\
+            return false;\
+        }\
+        template<typename obj_type, typename ret_type, classparam>\
         bool Start(obj_type* pObj, ret_type(obj_type::*pFun)(args), args)\
         {\
             if (SetRunnable(pObj, pFun, var))\
+            {\
+                return Start();\
+            }\
+            return false;\
+        }\
+        template<typename obj_type, typename ret_type, classparam>\
+        bool Start(SparkSharedPtr<obj_type> sharedObj, ret_type(obj_type::*pFun)(args), args)\
+        {\
+            if (SetRunnable(sharedObj, pFun, var))\
             {\
                 return Start();\
             }\

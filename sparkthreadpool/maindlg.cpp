@@ -176,12 +176,15 @@ BOOL CMainDlg::OnInitDialog(CWindow wndFocus, LPARAM lInitParam)
     SPARK_PARAM_INSTANCE_ASYN(CMainDlg, DoAsyncEx_5, SparkSharedPtr<CTest>, test);
     //SparkThreadPool::Instance().Execute(this, &CMainDlg::DoAsyncEx_5, test);
 
-    SparkThreadPool::Instance().Execute(this, &CMainDlg::DoInWorkThread, 123, 123);
-    SparkThreadPool::Instance().Execute(this, &CMainDlg::DoAsyncEx_4, 123.45);
-    SparkThreadPool::Instance().Execute(this, &CMainDlg::DoFunction, 1, 2.1f, 3.12);
-    SparkThreadPool::Instance().Execute(this, &CMainDlg::DoAsyncEx_3);
+    SparkThreadPool::Instance().Execute(SharedFromThis(), &CMainDlg::DoInWorkThread, 123, 123);
+    SparkThreadPool::Instance().Execute(SharedFromThis(), &CMainDlg::DoAsyncEx_4, 123.45);
+    SparkThreadPool::Instance().Execute(SharedFromThis(), &CMainDlg::DoFunction, 1, 2.1f, 3.12);
+    SparkThreadPool::Instance().Execute(SharedFromThis(), &CMainDlg::DoAsyncEx_3);
 
-    m_tWork.Start(this, &CMainDlg::DoFunction_1, 1, 2.0f, 3.00, this);
+    m_tWork.Start(SharedFromThis(), &CMainDlg::DoFunction_1, 1, 2.0f, 3.00, this);
+
+    ThreadFunction<CMainDlg, void (int, float, double)> fun(this, &CMainDlg::DoFunction);
+    fun(1, 2.0f, 3.0);
 
     return TRUE;
 }
@@ -251,7 +254,7 @@ void CMainDlg::DoDelay(int value)
 
 void CMainDlg::DoFunction(int a, float b, double c)
 {
-
+    int _a = a;
 }
 
 void CMainDlg::DoFunction_1(int a, float b, double c, CMainDlg* lpPrama)
