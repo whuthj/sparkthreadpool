@@ -149,6 +149,7 @@ public:
     void DoDelay(int value);
     void DoFunction(int a, float b, double c);
     void DoFunction_1(int a, float b, double c, Tuple<int, float, double, char> d);
+    Tuple<int, float, double, CString> DoTuple1();
 
 private:
     SparkWndTimer m_timerLog;

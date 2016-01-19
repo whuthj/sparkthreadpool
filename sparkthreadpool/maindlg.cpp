@@ -188,6 +188,8 @@ BOOL CMainDlg::OnInitDialog(CWindow wndFocus, LPARAM lInitParam)
     fun(1, 2.0f, 3.0);
 
     SimpleTuple<void(int, float, double)> t1(1, 2.0f, 3.0);
+    Tuple<int, float, double, CString> t2 = DoTuple1();
+    CString str = t2.Get<3>();
 
     return TRUE;
 }
@@ -267,7 +269,7 @@ void CMainDlg::DoFunction_1( int a, float b, double c, Tuple<int, float, double,
     double d_2 = d.Get<2>();
     char d_3 = d.Get<3>();
 
-    int len = Length<Tuple<int, float, double>>::value;
+    int len = TupleLength<Tuple<int, float, double>>::value;
 }
 
 void CMainDlg::DoAsync()
@@ -392,4 +394,22 @@ void CMainDlg::DoInWorkThread(int a, int b)
     int n = a + b;
 
     PrintText(L"工作线程ID：%d,完成工作,结果：%d", ::GetCurrentThreadId(), n);
+}
+
+Tuple<int, float, double, CString> CMainDlg::DoTuple1()
+{
+    int a = 123;
+    float b = 234.0f;
+    double c = 345.0;
+    CString str = L"Tuple多返回值爽";
+
+    Tuple<int&, float&, double&, CString&> t(a, b, c, str);
+    a = 1234;
+    str = L"Tuple多返回值爽!";
+    float& _b = t.Get<1>();
+    _b = 345.0f;
+
+    Tuple<int, float, double, CString> t1(a, b, c, str);
+
+    return t1;
 }

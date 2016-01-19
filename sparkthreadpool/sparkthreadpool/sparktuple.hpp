@@ -49,8 +49,7 @@ namespace Spark
         {
         private:
             typedef typename T::tail_type Next;
-            // 在Cons<>内部tail_type被typedef为TT，请回顾上面Cons<>的代码
-        public:             // Cons<>内部有两个关键的typedef：head_type、tail_type
+        public:
             typedef typename Element<N-1, Next>::type type; //递归
         };
 
@@ -136,11 +135,11 @@ namespace Spark
         }
 
         template<class T>
-        struct Length {
-            static const int value = 1 + Length<typename T::tail_type>::value; //递归
+        struct TupleLength {
+            static const int value = 1 + TupleLength<typename T::tail_type>::value; //递归
         };
         template<>
-        struct Length<NullType> {
+        struct TupleLength<NullType> {
             static const int value = 0;
         };
 
