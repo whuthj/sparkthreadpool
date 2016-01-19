@@ -3,6 +3,7 @@
 #include "threadpooltest.h"
 #include "sparkthreadpool\sparktimer.hpp"
 #include "sparkthreadpool\sparksharedptr.hpp"
+#include "sparkthreadpool/sparktuple.hpp"
 
 #define MY_COMMAND_HANDLER(id, code, func) \
 if (uMsg == WM_COMMAND && id == LOWORD(wParam) && code == HIWORD(wParam)) \
@@ -147,7 +148,7 @@ public:
     void DoTimer();
     void DoDelay(int value);
     void DoFunction(int a, float b, double c);
-    void DoFunction_1(int a, float b, double c, CMainDlg* lpPrama);
+    void DoFunction_1(int a, float b, double c, Tuple<int, float, double, char> d);
 
 private:
     SparkWndTimer m_timerLog;

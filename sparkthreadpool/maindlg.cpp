@@ -1,7 +1,6 @@
 ﻿#include "stdafx.h"
 #include "maindlg.h"
 #include "sparkthreadpool/sparkfunction.hpp"
-#include "sparkthreadpool/sparktuple.hpp"
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -182,13 +181,13 @@ BOOL CMainDlg::OnInitDialog(CWindow wndFocus, LPARAM lInitParam)
     SparkThreadPool::Instance().Execute(SharedFromThis(), &CMainDlg::DoFunction, 1, 2.1f, 3.12);
     SparkThreadPool::Instance().Execute(SharedFromThis(), &CMainDlg::DoAsyncEx_3);
 
-    m_tWork.Start(SharedFromThis(), &CMainDlg::DoFunction_1, 1, 2.0f, 3.00, this);
+    Tuple<int, float, double, char> t(123, 2.0f, 3.0, 'a');
+    m_tWork.Start(SharedFromThis(), &CMainDlg::DoFunction_1, 1, 2.0f, 3.00, t);
 
     ThreadFunction<CMainDlg, void (int, float, double)> fun(this, &CMainDlg::DoFunction);
     fun(1, 2.0f, 3.0);
 
-    Tuple<void(int, float)> t1(1, 2.0f);
-    tuple<int, float, double> t2;
+    SimpleTuple<void(int, float, double)> t1(1, 2.0f, 3.0);
 
     return TRUE;
 }
@@ -261,9 +260,14 @@ void CMainDlg::DoFunction(int a, float b, double c)
     int _a = a;
 }
 
-void CMainDlg::DoFunction_1(int a, float b, double c, CMainDlg* lpPrama)
+void CMainDlg::DoFunction_1( int a, float b, double c, Tuple<int, float, double, char> d )
 {
-    int _a = a;
+    int d_0 = d.Get<0>();
+    float d_1 = d.Get<1>();
+    double d_2 = d.Get<2>();
+    char d_3 = d.Get<3>();
+
+    int len = Length<Tuple<int, float, double>>::value;
 }
 
 void CMainDlg::DoAsync()
