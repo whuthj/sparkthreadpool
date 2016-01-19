@@ -44,6 +44,9 @@ namespace Spark
             class T9 = NullType>
         class Tuple;
 
+        //Element<1, Cons<int,Cons<long,Cons<bool,Cons<double,NullType> > > > >
+        //Element<1, Element<0, Cons<long,Cons<bool,Cons<double,NullType> > > > >
+        //取Cons<long,Cons<bool,Cons<double,NullType> > > > head_type为long
         template<int N, class T> // 这个int N会递减，以呈现递归的形式
         struct Element
         {
@@ -52,13 +55,13 @@ namespace Spark
         public:
             typedef typename Element<N-1, Next>::type type; //递归
         };
-
         template<class T>
-        struct Element<0,T>  //递归至N=0时，山穷水尽
+        struct Element<0,T>
         {
-            typedef typename T::head_type type; // 山穷水尽时直接将head_type定义为type
+            typedef typename T::head_type type;
         };
 
+        //模板嵌套
         template <class HT, class TT>
         struct Cons {
             typedef HT head_type;
@@ -69,7 +72,7 @@ namespace Spark
             template <int N>
             typename Element<N, Cons<HT, TT> >::type Get()
             {
-                return Spark::Thread::Get<N>(*this);  //转向全局的Get<>函数
+                return Spark::Thread::Get<N>(*this);
             }
 
             Cons() {}
@@ -112,12 +115,18 @@ namespace Spark
                 : head () {}
         };
 
+        //获取元素
+        //Cons<int,Cons<long,Cons<bool,Cons<double,NullType> > > >
+        //GetClass<2>
+        //return GetClass<1>::Get<long>(Cons<long,Cons<bool,Cons<double,NullType> > >);
+        //return GetClass<0>::Get<long>(Cons<bool,Cons<double,NullType> >);
+        //return bool值
         template<int N>
         struct GetClass {
             template<class RET, class HT, class TT >
             inline static RET Get(Cons<HT, TT>& t)
             {
-                return GetClass<N-1>::template Get<RET>(t.tail);
+                return GetClass<N-1>::Get<RET>(t.tail);
             }
         };
         template<>
@@ -131,9 +140,10 @@ namespace Spark
         template<int N, class HT, class TT>
         inline typename Element<N, Cons<HT, TT> >::type Get(Cons<HT, TT>& c)
         {
-            return Spark::Thread::GetClass<N>::template Get<typename Element<N, Cons<HT, TT> >::type>(c); 
+            return GetClass<N>::Get<typename Element<N, Cons<HT, TT> >::type>(c); 
         }
 
+        //获取Tuple长度
         template<class T>
         struct TupleLength {
             static const int value = 1 + TupleLength<typename T::tail_type>::value; //递归
@@ -143,6 +153,12 @@ namespace Spark
             static const int value = 0;
         };
 
+        //构建嵌套模板
+        //MapTupleToCons<int, long, bool, double>
+        //Cons<int, MapTupleToCons<long, bool, double>>
+        //Cons<int, Cons<long, MapTupleToCons<bool, double>>>
+        //Cons<int, Cons<long, Cons<bool, MapTupleToCons<double>>>>
+        //Cons<int, Cons<long, Cons<bool, Cons<double, NullType>>>>
         template <class T0, class T1, class T2, class T3, class T4,
         class T5, class T6, class T7, class T8, class T9>
         struct MapTupleToCons
@@ -158,7 +174,7 @@ namespace Spark
             typedef NullType type;
         };
 
-        //Tuple<int, long, double> => Cons<int,Cons<long,Cons<bool,Cons<double,NullType> > > >
+        //Tuple<int, long, bool, double> => Cons<int,Cons<long,Cons<bool,Cons<double,NullType> > > >
         //Cons<T0,Cons<T1,Cons<T2,Cons<T3,... ... > > > >
         template <class T0, class T1, class T2, class T3, class T4,
         class T5, class T6, class T7, class T8, class T9>
@@ -231,8 +247,7 @@ namespace Spark
             { }
         };
         template <>
-        class Tuple<NullType, NullType, NullType, NullType, NullType, NullType, NullType, NullType, NullType, NullType> :
-            public NullType
+        class Tuple<NullType, NullType, NullType, NullType, NullType, NullType, NullType, NullType, NullType, NullType> : public NullType
         {
         public:
             typedef NullType inherited;
