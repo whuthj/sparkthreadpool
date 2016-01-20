@@ -188,6 +188,8 @@ BOOL CMainDlg::OnInitDialog(CWindow wndFocus, LPARAM lInitParam)
     fun(1, 2.0f, 3.0);
 
     SimpleTuple<void(int, float, double)> t1(1, 2.0f, 3.0);
+    int t1_0 = t1.item_0;
+
     Tuple<int, float, double, CString> t2 = DoTuple1();
     CString str = t2.Get<3>();
 
