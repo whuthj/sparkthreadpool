@@ -148,7 +148,7 @@ public:
     void DoTimer();
     void DoDelay(int value);
     void DoFunction(int a, float b, double c);
-    void DoFunction_1(int a, float b, double c, Tuple<int, float, double, char> d);
+    void DoFunction_1(int a, float b, double c, Tuple<int, float, double, char> d, SimpleTuple<int, float, double, CString> e);
     Tuple<int, float, double, CString> DoTuple1();
 
 private:

@@ -282,10 +282,16 @@ namespace Spark
 
 //////////////////////////////////////////////////////////////////////////
 
-        template<typename Signature> struct SimpleTuple;
+        template <
+            class T0 = NullType, class T1 = NullType, class T2 = NullType,
+            class T3 = NullType, class T4 = NullType, class T5 = NullType,
+            class T6 = NullType, class T7 = NullType, class T8 = NullType,
+            class T9 = NullType>
+        struct SimpleTuple;
+
 #define DECLARE_TUPLE(ptype, classparam, args, args_ex, var)\
         template<classparam>\
-        struct SimpleTuple<void(ptype)>\
+        struct SimpleTuple<ptype>\
         {\
             SimpleTuple() {} \
             SimpleTuple(args)\

@@ -182,15 +182,18 @@ BOOL CMainDlg::OnInitDialog(CWindow wndFocus, LPARAM lInitParam)
     SparkThreadPool::Instance().Execute(SharedFromThis(), &CMainDlg::DoAsyncEx_3);
 
     Tuple<int, float, double, char> t(123, 2.0f, 3.0, 'a');
-    m_tWork.Start(SharedFromThis(), &CMainDlg::DoFunction_1, 1, 2.0f, 3.00, t);
+    SimpleTuple<int, float, double, CString> t1(1, 2.0f, 3.0, L"Hello");
+    int t1_0 = t1.item_0;
+    float t1_1 = t1.item_1;
+    CString t1_3 = t1.item_3;
+
+    m_tWork.Start(SharedFromThis(), &CMainDlg::DoFunction_1, 1, 2.0f, 3.00, t, t1);
 
     ThreadFunction<CMainDlg, void (int, float, double)> fun(this, &CMainDlg::DoFunction);
     fun(1, 2.0f, 3.0);
 
-    SimpleTuple<void(int, float, double)> t1(1, 2.0f, 3.0);
-    int t1_0 = t1.item_0;
-
     Tuple<int, float, double, CString> t2 = DoTuple1();
+    int a = t2.head;
     CString str = t2.Get<3>();
 
     return TRUE;
@@ -264,7 +267,7 @@ void CMainDlg::DoFunction(int a, float b, double c)
     int _a = a;
 }
 
-void CMainDlg::DoFunction_1( int a, float b, double c, Tuple<int, float, double, char> d )
+void CMainDlg::DoFunction_1( int a, float b, double c, Tuple<int, float, double, char> d, SimpleTuple<int, float, double, CString> e )
 {
     int d_0 = d.Get<0>();
     float d_1 = d.Get<1>();
@@ -412,6 +415,9 @@ Tuple<int, float, double, CString> CMainDlg::DoTuple1()
     _b = 345.0f;
 
     Tuple<int, float, double, CString> t1(a, b, c, str);
+    SimpleTuple<int, float, double, CString> t2(a, b, c, str);
+    SimpleTuple<int, float, double> t3(a, b, c);
+    SimpleTuple<> t4;
 
     return t1;
 }
