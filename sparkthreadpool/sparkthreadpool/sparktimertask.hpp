@@ -16,10 +16,12 @@ namespace Spark
         public:
             virtual ~SparkTimerTask() {};
             virtual int GetRunCount() const = 0;
-            virtual void SetRunCount(int nValue) = 0;
             virtual int GetLimitRunCount() const = 0;
+            virtual int GetElapse() const = 0;
+            virtual void SetRunCount(int nValue) = 0;
             virtual void SetLimitRunCount(int nValue) = 0;
             virtual void AddRunCount() = 0;
+            virtual void SetElapse(int nValue) = 0;
         };
         
         template<typename T, typename ParamType>
@@ -63,6 +65,13 @@ namespace Spark
                 }
             }
 
+            virtual void* GetRunObj()
+            {
+                if (NULL == m_pMemberFun) { return NULL; }
+
+                return m_pMemberFun->GetRunObj();
+            }
+
             virtual int GetRunCount() const
             {
                 return m_nRunCount;
@@ -88,18 +97,21 @@ namespace Spark
                 ++m_nRunCount;
             }
 
-            virtual void* GetRunObj()
+            virtual int GetElapse() const
             {
-                if (NULL == m_pMemberFun) { return NULL; }
+                return m_nElapse;
+            }
 
-                return m_pMemberFun->GetRunObj();
+            virtual void SetElapse(int nValue)
+            {
+                m_nElapse = nValue;
             }
 
         private:
             MemberFunPtrRunnable<T, ParamType>* m_pMemberFun;
             int m_nRunCount;
             int m_nLimitRunCount;
-
+            int m_nElapse;
         };
 
         template<typename T, typename ParamType>

@@ -125,19 +125,55 @@ namespace Spark
             DECLARE_SPARK_THREAD_FUNCTION(DECLARE_EXECUTE_PARAMS(arg0_type, arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type), DECLARE_EXECUTE_TPYE(typename arg0_type, typename arg1_type, typename arg2_type, typename arg3_type, typename arg4_type, typename arg5_type, typename arg6_type, typename arg7_type), DECLARE_EXECUTE_ARGS(arg0_type a0, arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5, arg6_type a6, arg7_type a7), DECLARE_EXECUTE_VAR(a0, a1, a2, a3, a4, a5, a6, a7));
             DECLARE_SPARK_THREAD_FUNCTION(DECLARE_EXECUTE_PARAMS(arg0_type, arg1_type, arg2_type, arg3_type, arg4_type, arg5_type, arg6_type, arg7_type, arg8_type), DECLARE_EXECUTE_TPYE(typename arg0_type, typename arg1_type, typename arg2_type, typename arg3_type, typename arg4_type, typename arg5_type, typename arg6_type, typename arg7_type, typename arg8_type), DECLARE_EXECUTE_ARGS(arg0_type a0, arg1_type a1, arg2_type a2, arg3_type a3, arg4_type a4, arg5_type a5, arg6_type a6, arg7_type a7, arg8_type a8), DECLARE_EXECUTE_VAR(a0, a1, a2, a3, a4, a5, a6, a7, a8));
 
+            template<typename T>
+            bool SetRunnable(T* pObj, void(T::*pFun)())
+            {
+                m_pRunnable = Spark::Thread::CreateRunnableEx(pObj, pFun);
+                RUNNABLE_PTR_HOST_ADDREF(m_pRunnable);
+                return true;
+            }
+
+            template<typename T>
+            bool SetRunnable(SparkSharedPtr<T> pObj, void(T::*pFun)())
+            {
+                m_pRunnable = Spark::Thread::CreateRunnableEx(pObj, pFun);
+                RUNNABLE_PTR_HOST_ADDREF(m_pRunnable);
+                return true;
+            }
+
             bool SetRunnable(void(*pFun)(void*), void* lpParam = NULL)
             {
                 m_pRunnable = Spark::Thread::CreateRunnable(pFun, lpParam);
+                RUNNABLE_PTR_HOST_ADDREF(m_pRunnable);
+                return true;
+            }
 
-                if (NULL == m_pRunnable)
+            template<typename T>
+            bool SingletonStart(T* pObj, void(T::*pFun)())
+            {
+                SparkLocker locker(m_lockStart);
+
+                if (!IsAlive())
                 {
-                    return false;
+                    CloseHandle();
+                    return Start(pObj, pFun);
                 }
 
-                m_pRunnable->SetBeHosted(true);
-                m_pRunnable->AddRef();
+                return false;
+            }
 
-                return true;
+            template<typename T>
+            bool SingletonStart(SparkSharedPtr<T> pObj, void(T::*pFun)())
+            {
+                SparkLocker locker(m_lockStart);
+
+                if (!IsAlive())
+                {
+                    CloseHandle();
+                    return Start(pObj, pFun);
+                }
+
+                return false;
             }
 
             bool SingletonStart(void(*pFun)(void*), void* lpParam = NULL)
@@ -153,16 +189,6 @@ namespace Spark
                 return false;
             }
 
-            bool Start(void(*pFun)(void*), void* lpParam = NULL)
-            {
-                if (SetRunnable(pFun, lpParam))
-                {
-                    return Start();
-                }
-
-                return false;
-            }
-
             bool SingletonStart()
             {
                 SparkLocker locker(m_lockStart);
@@ -170,6 +196,38 @@ namespace Spark
                 if (!IsAlive())
                 {
                     CloseHandle();
+                    return Start();
+                }
+
+                return false;
+            }
+
+            template<typename T>
+            bool Start(T* pObj, void(T::*pFun)())
+            {
+                if (SetRunnable(pObj, pFun))
+                {
+                    return Start();
+                }
+
+                return false;
+            }
+
+            template<typename T>
+            bool Start(SparkSharedPtr<T> pObj, void(T::*pFun)())
+            {
+                if (SetRunnable(pObj, pFun))
+                {
+                    return Start();
+                }
+
+                return false;
+            }
+
+            bool Start(void(*pFun)(void*), void* lpParam = NULL)
+            {
+                if (SetRunnable(pFun, lpParam))
+                {
                     return Start();
                 }
 

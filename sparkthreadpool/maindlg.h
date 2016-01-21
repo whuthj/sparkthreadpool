@@ -155,5 +155,6 @@ private:
     SparkWndTimer m_timerLog;
     SparkWndTimer m_timer;
     SparkThread m_tWork;
+    SparkThreadTimer m_timer1;
 
 };

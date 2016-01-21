@@ -8,6 +8,8 @@
 #include "sparkmsgwnd.hpp"
 #include "sparksynccontainer.hpp"
 #include "sparktimertask.hpp"
+#include "sparkthread.hpp"
+#include <vector>
 
 namespace Spark
 {
@@ -225,9 +227,223 @@ namespace Spark
 
         __declspec(selectany) SparkWndTimer::TimerWnd SparkWndTimer::s_wnd;
 
+        class SparkTimerHeap
+        {
+        public:
+            SparkTimerTask* Minimum() 
+            {
+                return m_vecTimerTask[0];
+            }
+
+            bool IsEmpty() 
+            {
+                return m_vecTimerTask.empty();
+            }
+
+            void Insert(SparkTimerTask* pTask) 
+            {
+                m_vecTimerTask.push_back(pTask);
+                UpHeap();
+            }
+
+            void Delete(int pos) 
+            {
+                int size = m_vecTimerTask.size();
+                if (pos >= 0 && pos < size) 
+                {
+                    m_vecTimerTask[pos] = m_vecTimerTask[--size];
+                    SparkTimerTask* pTmp = m_vecTimerTask[size];
+                    SAFE_HOST_RELEASE(pTmp);
+                    m_vecTimerTask.erase(m_vecTimerTask.end());
+                    DownHeap(pos);
+                }
+            }
+
+            void UpHeap() 
+            {
+                int size = m_vecTimerTask.size();
+                int current = size - 1;
+                int parent = (current - 1) / 2;
+
+                while (m_vecTimerTask[current]->GetElapse() < m_vecTimerTask[parent]->GetElapse())
+                {
+                    // swap the two
+                    SparkTimerTask* pTmp = m_vecTimerTask[current];
+                    m_vecTimerTask[current] = m_vecTimerTask[parent];
+                    m_vecTimerTask[parent] = pTmp;
+
+                    // update pos and current
+                    current = parent;
+                    parent = (current - 1) / 2;
+                }
+            }
+
+            void DownHeap(int pos) 
+            {
+                int current = pos;
+                int child = 2 * current + 1;
+                int size = m_vecTimerTask.size();
+
+                while (child < size && size > 0)
+                {
+                    // compare the children if they exist
+                    if (child + 1 < size
+                        && m_vecTimerTask[child + 1]->GetElapse() < m_vecTimerTask[child]->GetElapse()) {
+                            child++;
+                    }
+
+                    // compare selected child with parent
+                    if (m_vecTimerTask[current]->GetElapse() < m_vecTimerTask[child]->GetElapse()) {
+                        break;
+                    }
+
+                    // swap the two
+                    SparkTimerTask* pTmp = m_vecTimerTask[current];
+                    m_vecTimerTask[current] = m_vecTimerTask[child];
+                    m_vecTimerTask[child] = pTmp;
+
+                    // update pos and current
+                    current = child;
+                    child = 2 * current + 1;
+                }
+            }
+
+            void Reset()
+            {
+                m_vecTimerTask.clear();
+            }
+
+            void AdjustMinimum() 
+            {
+                DownHeap(0);
+            }
+
+            void DeleteIfCancelled() 
+            {
+                //for (int i = 0; i < size; i++) {
+                //    if (timers[i].cancelled) {
+                //        deletedCancelledNumber++;
+                //        delete(i);
+                //        // re-try this point
+                //        i--;
+                //    }
+                //}
+            }
+
+            int GetTask(SparkTimerTask* pTask) 
+            {
+                /*for (int i = 0; i < timers.length; i++) {
+                    if (timers[i] == task) {
+                        return i;
+                    }
+                }
+                return -1;*/
+            }
+        private:
+            std::vector<SparkTimerTask*> m_vecTimerTask;
+            int m_nDeletedCancelledNumber;
+
+        };
+
         class SparkThreadTimer
         {
+        public:
+            SparkThreadTimer()
+            {
+                m_hExitEvt = ::CreateEvent(NULL, TRUE, FALSE, NULL);
+                m_hNotifyEvt = ::CreateEvent(NULL, FALSE, FALSE, NULL);
+                m_thread.Start(this, &SparkThreadTimer::Tick);
+            }
 
+            virtual ~SparkThreadTimer()
+            {
+                if (m_hExitEvt)
+                {
+                    ::SetEvent(m_hExitEvt);
+                }
+                m_thread.Join();
+
+                if (m_hExitEvt)
+                {
+                    ::CloseHandle(m_hExitEvt);
+                    m_hExitEvt = NULL;
+                }
+            }
+
+        public:
+            template<typename T, typename ParamType>
+            bool StartTimer(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam, UINT nElapse, int nRunCount = 0)
+            {
+                if (nRunCount < 0) { return false; }
+
+                StopTimer();
+                SparkTimerTask* pTask = CreateTimerTask<T>(pObj, pFun, lpParam);
+
+                RUNNABLE_PTR_HOST_ADDREF(pTask);
+                pTask->SetLimitRunCount(nRunCount);
+                pTask->SetElapse(nElapse);
+                m_timerHeap.Insert(pTask);
+                ::SetEvent(m_hNotifyEvt);
+
+                return true;
+            }
+
+            template<typename T>
+            bool StartTimer(T* pObj, void(T::*pFun)(), UINT nElapse, int nRunCount = 0)
+            {
+                if (nRunCount < 0) { return false; }
+
+                StopTimer();
+                SparkTimerTask* pTask = CreateTimerTask<T>(pObj, pFun);
+
+                RUNNABLE_PTR_HOST_ADDREF(pTask);
+                pTask->SetLimitRunCount(nRunCount);
+                pTask->SetElapse(nElapse);
+                m_timerHeap.Insert(pTask);
+                ::SetEvent(m_hNotifyEvt);
+
+                return true;
+            }
+
+            void StopTimer()
+            {
+                
+            }
+
+        private:
+            void Tick()
+            {
+                DWORD dwRet = 0;
+                int nElapse = 1000;
+                SparkTimerTask* pTask = NULL;
+                HANDLE hWaitEvt[] = { m_hExitEvt, m_hNotifyEvt };
+
+                for (;;)
+                {
+                    if (m_timerHeap.IsEmpty())
+                    {
+                        ::WaitForMultipleObjects(2, hWaitEvt, FALSE, INFINITE);
+                    }
+
+                    pTask = m_timerHeap.Minimum();
+                    nElapse = pTask->GetElapse();
+
+                    dwRet = ::WaitForMultipleObjects(2, hWaitEvt, FALSE, nElapse);
+                    if (WAIT_TIMEOUT != dwRet)
+                    {
+                        break;
+                    }
+
+                    pTask->Run();
+                }
+            }
+
+        private:
+            SparkThread m_thread;
+            SparkTimerHeap m_timerHeap;
+
+            HANDLE   m_hExitEvt;
+            HANDLE   m_hNotifyEvt;
         };
     }
 }

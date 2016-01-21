@@ -196,6 +196,8 @@ BOOL CMainDlg::OnInitDialog(CWindow wndFocus, LPARAM lInitParam)
     int a = t2.head;
     CString str = t2.Get<3>();
 
+    m_timer1.StartTimer(this, &CMainDlg::DoTimer, 1000, 2);
+
     return TRUE;
 }
 
@@ -273,6 +275,8 @@ void CMainDlg::DoFunction_1( int a, float b, double c, Tuple<int, float, double,
     float d_1 = d.Get<1>();
     double d_2 = d.Get<2>();
     char d_3 = d.Get<3>();
+
+    CString e_3 = e.item_3;
 
     int len = TupleLength<Tuple<int, float, double>>::value;
 }
