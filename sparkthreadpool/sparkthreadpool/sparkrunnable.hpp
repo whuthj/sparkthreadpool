@@ -61,16 +61,6 @@ namespace Spark
             virtual void ReleaseRunObj() {};
         };
 
-        //待实现，抽出MemberRunnable类
-        class MemberRunnable : public IRunnable
-            , public AddRefReleaseRunnable
-        {
-        public:
-            virtual ~MemberRunnable() {};
-            virtual void* GetRunObj() { return this; };
-            virtual void ReleaseRunObj() {};
-        };
-
         class FunPtrRunnable : public Runnable
         {
         public:

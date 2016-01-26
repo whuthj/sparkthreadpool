@@ -308,8 +308,7 @@ namespace Spark
                         return false;
                     }
 
-                    m_pCleanerThread->SetRunnable<SparkThreadPoolImpl, void, void*>(this, &SparkThreadPoolImpl::CleanerRun, NULL);
-                    m_pCleanerThread->Start();
+                    m_pCleanerThread->Start(this, &SparkThreadPoolImpl::CleanerRun);
                 }
 
                 return true;
@@ -778,7 +777,7 @@ namespace Spark
                 ResetWorkThreadStatus(pWorkThread);
             }
 
-            void CleanerRun(void* pParam)
+            void CleanerRun()
             {
                 for (;;)
                 {
