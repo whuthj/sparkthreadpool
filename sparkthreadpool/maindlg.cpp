@@ -196,7 +196,9 @@ BOOL CMainDlg::OnInitDialog(CWindow wndFocus, LPARAM lInitParam)
     int a = t2.head;
     CString str = t2.Get<3>();
 
-    m_timer1.StartTimer(this, &CMainDlg::DoTimer, 1000, 2);
+    m_timer1.StartTimer(this, &CMainDlg::DoTimer_1, 1000, 2);
+    m_timer1.StartTimer(this, &CMainDlg::DoTimer_2, 2000, 2);
+    m_pTimeTask = m_timer1.StartTimer(this, &CMainDlg::DoTimer_3, 3000, 2);
 
     return TRUE;
 }
@@ -257,6 +259,25 @@ void CMainDlg::DoTimer()
     //{
     //    mTimer2.StopTimer();
     //}
+}
+
+void CMainDlg::DoTimer_1()
+{
+    SparkUtils::DebugString(L"DoTimer_1:%d\n", ::GetTickCount());
+    PrintText(L"DoTimer_1");
+    m_pTimeTask->Stop();
+}
+
+void CMainDlg::DoTimer_2()
+{
+    SparkUtils::DebugString(L"DoTimer_2:%d\n", ::GetTickCount());
+    PrintText(L"DoTimer_2");
+}
+
+void CMainDlg::DoTimer_3()
+{
+    SparkUtils::DebugString(L"DoTimer_3:%d\n", ::GetTickCount());
+    PrintText(L"DoTimer_3");
 }
 
 void CMainDlg::DoDelay(int value)

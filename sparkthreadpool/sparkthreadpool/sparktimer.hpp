@@ -232,40 +232,46 @@ namespace Spark
         public:
             SparkTimerTask* Minimum() 
             {
+                SparkLocker lock(m_taskLock);
+
                 return m_vecTimerTask[0];
             }
 
             bool IsEmpty() 
             {
+                SparkLocker lock(m_taskLock);
+
                 return m_vecTimerTask.empty();
             }
 
             void Insert(SparkTimerTask* pTask) 
             {
+                SparkLocker lock(m_taskLock);
+
                 m_vecTimerTask.push_back(pTask);
                 UpHeap();
             }
 
             void Delete(int pos) 
             {
-                int size = m_vecTimerTask.size();
-                if (pos >= 0 && pos < size) 
+                SparkLocker lock(m_taskLock);
+
+                std::vector<SparkTimerTask*>::iterator _itr = m_vecTimerTask.begin() + pos;
+                if (_itr != m_vecTimerTask.end())
                 {
-                    m_vecTimerTask[pos] = m_vecTimerTask[--size];
-                    SparkTimerTask* pTmp = m_vecTimerTask[size];
-                    SAFE_HOST_RELEASE(pTmp);
-                    m_vecTimerTask.erase(m_vecTimerTask.end());
-                    DownHeap(pos);
+                    m_vecTimerTask.erase(_itr);
                 }
             }
 
             void UpHeap() 
             {
+                SparkLocker lock(m_taskLock);
+
                 int size = m_vecTimerTask.size();
                 int current = size - 1;
                 int parent = (current - 1) / 2;
 
-                while (m_vecTimerTask[current]->GetElapse() < m_vecTimerTask[parent]->GetElapse())
+                while (m_vecTimerTask[current]->GetWhen() < m_vecTimerTask[parent]->GetWhen())
                 {
                     // swap the two
                     SparkTimerTask* pTmp = m_vecTimerTask[current];
@@ -280,6 +286,8 @@ namespace Spark
 
             void DownHeap(int pos) 
             {
+                SparkLocker lock(m_taskLock);
+
                 int current = pos;
                 int child = 2 * current + 1;
                 int size = m_vecTimerTask.size();
@@ -288,12 +296,12 @@ namespace Spark
                 {
                     // compare the children if they exist
                     if (child + 1 < size
-                        && m_vecTimerTask[child + 1]->GetElapse() < m_vecTimerTask[child]->GetElapse()) {
+                        && m_vecTimerTask[child + 1]->GetWhen() < m_vecTimerTask[child]->GetWhen()) {
                             child++;
                     }
 
                     // compare selected child with parent
-                    if (m_vecTimerTask[current]->GetElapse() < m_vecTimerTask[child]->GetElapse()) {
+                    if (m_vecTimerTask[current]->GetWhen() < m_vecTimerTask[child]->GetWhen()) {
                         break;
                     }
 
@@ -310,6 +318,7 @@ namespace Spark
 
             void Reset()
             {
+                SparkLocker lock(m_taskLock);
                 m_vecTimerTask.clear();
             }
 
@@ -318,31 +327,10 @@ namespace Spark
                 DownHeap(0);
             }
 
-            void DeleteIfCancelled() 
-            {
-                //for (int i = 0; i < size; i++) {
-                //    if (timers[i].cancelled) {
-                //        deletedCancelledNumber++;
-                //        delete(i);
-                //        // re-try this point
-                //        i--;
-                //    }
-                //}
-            }
-
-            int GetTask(SparkTimerTask* pTask) 
-            {
-                /*for (int i = 0; i < timers.length; i++) {
-                    if (timers[i] == task) {
-                        return i;
-                    }
-                }
-                return -1;*/
-            }
         private:
             std::vector<SparkTimerTask*> m_vecTimerTask;
+            SparkLock m_taskLock;
             int m_nDeletedCancelledNumber;
-
         };
 
         class SparkThreadTimer
@@ -351,8 +339,8 @@ namespace Spark
             SparkThreadTimer()
             {
                 m_hExitEvt = ::CreateEvent(NULL, TRUE, FALSE, NULL);
-                m_hNotifyEvt = ::CreateEvent(NULL, FALSE, FALSE, NULL);
-                m_thread.Start(this, &SparkThreadTimer::Tick);
+                m_hNotifyEvt = ::CreateEvent(NULL, TRUE, FALSE, NULL);
+                m_thread.Start(this, &SparkThreadTimer::_Tick);
             }
 
             virtual ~SparkThreadTimer()
@@ -368,53 +356,79 @@ namespace Spark
                     ::CloseHandle(m_hExitEvt);
                     m_hExitEvt = NULL;
                 }
+
+                if (m_hNotifyEvt)
+                {
+                    ::CloseHandle(m_hNotifyEvt);
+                    m_hNotifyEvt = NULL;
+                }
             }
 
         public:
             template<typename T, typename ParamType>
-            bool StartTimer(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam, UINT nElapse, int nRunCount = 0)
+            SparkTimerTask* StartTimer(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam, UINT nElapse, int nRunCount = 0)
             {
-                if (nRunCount < 0) { return false; }
+                if (nRunCount < 0) { return NULL; }
 
-                StopTimer();
                 SparkTimerTask* pTask = CreateTimerTask<T>(pObj, pFun, lpParam);
-
                 RUNNABLE_PTR_HOST_ADDREF(pTask);
-                pTask->SetLimitRunCount(nRunCount);
-                pTask->SetElapse(nElapse);
-                m_timerHeap.Insert(pTask);
-                ::SetEvent(m_hNotifyEvt);
 
-                return true;
+                AddTaskAndNotify(pTask, nElapse, nRunCount);
+
+                return pTask;
             }
 
             template<typename T>
-            bool StartTimer(T* pObj, void(T::*pFun)(), UINT nElapse, int nRunCount = 0)
+            SparkTimerTask* StartTimer(T* pObj, void(T::*pFun)(), UINT nElapse, int nRunCount = 0)
             {
-                if (nRunCount < 0) { return false; }
+                if (nRunCount < 0) { return NULL; }
 
-                StopTimer();
                 SparkTimerTask* pTask = CreateTimerTask<T>(pObj, pFun);
-
                 RUNNABLE_PTR_HOST_ADDREF(pTask);
-                pTask->SetLimitRunCount(nRunCount);
-                pTask->SetElapse(nElapse);
-                m_timerHeap.Insert(pTask);
-                ::SetEvent(m_hNotifyEvt);
 
-                return true;
+                AddTaskAndNotify(pTask, nElapse, nRunCount);
+
+                return pTask;
             }
 
-            void StopTimer()
+            void AddTaskAndNotify(SparkTimerTask* pTask, UINT nElapse, int nRunCount)
             {
-                
+                if (NULL == pTask)
+                {
+                    return;
+                }
+
+                pTask->SetLimitRunCount(nRunCount);
+                pTask->SetElapse(nElapse);
+                int nTimeWhen = ::GetTickCount() + pTask->GetElapse();
+                pTask->SetWhen(nTimeWhen);
+
+                m_timerHeap.Insert(pTask);
+                _NotifyAddTask();
             }
 
         private:
-            void Tick()
+            void _NotifyAddTask()
             {
+                if (m_hNotifyEvt)
+                {
+                    ::SetEvent(m_hNotifyEvt);
+                }
+            }
+
+            void _NotifyRemoveTask()
+            {
+                if (m_hNotifyEvt)
+                {
+                    ::ResetEvent(m_hNotifyEvt);
+                }
+            }
+
+            void _Tick()
+            {
+                int nTimeToSleep = 0;
+                bool bIsStop = false;
                 DWORD dwRet = 0;
-                int nElapse = 1000;
                 SparkTimerTask* pTask = NULL;
                 HANDLE hWaitEvt[] = { m_hExitEvt, m_hNotifyEvt };
 
@@ -426,16 +440,59 @@ namespace Spark
                     }
 
                     pTask = m_timerHeap.Minimum();
-                    nElapse = pTask->GetElapse();
+                    nTimeToSleep = _CalcTimeToSleep(pTask);
+                    m_timerHeap.Delete(0);
+                    m_timerHeap.AdjustMinimum();
 
-                    dwRet = ::WaitForMultipleObjects(2, hWaitEvt, FALSE, nElapse);
+                    bIsStop = _IsTimeTaskStop(pTask);
+                    if (bIsStop)
+                    {
+                        SAFE_HOST_RELEASE(pTask);
+                        _NotifyRemoveTask();
+                        continue;
+                    }
+
+                    dwRet = ::WaitForSingleObject(m_hExitEvt, nTimeToSleep);
                     if (WAIT_TIMEOUT != dwRet)
                     {
                         break;
                     }
 
+                    pTask->AddRunCount();
                     pTask->Run();
+                    pTask->AddWhen(pTask->GetElapse());
+
+                    bIsStop = _IsTimeTaskStop(pTask);
+                    if (bIsStop)
+                    {
+                        SAFE_HOST_RELEASE(pTask);
+                        _NotifyRemoveTask();
+                        continue;
+                    }
+
+                    m_timerHeap.Insert(pTask);
                 }
+            }
+
+            int _CalcTimeToSleep( SparkTimerTask* pTask )
+            {
+                int nTimeWhen = pTask->GetWhen();
+                int nTimeToSleep = nTimeWhen - ::GetTickCount();
+                nTimeToSleep = nTimeToSleep > 0 ? nTimeToSleep : 0;
+
+                return nTimeToSleep;
+            }
+
+            bool _IsTimeTaskStop(SparkTimerTask* pTask)
+            {
+                bool bIsStop = pTask->IsStop();
+
+                if (pTask->GetLimitRunCount() > 0 && pTask->GetLimitRunCount() <= pTask->GetRunCount())
+                {
+                    bIsStop = true;
+                }
+                
+                return bIsStop;
             }
 
         private:

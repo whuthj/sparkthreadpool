@@ -90,6 +90,7 @@
     <ClInclude Include="sparkthreadpool\sparkthreadpool.hpp" />
     <ClInclude Include="sparkthreadpool\sparkthreadpooldef.hpp" />
     <ClInclude Include="sparkthreadpool\sparkthreadpoolimpl.hpp" />
+    <ClInclude Include="sparkthreadpool\sparkthreadqueue.hpp" />
     <ClInclude Include="sparkthreadpool\sparktimer.hpp" />
     <ClInclude Include="sparkthreadpool\sparktimertask.hpp" />
     <ClInclude Include="sparkthreadpool\sparktuple.hpp" />

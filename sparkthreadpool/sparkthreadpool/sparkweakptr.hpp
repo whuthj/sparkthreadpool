@@ -21,12 +21,12 @@ namespace Spark
             _SparkPtrRefCount() : m_lRef(0l), m_lWeakRef(0l)
             {
                 IncRef();
-                SparkUtils::DebugString(L"new _SparkPtrRefCount \n");
+                //SparkUtils::DebugString(L"new _SparkPtrRefCount \n");
             }
 
             virtual ~_SparkPtrRefCount()
             {
-                SparkUtils::DebugString(L"delete _SparkPtrRefCount \n");
+                //SparkUtils::DebugString(L"delete _SparkPtrRefCount \n");
             }
 
             long use_count()

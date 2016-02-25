@@ -89,6 +89,9 @@
     <ClInclude Include="sparkthreadpool\sparktuple.hpp">
       <Filter>src\sparkthreadpool</Filter>
     </ClInclude>
+    <ClInclude Include="sparkthreadpool\sparkthreadqueue.hpp">
+      <Filter>src\sparkthreadpool</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

@@ -146,6 +146,10 @@ public:
 
     void DoTimerLog();
     void DoTimer();
+    void DoTimer_1();
+    void DoTimer_2();
+    void DoTimer_3();
+
     void DoDelay(int value);
     void DoFunction(int a, float b, double c);
     void DoFunction_1(int a, float b, double c, Tuple<int, float, double, char> d, SimpleTuple<int, float, double, CString> e);
@@ -156,5 +160,6 @@ private:
     SparkWndTimer m_timer;
     SparkThread m_tWork;
     SparkThreadTimer m_timer1;
+    SparkTimerTask* m_pTimeTask;
 
 };

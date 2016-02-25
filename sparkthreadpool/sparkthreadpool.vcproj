@@ -284,6 +284,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\sparkthreadpool\sparkthreadqueue.hpp"
+					>
+				</File>
+				<File
 					RelativePath=".\sparkthreadpool\sparktimer.hpp"
 					>
 				</File>

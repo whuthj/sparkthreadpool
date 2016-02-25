@@ -15,13 +15,21 @@ namespace Spark
         {
         public:
             virtual ~SparkTimerTask() {};
+
             virtual int GetRunCount() const = 0;
             virtual int GetLimitRunCount() const = 0;
             virtual int GetElapse() const = 0;
+            virtual int GetWhen() const = 0;
+
             virtual void SetRunCount(int nValue) = 0;
             virtual void SetLimitRunCount(int nValue) = 0;
             virtual void AddRunCount() = 0;
             virtual void SetElapse(int nValue) = 0;
+            virtual void SetWhen(int nValue) = 0;
+            virtual void AddWhen(int nValue) = 0;
+
+            virtual bool IsStop() = 0;
+            virtual void Stop() = 0;
         };
         
         template<typename T, typename ParamType>
@@ -36,8 +44,7 @@ namespace Spark
                 m_pMemberFun = new MemberFunPtrRunnable<T, ParamType>(pObj, pFun, lpParam);
                 m_pMemberFun->AddRef();
 
-                m_nRunCount = 0;
-                m_nLimitRunCount = 0;
+                _InitParam();
             }
 
             MemberSparkTimerTask(T* pObj, NoParamRunFun pFun)
@@ -45,8 +52,7 @@ namespace Spark
                 m_pMemberFun = new MemberFunPtrRunnable<T, void*>(pObj, pFun);
                 m_pMemberFun->AddRef();
 
-                m_nRunCount = 0;
-                m_nLimitRunCount = 0;
+                _InitParam();
             }
 
             virtual ~MemberSparkTimerTask()
@@ -107,11 +113,50 @@ namespace Spark
                 m_nElapse = nValue;
             }
 
+            virtual int GetWhen() const
+            {
+                return m_nWhen;
+            }
+
+            virtual void SetWhen(int nValue)
+            {
+                m_nWhen = nValue;
+            }
+
+            virtual void AddWhen(int nValue)
+            {
+                m_nWhen += nValue;
+            }
+
+            virtual bool IsStop()
+            {
+                return m_bIsStop;
+            }
+
+            virtual void Stop()
+            {
+                m_bIsStop = true;
+            }
+
+        private:
+            void _InitParam()
+            {
+                m_nRunCount = 0;
+                m_nLimitRunCount = 0;
+                m_nElapse = 0;
+                m_nWhen = 0;
+                m_bIsStop = false;
+            }
+
         private:
             MemberFunPtrRunnable<T, ParamType>* m_pMemberFun;
             int m_nRunCount;
             int m_nLimitRunCount;
             int m_nElapse;
+            int m_nDelay;
+            int m_nPeriod;
+            int m_nWhen;
+            bool m_bIsStop; 
         };
 
         template<typename T, typename ParamType>
