@@ -273,12 +273,10 @@ namespace Spark
 
                 while (m_vecTimerTask[current]->GetWhen() < m_vecTimerTask[parent]->GetWhen())
                 {
-                    // swap the two
                     SparkTimerTask* pTmp = m_vecTimerTask[current];
                     m_vecTimerTask[current] = m_vecTimerTask[parent];
                     m_vecTimerTask[parent] = pTmp;
 
-                    // update pos and current
                     current = parent;
                     parent = (current - 1) / 2;
                 }
@@ -294,23 +292,19 @@ namespace Spark
 
                 while (child < size && size > 0)
                 {
-                    // compare the children if they exist
                     if (child + 1 < size
                         && m_vecTimerTask[child + 1]->GetWhen() < m_vecTimerTask[child]->GetWhen()) {
                             child++;
                     }
 
-                    // compare selected child with parent
                     if (m_vecTimerTask[current]->GetWhen() < m_vecTimerTask[child]->GetWhen()) {
                         break;
                     }
 
-                    // swap the two
                     SparkTimerTask* pTmp = m_vecTimerTask[current];
                     m_vecTimerTask[current] = m_vecTimerTask[child];
                     m_vecTimerTask[child] = pTmp;
 
-                    // update pos and current
                     current = child;
                     child = 2 * current + 1;
                 }
@@ -333,23 +327,22 @@ namespace Spark
             int m_nDeletedCancelledNumber;
         };
 
-        class SparkThreadTimer
+        class SparkTimerThread : public SparkThread
         {
         public:
-            SparkThreadTimer()
+            SparkTimerThread()
             {
                 m_hExitEvt = ::CreateEvent(NULL, TRUE, FALSE, NULL);
                 m_hNotifyEvt = ::CreateEvent(NULL, TRUE, FALSE, NULL);
-                m_thread.Start(this, &SparkThreadTimer::_Tick);
             }
 
-            virtual ~SparkThreadTimer()
+            virtual ~SparkTimerThread()
             {
                 if (m_hExitEvt)
                 {
                     ::SetEvent(m_hExitEvt);
                 }
-                m_thread.Join();
+                Join();
 
                 if (m_hExitEvt)
                 {
@@ -365,39 +358,14 @@ namespace Spark
             }
 
         public:
-            template<typename T, typename ParamType>
-            SparkTimerTask* StartTimer(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam, UINT nElapse, int nRunCount = 0)
-            {
-                if (nRunCount < 0) { return NULL; }
-
-                SparkTimerTask* pTask = CreateTimerTask<T>(pObj, pFun, lpParam);
-                RUNNABLE_PTR_HOST_ADDREF(pTask);
-
-                AddTaskAndNotify(pTask, nElapse, nRunCount);
-
-                return pTask;
-            }
-
-            template<typename T>
-            SparkTimerTask* StartTimer(T* pObj, void(T::*pFun)(), UINT nElapse, int nRunCount = 0)
-            {
-                if (nRunCount < 0) { return NULL; }
-
-                SparkTimerTask* pTask = CreateTimerTask<T>(pObj, pFun);
-                RUNNABLE_PTR_HOST_ADDREF(pTask);
-
-                AddTaskAndNotify(pTask, nElapse, nRunCount);
-
-                return pTask;
-            }
-
-            void AddTaskAndNotify(SparkTimerTask* pTask, UINT nElapse, int nRunCount)
+            bool AddTaskAndNotify(SparkTimerTask* pTask, UINT nElapse, int nRunCount)
             {
                 if (NULL == pTask)
                 {
-                    return;
+                    return false;
                 }
 
+                RUNNABLE_PTR_HOST_ADDREF(pTask);
                 pTask->SetLimitRunCount(nRunCount);
                 pTask->SetElapse(nElapse);
                 int nTimeWhen = ::GetTickCount() + pTask->GetElapse();
@@ -405,26 +373,12 @@ namespace Spark
 
                 m_timerHeap.Insert(pTask);
                 _NotifyAddTask();
+
+                return true;
             }
 
-        private:
-            void _NotifyAddTask()
-            {
-                if (m_hNotifyEvt)
-                {
-                    ::SetEvent(m_hNotifyEvt);
-                }
-            }
-
-            void _NotifyRemoveTask()
-            {
-                if (m_hNotifyEvt)
-                {
-                    ::ResetEvent(m_hNotifyEvt);
-                }
-            }
-
-            void _Tick()
+        protected:
+            virtual void Run()
             {
                 int nTimeToSleep = 0;
                 bool bIsStop = false;
@@ -474,6 +428,23 @@ namespace Spark
                 }
             }
 
+        private:
+            void _NotifyAddTask()
+            {
+                if (m_hNotifyEvt)
+                {
+                    ::SetEvent(m_hNotifyEvt);
+                }
+            }
+
+            void _NotifyRemoveTask()
+            {
+                if (m_hNotifyEvt)
+                {
+                    ::ResetEvent(m_hNotifyEvt);
+                }
+            }
+
             int _CalcTimeToSleep( SparkTimerTask* pTask )
             {
                 int nTimeWhen = pTask->GetWhen();
@@ -491,16 +462,81 @@ namespace Spark
                 {
                     bIsStop = true;
                 }
-                
+
                 return bIsStop;
             }
 
         private:
             SparkThread m_thread;
             SparkTimerHeap m_timerHeap;
-
-            HANDLE   m_hExitEvt;
-            HANDLE   m_hNotifyEvt;
+            HANDLE m_hExitEvt;
+            HANDLE m_hNotifyEvt;
         };
+
+        class SparkThreadTimer
+        {
+        public:
+            SparkThreadTimer()
+            {
+                m_pTimeTask = NULL;
+                s_timerThread.SingletonStart();
+            }
+
+            virtual ~SparkThreadTimer()
+            {
+                _ReleaseTimer();
+            }
+
+        public:
+            template<typename T, typename ParamType>
+            bool StartTimer(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam, UINT nElapse, int nRunCount = 0)
+            {
+                if (nRunCount < 0) { return false; }
+
+                _ReleaseTimer();
+                m_pTimeTask = CreateTimerTask<T>(pObj, pFun, lpParam);
+                RUNNABLE_PTR_HOST_ADDREF(m_pTimeTask);
+
+                s_timerThread.AddTaskAndNotify(m_pTimeTask, nElapse, nRunCount);
+
+                return true;
+            }
+
+            template<typename T>
+            bool StartTimer(T* pObj, void(T::*pFun)(), UINT nElapse, int nRunCount = 0)
+            {
+                if (nRunCount < 0) { return false; }
+
+                _ReleaseTimer();
+                m_pTimeTask = CreateTimerTask<T>(pObj, pFun);
+                RUNNABLE_PTR_HOST_ADDREF(m_pTimeTask);
+
+                s_timerThread.AddTaskAndNotify(m_pTimeTask, nElapse, nRunCount);
+
+                return true;
+            }
+
+            void StopTimer()
+            {
+                if (m_pTimeTask)
+                {
+                    m_pTimeTask->Stop();
+                }
+            }
+
+        private:
+            void _ReleaseTimer()
+            {
+                StopTimer();
+                SAFE_HOST_RELEASE(m_pTimeTask);
+            }
+
+        private:
+            static SparkTimerThread s_timerThread;
+            SparkTimerTask* m_pTimeTask;
+        };
+
+        __declspec(selectany) Spark::Thread::SparkTimerThread SparkThreadTimer::s_timerThread;
+
     }
 }

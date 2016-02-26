@@ -159,7 +159,8 @@ private:
     SparkWndTimer m_timerLog;
     SparkWndTimer m_timer;
     SparkThread m_tWork;
-    SparkThreadTimer m_timer1;
-    SparkTimerTask* m_pTimeTask;
+    SparkThreadTimer m_timer1_1;
+    SparkThreadTimer m_timer1_2;
+    SparkThreadTimer m_timer1_3;
 
 };

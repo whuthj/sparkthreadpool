@@ -196,9 +196,17 @@ BOOL CMainDlg::OnInitDialog(CWindow wndFocus, LPARAM lInitParam)
     int a = t2.head;
     CString str = t2.Get<3>();
 
-    m_timer1.StartTimer(this, &CMainDlg::DoTimer_1, 1000, 2);
-    m_timer1.StartTimer(this, &CMainDlg::DoTimer_2, 2000, 2);
-    m_pTimeTask = m_timer1.StartTimer(this, &CMainDlg::DoTimer_3, 3000, 2);
+    m_timer1_1.StartTimer(this, &CMainDlg::DoTimer_1, 100, 2);
+    m_timer1_1.StartTimer(this, &CMainDlg::DoTimer_1, 1000, 2);
+    m_timer1_2.StartTimer(this, &CMainDlg::DoTimer_2, 200, 2);
+    m_timer1_2.StartTimer(this, &CMainDlg::DoTimer_2, 2000, 2);
+    m_timer1_3.StartTimer(this, &CMainDlg::DoTimer_3, 3000, 2);
+
+    SparkThreadTimer timer1_4;
+    timer1_4.StartTimer(this, &CMainDlg::DoTimer_3, 3000, 2);
+
+    SparkThreadTimer timer1_5;
+    timer1_5.StartTimer(this, &CMainDlg::DoTimer_3, 3000, 2);
 
     return TRUE;
 }
@@ -265,13 +273,14 @@ void CMainDlg::DoTimer_1()
 {
     SparkUtils::DebugString(L"DoTimer_1:%d\n", ::GetTickCount());
     PrintText(L"DoTimer_1");
-    m_pTimeTask->Stop();
+    m_timer1_3.StopTimer();
 }
 
 void CMainDlg::DoTimer_2()
 {
     SparkUtils::DebugString(L"DoTimer_2:%d\n", ::GetTickCount());
     PrintText(L"DoTimer_2");
+    m_timer1_3.StartTimer(this, &CMainDlg::DoTimer_3, 3000, 2);
 }
 
 void CMainDlg::DoTimer_3()
