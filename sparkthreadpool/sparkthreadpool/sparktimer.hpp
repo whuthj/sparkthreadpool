@@ -336,8 +336,69 @@ namespace Spark
                 m_vecTimerTask.clear();
             }
 
+            int DestroyTasksByRunObj(void* lpRunObj)
+            {
+                int nDeleteCount = 0;
+
+                TimerTasks tasks;
+                {
+                    SparkLocker locker(m_taskLock);
+                    TimerTasksItr itr = m_vecTimerTask.begin();
+                    while (itr != m_vecTimerTask.end())
+                    {
+                        SparkTimerTask* pRunnable = *itr;
+                        if (NULL != pRunnable && lpRunObj == pRunnable->GetRunObj())
+                        {
+                            pRunnable->AddRef();
+                            tasks.push_back(pRunnable);
+                        }
+                        itr++;
+                    }
+                }
+
+                TimerTasksItr itr = tasks.begin();
+                while (itr != tasks.end())
+                {
+                    SparkTimerTask* pRunnable = *itr;
+                    if (lpRunObj == pRunnable->GetRunObj())
+                    {
+                        SAFE_RELEASE_RUN_OBJ(pRunnable);
+                        RemoveTask(pRunnable);
+                        SAFE_HOST_RELEASE(pRunnable);
+                        itr = tasks.erase(itr);
+                        nDeleteCount++;
+                        continue;
+                    }
+                    itr++;
+                }
+                tasks.clear();
+
+                return nDeleteCount;
+            }
+
         private:
-            std::vector<SparkTimerTask*> m_vecTimerTask;
+            void RemoveTask(SparkTimerTask* pRunnable)
+            {
+                SparkLocker locker(m_taskLock);
+
+                TimerTasksItr itr = m_vecTimerTask.begin();
+                while (itr != m_vecTimerTask.end())
+                {
+                    SparkTimerTask* pTmp = *itr;
+                    if (pRunnable == pTmp)
+                    {
+                        itr = m_vecTimerTask.erase(itr);
+                        break;
+                    }
+                    itr++;
+                }
+            }
+
+        private:
+            typedef std::vector<SparkTimerTask*> TimerTasks;
+            typedef TimerTasks::iterator TimerTasksItr;
+
+            TimerTasks m_vecTimerTask;
             SparkLock m_taskLock;
             int m_nDeletedCancelledNumber;
         };
