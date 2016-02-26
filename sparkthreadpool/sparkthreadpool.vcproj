@@ -296,6 +296,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\sparkthreadpool\sparktuple.hpp"
+					>
+				</File>
+				<File
 					RelativePath=".\sparkthreadpool\sparkutils.hpp"
 					>
 				</File>

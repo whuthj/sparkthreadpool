@@ -321,6 +321,21 @@ namespace Spark
                 DownHeap(0);
             }
 
+            void DestroyAllTimeTask()
+            {
+                SparkLocker lock(m_taskLock);
+
+                std::vector<SparkTimerTask*>::iterator _itr;
+                for (_itr = m_vecTimerTask.begin(); _itr != m_vecTimerTask.end(); ++_itr)
+                {
+                    SparkTimerTask* pTask = *_itr;
+                    SAFE_HOST_RELEASE(pTask);
+                    pTask = NULL;
+                }
+
+                m_vecTimerTask.clear();
+            }
+
         private:
             std::vector<SparkTimerTask*> m_vecTimerTask;
             SparkLock m_taskLock;
@@ -355,6 +370,8 @@ namespace Spark
                     ::CloseHandle(m_hNotifyEvt);
                     m_hNotifyEvt = NULL;
                 }
+
+                _DestroyAllTimerTask();
             }
 
         public:
@@ -390,7 +407,11 @@ namespace Spark
                 {
                     if (m_timerHeap.IsEmpty())
                     {
-                        ::WaitForMultipleObjects(2, hWaitEvt, FALSE, INFINITE);
+                        dwRet = ::WaitForMultipleObjects(2, hWaitEvt, FALSE, INFINITE);
+                        if ((WAIT_OBJECT_0 + 1) != dwRet)
+                        {
+                            break;
+                        }
                     }
 
                     pTask = m_timerHeap.Minimum();
@@ -409,6 +430,8 @@ namespace Spark
                     dwRet = ::WaitForSingleObject(m_hExitEvt, nTimeToSleep);
                     if (WAIT_TIMEOUT != dwRet)
                     {
+                        SAFE_HOST_RELEASE(pTask);
+                        _NotifyRemoveTask();
                         break;
                     }
 
@@ -429,6 +452,11 @@ namespace Spark
             }
 
         private:
+            void _DestroyAllTimerTask()
+            {
+                m_timerHeap.DestroyAllTimeTask();
+            }
+
             void _NotifyAddTask()
             {
                 if (m_hNotifyEvt)
