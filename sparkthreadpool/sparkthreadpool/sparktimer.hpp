@@ -230,11 +230,35 @@ namespace Spark
         class SparkTimerHeap
         {
         public:
+            SparkTimerHeap()
+            {
+                m_pTimerTask = NULL;
+            }
+
+            virtual ~SparkTimerHeap()
+            {
+                SAFE_HOST_RELEASE(m_pTimerTask);
+            }
+
             SparkTimerTask* Minimum() 
             {
                 SparkLocker lock(m_taskLock);
 
-                return m_vecTimerTask[0];
+                if (m_vecTimerTask.empty())
+                {
+                    return NULL;
+                }
+
+                if (m_pTimerTask)
+                {
+                    SAFE_HOST_RELEASE(m_pTimerTask);
+                    m_pTimerTask = NULL;
+                }
+
+                m_pTimerTask = m_vecTimerTask[0];
+                m_pTimerTask->AddRef();
+
+                return m_pTimerTask;
             }
 
             bool IsEmpty() 
@@ -363,7 +387,7 @@ namespace Spark
                     if (lpRunObj == pRunnable->GetRunObj())
                     {
                         SAFE_RELEASE_RUN_OBJ(pRunnable);
-                        RemoveTask(pRunnable);
+                        _DestroyTask(pRunnable);
                         SAFE_HOST_RELEASE(pRunnable);
                         itr = tasks.erase(itr);
                         nDeleteCount++;
@@ -373,11 +397,28 @@ namespace Spark
                 }
                 tasks.clear();
 
+                if (m_pTimerTask)
+                {
+                    SAFE_RELEASE_RUN_OBJ(m_pTimerTask);
+                    m_pTimerTask = NULL;
+                    nDeleteCount++;
+                }
+
                 return nDeleteCount;
             }
 
+            void Lock()
+            {
+                m_taskLock.Lock();
+            }
+
+            void Unlock()
+            {
+                m_taskLock.Unlock();
+            }
+
         private:
-            void RemoveTask(SparkTimerTask* pRunnable)
+            void _DestroyTask(SparkTimerTask* pRunnable)
             {
                 SparkLocker locker(m_taskLock);
 
@@ -388,6 +429,7 @@ namespace Spark
                     if (pRunnable == pTmp)
                     {
                         itr = m_vecTimerTask.erase(itr);
+                        AdjustMinimum();
                         break;
                     }
                     itr++;
@@ -400,7 +442,7 @@ namespace Spark
 
             TimerTasks m_vecTimerTask;
             SparkLock m_taskLock;
-            int m_nDeletedCancelledNumber;
+            SparkTimerTask* m_pTimerTask; //正在执行的定时器任务
         };
 
         class SparkTimerThread : public SparkThread
@@ -455,6 +497,11 @@ namespace Spark
                 return true;
             }
 
+            int DestroyTasksByRunObj(void* lpRunObj)
+            {
+                return m_timerHeap.DestroyTasksByRunObj(lpRunObj);
+            }
+
         protected:
             virtual void Run()
             {
@@ -475,10 +522,15 @@ namespace Spark
                         }
                     }
 
+                    m_timerHeap.Lock();
                     pTask = m_timerHeap.Minimum();
-                    nTimeToSleep = _CalcTimeToSleep(pTask);
                     m_timerHeap.Delete(0);
                     m_timerHeap.AdjustMinimum();
+                    m_timerHeap.Unlock();
+
+                    if (NULL == pTask) { continue; }
+
+                    nTimeToSleep = _CalcTimeToSleep(pTask);
 
                     bIsStop = _IsTimeTaskStop(pTask);
                     if (bIsStop)
@@ -496,10 +548,6 @@ namespace Spark
                         break;
                     }
 
-                    pTask->AddRunCount();
-                    pTask->Run();
-                    pTask->AddWhen(pTask->GetElapse());
-
                     bIsStop = _IsTimeTaskStop(pTask);
                     if (bIsStop)
                     {
@@ -507,6 +555,10 @@ namespace Spark
                         _NotifyRemoveTask();
                         continue;
                     }
+
+                    pTask->AddRunCount();
+                    pTask->Run();
+                    pTask->AddWhen(pTask->GetElapse());
 
                     m_timerHeap.Insert(pTask);
                 }
@@ -611,6 +663,11 @@ namespace Spark
                 {
                     m_pTimeTask->Stop();
                 }
+            }
+
+            static int DestroyThisTimerTask(void* lpRunObj)
+            {
+                return s_timerThread.DestroyTasksByRunObj(lpRunObj);
             }
 
         private:

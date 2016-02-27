@@ -138,6 +138,7 @@ CMainDlg::CMainDlg()
 CMainDlg::~CMainDlg()
 {
     SparkWndTimer::DestroyThisTimerTask(this);
+    SparkThreadTimer::DestroyThisTimerTask(this);
     DWORD dwStart = ::GetTickCount();
     m_tWork.Join();
     SPARK_INSTANCE_DESTROY_TASKS(this);
@@ -199,7 +200,7 @@ BOOL CMainDlg::OnInitDialog(CWindow wndFocus, LPARAM lInitParam)
     m_timer1_1.StartTimer(this, &CMainDlg::DoTimer_1, 100, 2);
     m_timer1_1.StartTimer(this, &CMainDlg::DoTimer_1, 1000, 2);
     m_timer1_2.StartTimer(this, &CMainDlg::DoTimer_2, 200, 2);
-    m_timer1_2.StartTimer(this, &CMainDlg::DoTimer_2, 2000, 2);
+    m_timer1_2.StartTimer(this, &CMainDlg::DoTimer_2, 42000, 2);
     m_timer1_3.StartTimer(this, &CMainDlg::DoTimer_3, 3000, 2);
 
     SparkThreadTimer timer1_4;

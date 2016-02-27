@@ -948,7 +948,7 @@ namespace Spark
 
             ThreadPool m_threadPool;
             ThreadPool m_trashThread;
-            ObjRefMap m_objRefMap;
+            ObjRefMap m_objRefMap; // 运行主体引用计数以防SendMessage导致死锁
             Tasks m_tasks;
             Tasks m_runTasks;
 

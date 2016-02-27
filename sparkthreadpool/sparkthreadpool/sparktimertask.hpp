@@ -78,6 +78,14 @@ namespace Spark
                 return m_pMemberFun->GetRunObj();
             }
 
+            virtual void ReleaseRunObj()
+            {
+                if (NULL != m_pMemberFun)
+                {
+                    m_pMemberFun->ReleaseRunObj();
+                }
+            }
+
             virtual int GetRunCount() const
             {
                 return m_nRunCount;
