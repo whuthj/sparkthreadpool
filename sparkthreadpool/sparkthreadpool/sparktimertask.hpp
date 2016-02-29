@@ -41,7 +41,6 @@ namespace Spark
 
             MemberSparkTimerTask(T* pObj, RunFun pFun, ParamType lpParam = NULL)
             {
-                m_pShareMemberFun = NULL;
                 m_pMemberFun = new MemberFunPtrRunnable<T, ParamType>(pObj, pFun, lpParam);
                 m_pMemberFun->AddRef();
 
@@ -50,27 +49,8 @@ namespace Spark
 
             MemberSparkTimerTask(T* pObj, NoParamRunFun pFun)
             {
-                m_pShareMemberFun = NULL;
                 m_pMemberFun = new MemberFunPtrRunnable<T, void*>(pObj, pFun);
                 m_pMemberFun->AddRef();
-
-                _InitParam();
-            }
-
-            MemberSparkTimerTask(SparkSharedPtr<T> pObj, RunFun pFun, ParamType lpParam = NULL)
-            {
-                m_pMemberFun = NULL;
-                m_pShareMemberFun = new SharedMemberFunPtrRunnable<T, ParamType>(pObj, pFun, lpParam);
-                m_pShareMemberFun->AddRef();
-
-                _InitParam();
-            }
-
-            MemberSparkTimerTask(SparkSharedPtr<T> pObj, NoParamRunFun pFun)
-            {
-                m_pMemberFun = NULL;
-                m_pShareMemberFun = new SharedMemberFunPtrRunnable<T, ParamType>(pObj, pFun);
-                m_pShareMemberFun->AddRef();
 
                 _InitParam();
             }
@@ -81,10 +61,6 @@ namespace Spark
                 {
                     m_pMemberFun->Release();
                 }
-                if (NULL != m_pShareMemberFun)
-                {
-                    m_pShareMemberFun->Release();
-                }
             }
 
             virtual void Run()
@@ -93,15 +69,11 @@ namespace Spark
                 {
                     m_pMemberFun->Run();
                 }
-                if (NULL != m_pShareMemberFun)
-                {
-                    m_pShareMemberFun->Run();
-                }
             }
 
             virtual void* GetRunObj()
             {
-                if (NULL == m_pMemberFun && NULL == m_pShareMemberFun) 
+                if (NULL == m_pMemberFun) 
                 { 
                     return NULL; 
                 }
@@ -110,10 +82,6 @@ namespace Spark
                 {
                     return m_pMemberFun->GetRunObj();
                 }
-                if (m_pShareMemberFun)
-                {
-                    return m_pShareMemberFun->GetRunObj();
-                }
             }
 
             virtual void ReleaseRunObj()
@@ -121,10 +89,6 @@ namespace Spark
                 if (NULL != m_pMemberFun)
                 {
                     m_pMemberFun->ReleaseRunObj();
-                }
-                if (NULL != m_pShareMemberFun)
-                {
-                    m_pShareMemberFun->ReleaseRunObj();
                 }
             }
 
@@ -200,7 +164,6 @@ namespace Spark
 
         private:
             MemberFunPtrRunnable<T, ParamType>* m_pMemberFun;
-            SharedMemberFunPtrRunnable<T, ParamType>* m_pShareMemberFun;
             int m_nRunCount;
             int m_nLimitRunCount;
             int m_nElapse;
@@ -226,20 +189,5 @@ namespace Spark
             return pTask;
         };
 
-        template<typename T, typename ParamType>
-        inline SparkTimerTask* CreateTimerTask(SparkSharedPtr<T> pObj, void(T::*pFun)(ParamType), ParamType lpParam = NULL)
-        {
-            SparkTimerTask *pTask = new MemberSparkTimerTask<T, ParamType>(pObj, pFun, lpParam);
-
-            return pTask;
-        };
-
-        template<typename T>
-        inline SparkTimerTask* CreateTimerTask(SparkSharedPtr<T> pObj, void(T::*pFun)())
-        {
-            SparkTimerTask *pTask = new MemberSparkTimerTask<T, void*>(pObj, pFun);
-
-            return pTask;
-        };
     }
 }

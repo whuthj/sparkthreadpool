@@ -672,24 +672,6 @@ namespace Spark
                 return pTask;
             }
 
-            template<typename T, typename ParamType>
-            static SparkTimerTask* Schedule(SparkSharedPtr<T> pObj, void(T::*pFun)(ParamType), ParamType lpParam, UINT nElapse, int nRunCount = 0)
-            {
-                SparkTimerTask* pTask = CreateTimerTask<T, ParamType>(pObj, pFun, lpParam);
-                s_timerThread.AddTaskAndNotify(pTask, nElapse, nRunCount);
-
-                return pTask;
-            }
-
-            template<typename T>
-            static SparkTimerTask* Schedule(SparkSharedPtr<T> pObj, void(T::*pFun)(), UINT nElapse, int nRunCount = 0)
-            {
-                SparkTimerTask* pTask = CreateTimerTask<T>(pObj, pFun);
-                s_timerThread.AddTaskAndNotify(pTask, nElapse, nRunCount);
-
-                return pTask;
-            }
-
         public:
             template<typename T, typename ParamType>
             bool StartTimer(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam, UINT nElapse, int nRunCount = 0)
@@ -707,34 +689,6 @@ namespace Spark
 
             template<typename T>
             bool StartTimer(T* pObj, void(T::*pFun)(), UINT nElapse, int nRunCount = 0)
-            {
-                if (nRunCount < 0) { return false; }
-
-                _ReleaseTimer();
-                m_pTimeTask = CreateTimerTask<T>(pObj, pFun);
-                RUNNABLE_PTR_HOST_ADDREF(m_pTimeTask);
-
-                s_timerThread.AddTaskAndNotify(m_pTimeTask, nElapse, nRunCount);
-
-                return true;
-            }
-
-            template<typename T, typename ParamType>
-            bool StartTimer(SparkSharedPtr<T> pObj, void(T::*pFun)(ParamType), ParamType lpParam, UINT nElapse, int nRunCount = 0)
-            {
-                if (nRunCount < 0) { return false; }
-
-                _ReleaseTimer();
-                m_pTimeTask = CreateTimerTask<T>(pObj, pFun, lpParam);
-                RUNNABLE_PTR_HOST_ADDREF(m_pTimeTask);
-
-                s_timerThread.AddTaskAndNotify(m_pTimeTask, nElapse, nRunCount);
-
-                return true;
-            }
-
-            template<typename T>
-            bool StartTimer(SparkSharedPtr<T> pObj, void(T::*pFun)(), UINT nElapse, int nRunCount = 0)
             {
                 if (nRunCount < 0) { return false; }
 
