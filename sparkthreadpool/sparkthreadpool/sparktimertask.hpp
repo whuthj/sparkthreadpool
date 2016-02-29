@@ -161,8 +161,8 @@ namespace Spark
             int m_nRunCount;
             int m_nLimitRunCount;
             int m_nElapse;
-            int m_nDelay;
-            int m_nPeriod;
+            /*int m_nDelay;
+            int m_nPeriod;*/
             int m_nWhen;
             bool m_bIsStop; 
         };

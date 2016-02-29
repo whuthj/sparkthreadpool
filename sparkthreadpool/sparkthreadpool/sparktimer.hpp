@@ -623,9 +623,37 @@ namespace Spark
                 s_timerThread.SingletonStart();
             }
 
+            SparkThreadTimer(SparkTimerTask* pTask)
+            {
+                m_pTimeTask = pTask;
+                if (m_pTimeTask) 
+                { 
+                    if (m_pTimeTask->IsBeHosted()) { m_pTimeTask->AddRef();}
+                }
+            }
+
             virtual ~SparkThreadTimer()
             {
                 _ReleaseTimer();
+            }
+
+        public:
+            template<typename T, typename ParamType>
+            static SparkTimerTask* Schedule(T* pObj, void(T::*pFun)(ParamType), ParamType lpParam, UINT nElapse, int nRunCount = 0)
+            {
+                SparkTimerTask* pTask = CreateTimerTask<T, ParamType>(pObj, pFun, lpParam);
+                s_timerThread.AddTaskAndNotify(pTask, nElapse, nRunCount);
+
+                return pTask;
+            }
+
+            template<typename T>
+            static SparkTimerTask* Schedule(T* pObj, void(T::*pFun)(), UINT nElapse, int nRunCount = 0)
+            {
+                SparkTimerTask* pTask = CreateTimerTask<T>(pObj, pFun);
+                s_timerThread.AddTaskAndNotify(pTask, nElapse, nRunCount);
+                
+                return pTask;
             }
 
         public:

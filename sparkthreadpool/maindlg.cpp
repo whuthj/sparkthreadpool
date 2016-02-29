@@ -209,6 +209,8 @@ BOOL CMainDlg::OnInitDialog(CWindow wndFocus, LPARAM lInitParam)
     SparkThreadTimer timer1_5;
     timer1_5.StartTimer(this, &CMainDlg::DoTimer_3, 3000, 2);
 
+    SparkThreadTimer::Schedule(this, &CMainDlg::DoTimer_2, 100, 2);
+
     return TRUE;
 }
 
