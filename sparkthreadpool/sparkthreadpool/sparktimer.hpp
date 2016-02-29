@@ -627,8 +627,9 @@ namespace Spark
             {
                 m_pTimeTask = pTask;
                 if (m_pTimeTask) 
-                { 
-                    if (m_pTimeTask->IsBeHosted()) { m_pTimeTask->AddRef();}
+                {
+                    m_pTimeTask->SetBeHosted(true);
+                    m_pTimeTask->AddRef();
                 }
             }
 
