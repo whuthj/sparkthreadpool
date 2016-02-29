@@ -353,11 +353,18 @@ namespace Spark
                 for (_itr = m_vecTimerTask.begin(); _itr != m_vecTimerTask.end(); ++_itr)
                 {
                     SparkTimerTask* pTask = *_itr;
+                    SAFE_RELEASE_RUN_OBJ(pTask);
                     SAFE_HOST_RELEASE(pTask);
                     pTask = NULL;
                 }
 
                 m_vecTimerTask.clear();
+
+                if (m_pTimerTask)
+                {
+                    SAFE_RELEASE_RUN_OBJ(m_pTimerTask);
+                    m_pTimerTask = NULL;
+                }
             }
 
             int DestroyTasksByRunObj(void* lpRunObj)
@@ -397,11 +404,14 @@ namespace Spark
                 }
                 tasks.clear();
 
-                if (m_pTimerTask)
                 {
-                    SAFE_RELEASE_RUN_OBJ(m_pTimerTask);
-                    m_pTimerTask = NULL;
-                    nDeleteCount++;
+                    SparkLocker lock(m_taskLock);
+                    if (m_pTimerTask)
+                    {
+                        SAFE_RELEASE_RUN_OBJ(m_pTimerTask);
+                        m_pTimerTask = NULL;
+                        nDeleteCount++;
+                    }
                 }
 
                 return nDeleteCount;

@@ -209,7 +209,7 @@ BOOL CMainDlg::OnInitDialog(CWindow wndFocus, LPARAM lInitParam)
     SparkThreadTimer timer1_5;
     timer1_5.StartTimer(this, &CMainDlg::DoTimer_3, 3000, 2);
 
-    m_timer1_4.SetTimerTask(SparkThreadTimer::Schedule(SharedFromThis(), &CMainDlg::DoTimer_2, 10000, 10));
+    m_timer1_4.SetTimerTask(SparkThreadTimer::Schedule(this, &CMainDlg::DoTimer_2, 10000, 10));
 
     return TRUE;
 }
