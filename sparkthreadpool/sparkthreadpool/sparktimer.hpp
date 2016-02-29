@@ -625,16 +625,22 @@ namespace Spark
 
             SparkThreadTimer(SparkTimerTask* pTask)
             {
-                m_pTimeTask = pTask;
-                if (m_pTimeTask) 
-                { 
-                    if (m_pTimeTask->IsBeHosted()) { m_pTimeTask->AddRef();}
-                }
+                SetTimerTask(pTask);
             }
 
             virtual ~SparkThreadTimer()
             {
                 _ReleaseTimer();
+            }
+
+            void SetTimerTask(SparkTimerTask* pTask)
+            {
+                m_pTimeTask = pTask;
+                if (m_pTimeTask) 
+                {
+                    m_pTimeTask->SetBeHosted(true);
+                    m_pTimeTask->AddRef();
+                }
             }
 
         public:
