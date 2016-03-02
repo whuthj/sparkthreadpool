@@ -175,8 +175,8 @@ namespace Spark
                 return m_threadPoolImpl.SwitchToWndThread(pTask, bIsSendMsg);
             }
 
-            template<typename T>
-            bool Execute(T* pObj, void(T::*pFun)(),
+            template<typename T, typename ret_type>
+            bool Execute(T* pObj, ret_type(T::*pFun)(),
                 SparkRunnableType emRunnableType = emSRType_Schedule_Post)
             {
                 Runnable* pTask = Spark::Thread::CreateRunnableEx(pObj, pFun);
@@ -185,8 +185,8 @@ namespace Spark
                 return Execute(pTask, emRunnableType);
             }
 
-            template<typename T>
-            bool Execute(SparkSharedPtr<T> pObj, void(T::*pFun)(),
+            template<typename T, typename ret_type>
+            bool Execute(SparkSharedPtr<T> pObj, ret_type(T::*pFun)(),
                 SparkRunnableType emRunnableType = emSRType_Schedule_Post)
             {
                 Runnable* pTask = Spark::Thread::CreateRunnableEx(pObj, pFun);
