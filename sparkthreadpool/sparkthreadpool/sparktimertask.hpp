@@ -78,10 +78,7 @@ namespace Spark
                     return NULL; 
                 }
 
-                if (m_pMemberFun)
-                {
-                    return m_pMemberFun->GetRunObj();
-                }
+                return m_pMemberFun->GetRunObj();
             }
 
             virtual void ReleaseRunObj()
