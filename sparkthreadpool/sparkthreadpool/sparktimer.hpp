@@ -16,6 +16,7 @@ namespace Spark
     namespace Thread
     {
         static const LPCWSTR SPARK_TIMER_WND_CLASS_NAME = L"SparkWndTimer";
+        static const int MAX_TIMER_COUNT = 100000;
 
         class SparkWndTimer
         {
@@ -461,7 +462,7 @@ namespace Spark
             SparkTimerThread()
             {
                 m_hExitEvt = ::CreateEvent(NULL, TRUE, FALSE, NULL);
-                m_hNotifyEvt = ::CreateEvent(NULL, TRUE, FALSE, NULL);
+                m_hNotifyEvt = ::CreateSemaphore(NULL, 0, MAX_TIMER_COUNT, NULL);
             }
 
             virtual ~SparkTimerThread()
@@ -571,6 +572,7 @@ namespace Spark
                     pTask->AddWhen(pTask->GetElapse());
 
                     m_timerHeap.Insert(pTask);
+                    _NotifyAddTask();
                 }
             }
 
@@ -584,7 +586,7 @@ namespace Spark
             {
                 if (m_hNotifyEvt)
                 {
-                    ::SetEvent(m_hNotifyEvt);
+                    ::ReleaseSemaphore(m_hNotifyEvt, 1, NULL);
                 }
             }
 
@@ -592,7 +594,7 @@ namespace Spark
             {
                 if (m_hNotifyEvt)
                 {
-                    ::ResetEvent(m_hNotifyEvt);
+                    ::WaitForSingleObject(m_hNotifyEvt, 1);
                 }
             }
 
