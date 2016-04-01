@@ -59,5 +59,71 @@ namespace Spark
                 m_lock.Unlock();
             }
         };
+
+        #if (_WIN32_WINNT >= 0x0600)
+        class SparkRWLock
+        {
+        public:
+            SparkRWLock(void)
+            {
+                ::InitializeSRWLock(&m_srwLock); 
+            }
+
+            void LockR(void)
+            {
+                ::AcquireSRWLockShared(&m_srwLock); 
+            }
+
+            void LockW(void)
+            {
+                ::AcquireSRWLockExclusive(&m_srwLock); 
+            }
+
+            void UnlockR(void)
+            {
+                ::ReleaseSRWLockShared(&m_srwLock); 
+            }
+
+            void UnlockW(void)
+            {
+                ::ReleaseSRWLockExclusive(&m_srwLock); 
+            }
+
+        private:
+            SRWLOCK  m_srwLock; 
+        };
+
+        class SparkRWLocker
+        {
+        public:
+            SparkRWLocker(SparkRWLock& locker, bool bRead) 
+                : m_srwLocker(locker), m_bRead(bRead), m_bLocked(true)
+            {
+                if (m_bRead) { m_srwLocker.LockR(); }
+                else { m_srwLocker.LockW(); } 
+            }
+
+            ~SparkRWLocker(void)
+            {
+                if (m_bRead) { m_srwLocker.UnlockR(); } 
+                else { m_srwLocker.UnlockW(); }
+            }
+
+            operator bool (void) const
+            {
+                return m_bLocked; 
+            }
+
+            void Unlock(void)
+            {
+                m_bLocked = false; 
+            }
+
+        private:
+            SparkRWLock& m_srwLocker; 
+            bool      m_bLocked; 
+            bool      m_bRead; 
+        }; 
+        #endif
     }
 }
