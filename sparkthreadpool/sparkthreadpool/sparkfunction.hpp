@@ -100,13 +100,11 @@ namespace Spark
             typedef ThreadFunction selftype;
             typedef ret_type(obj_type::*RunFun)();
         public:
-            ThreadFunction() : m_pObj(NULL), m_pFun(NULL), m_lWorkRef(0) {} 
+            ThreadFunction() : m_pObj(NULL), m_pFun(NULL) {} 
             ThreadFunction(obj_type* pObj, RunFun pFun)
             {
                 m_pObj = pObj;
                 m_pFun = pFun;
-                m_lWorkRef = 0;
-                ::InterlockedIncrement(&m_lWorkRef);
             }
             ret_type operator()()
             {
@@ -116,34 +114,12 @@ namespace Spark
             {
                 return m_pObj;
             }
-
-            virtual void ReleaseRunObj()
-            {
-                for (;;)
-                {
-                    if (::InterlockedDecrement(&m_lWorkRef) <= 0)
-                    {
-                        break;
-                    }
-
-                    ::InterlockedIncrement(&m_lWorkRef);
-                    ::Sleep(10);
-                }
-            }
-            virtual void Run()
+            virtual void SafeRun()
             {
                 if (NULL == m_pObj) { return; }
                 if (NULL == m_pFun) { return; }
 
-                if (::InterlockedIncrement(&m_lWorkRef) <= 1)
-                {
-                    ::InterlockedDecrement(&m_lWorkRef);
-                    return;
-                }
-
                 if (m_pFun) { (m_pObj->*m_pFun)(); }
-
-                ::InterlockedDecrement(&m_lWorkRef);
             }
         private:
             ret_type _CallFun()
@@ -153,7 +129,6 @@ namespace Spark
         private:
             RunFun m_pFun;
             obj_type* m_pObj;
-            volatile long m_lWorkRef;
         };
         template<typename obj_type, typename ret_type>
         class SharedThreadFunction<obj_type, ret_type()> : public Runnable
@@ -162,13 +137,11 @@ namespace Spark
             typedef SharedThreadFunction selftype;
             typedef ret_type(obj_type::*RunFun)();
         public:
-            SharedThreadFunction() : m_pFun(NULL), m_lWorkRef(0) {}
+            SharedThreadFunction() : m_pFun(NULL) {}
             SharedThreadFunction(SparkSharedPtr<obj_type> sharedObj, RunFun pFun)
             {
                 m_pObj = sharedObj;
                 m_pFun = pFun;
-                m_lWorkRef = 0;
-                ::InterlockedIncrement(&m_lWorkRef);
             }
             ret_type operator()()
             {
@@ -178,34 +151,12 @@ namespace Spark
             {
                 return m_pObj;
             }
-
-            virtual void ReleaseRunObj()
-            {
-                for (;;)
-                {
-                    if (::InterlockedDecrement(&m_lWorkRef) <= 0)
-                    {
-                        break;
-                    }
-
-                    ::InterlockedIncrement(&m_lWorkRef);
-                    ::Sleep(10);
-                }
-            }
-            virtual void Run()
+            virtual void SafeRun()
             {
                 if (NULL == m_pObj) { return; }
                 if (NULL == m_pFun) { return; }
 
-                if (::InterlockedIncrement(&m_lWorkRef) <= 1)
-                {
-                    ::InterlockedDecrement(&m_lWorkRef);
-                    return;
-                }
-
                 if (m_pFun) { (m_pObj->*m_pFun)(); }
-
-                ::InterlockedDecrement(&m_lWorkRef);
             }
         private:
             ret_type _CallFun()
@@ -215,7 +166,6 @@ namespace Spark
         private:
             RunFun m_pFun;
             SparkSharedPtr<obj_type> m_pObj;
-            volatile long m_lWorkRef;
         };
         template<typename obj_type, typename ret_type>
         inline Runnable* CreateRunnableEx(obj_type* pObj, ret_type(obj_type::*pFun)())
@@ -268,13 +218,11 @@ namespace Spark
             typedef ThreadFunction selftype;\
             typedef ret_type(obj_type::*RunFun)(args);\
         public:\
-            ThreadFunction() : m_pObj(NULL), m_pFun(NULL), m_lWorkRef(0) {} \
+            ThreadFunction() : m_pObj(NULL), m_pFun(NULL) {} \
             ThreadFunction(obj_type* pObj, RunFun pFun)\
             {\
                 m_pObj = pObj;\
                 m_pFun = pFun;\
-                m_lWorkRef = 0;\
-                ::InterlockedIncrement(&m_lWorkRef);\
             }\
             ret_type operator()(args)\
             {\
@@ -288,29 +236,11 @@ namespace Spark
             {\
                 return m_pObj;\
             }\
-            virtual void ReleaseRunObj()\
-            {\
-                for (;;)\
-                {\
-                    if (::InterlockedDecrement(&m_lWorkRef) <= 0)\
-                    {\
-                        break;\
-                    }\
-                    ::InterlockedIncrement(&m_lWorkRef);\
-                    ::Sleep(10);\
-                }\
-            }\
-            virtual void Run()\
+            virtual void SafeRun()\
             {\
                 if (NULL == m_pObj) { return; }\
                 if (NULL == m_pFun) { return; }\
-                if (::InterlockedIncrement(&m_lWorkRef) <= 1)\
-                {\
-                    ::InterlockedDecrement(&m_lWorkRef);\
-                    return;\
-                }\
                 (m_pObj->*m_pFun)(F_EXPAND(args_ex));\
-                ::InterlockedDecrement(&m_lWorkRef);\
             }\
         private:\
             ret_type _CallFun(args)\
@@ -321,7 +251,6 @@ namespace Spark
             RunFun m_pFun;\
             obj_type* m_pObj;\
             _args_data m_args;\
-            volatile long m_lWorkRef;\
         };\
         template<typename obj_type, typename ret_type, classparam>\
         class SharedThreadFunction<obj_type, ret_type (ptype)> : public Runnable\
@@ -331,13 +260,11 @@ namespace Spark
             typedef SharedThreadFunction selftype;\
             typedef ret_type(obj_type::*RunFun)(args);\
         public:\
-            SharedThreadFunction() : m_pFun(NULL), m_lWorkRef(0) {} \
+            SharedThreadFunction() : m_pFun(NULL) {} \
             SharedThreadFunction(SparkSharedPtr<obj_type> pObj, RunFun pFun)\
             {\
                 m_pObj = pObj;\
                 m_pFun = pFun;\
-                m_lWorkRef = 0;\
-                ::InterlockedIncrement(&m_lWorkRef);\
             }\
             ret_type operator()(args)\
             {\
@@ -351,29 +278,11 @@ namespace Spark
             {\
                 return m_pObj;\
             }\
-            virtual void ReleaseRunObj()\
-            {\
-                for (;;)\
-                {\
-                    if (::InterlockedDecrement(&m_lWorkRef) <= 0)\
-                    {\
-                        break;\
-                    }\
-                    ::InterlockedIncrement(&m_lWorkRef);\
-                    ::Sleep(10);\
-                }\
-            }\
-            virtual void Run()\
+            virtual void SafeRun()\
             {\
                 if (NULL == m_pObj) { return; }\
                 if (NULL == m_pFun) { return; }\
-                if (::InterlockedIncrement(&m_lWorkRef) <= 1)\
-                {\
-                    ::InterlockedDecrement(&m_lWorkRef);\
-                    return;\
-                }\
                 (m_pObj->*m_pFun)(F_EXPAND(args_ex));\
-                ::InterlockedDecrement(&m_lWorkRef);\
             }\
         private:\
             ret_type _CallFun(args)\
@@ -384,7 +293,6 @@ namespace Spark
             RunFun m_pFun;\
             SparkSharedPtr<obj_type> m_pObj;\
             _args_data m_args;\
-            volatile long m_lWorkRef;\
         };\
         template<typename obj_type, typename ret_type, classparam>\
         inline Runnable* CreateRunnableEx(obj_type* pObj, ret_type(obj_type::*pFun)(ptype), args)\

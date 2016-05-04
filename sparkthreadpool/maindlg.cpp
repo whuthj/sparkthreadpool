@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "maindlg.h"
 #include "sparkthreadpool/sparkfunction.hpp"
+#include "TestRunnable.h"
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -181,6 +182,10 @@ BOOL CMainDlg::OnInitDialog(CWindow wndFocus, LPARAM lInitParam)
     SparkThreadPool::Instance().Execute(SharedFromThis(), &CMainDlg::DoAsyncEx_4, 123.45);
     SparkThreadPool::Instance().Execute(SharedFromThis(), &CMainDlg::DoFunction, 1, 2.1f, 3.12);
     SparkThreadPool::Instance().Execute(SharedFromThis(), &CMainDlg::DoAsyncEx_3);
+
+    TestRunnable* pTestRun = new TestRunnable;
+    pTestRun->HostAndAddRef();
+    SparkThreadPool::Instance().Execute(pTestRun);
 
     Tuple<int, float, double, char> t(123, 2.0f, 3.0, 'a');
     SimpleTuple<int, float, double, CString> t1(1, 2.0f, 3.0, L"Hello");

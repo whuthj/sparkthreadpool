@@ -47,18 +47,58 @@ namespace Spark
         class IRunnable
         {
         public:
-            virtual ~IRunnable() { };
+            virtual ~IRunnable() { }
             virtual void Run() = 0;
-
         };
 
         class Runnable : public IRunnable
                        , public AddRefReleaseRunnable
         {
         public:
-            virtual ~Runnable() {};
-            virtual void* GetRunObj() { return this; };
-            virtual void ReleaseRunObj() {};
+            virtual ~Runnable() {}
+            virtual void SafeRun() {}
+            virtual void* GetRunObj() { return this; }
+
+            Runnable() : m_lRunObjRef(0)
+            {
+                ::InterlockedIncrement(&m_lRunObjRef);
+            }
+
+            void HostAndAddRef()
+            {
+                SetBeHosted(true);
+                AddRef();
+            }
+
+            virtual void Run()
+            {
+                if (::InterlockedIncrement(&m_lRunObjRef) <= 1)
+                {
+                    ::InterlockedDecrement(&m_lRunObjRef);
+                    return;
+                }
+
+                SafeRun();
+
+                ::InterlockedDecrement(&m_lRunObjRef);
+            }
+
+            virtual void ReleaseRunObj()
+            {
+                for (;;)
+                {
+                    if (::InterlockedDecrement(&m_lRunObjRef) <= 0)
+                    {
+                        break;
+                    }
+
+                    ::InterlockedIncrement(&m_lRunObjRef);
+                    ::Sleep(10);
+                }
+            }
+
+        private:
+            volatile long       m_lRunObjRef;
         };
 
         class FunPtrRunnable : public Runnable
@@ -116,9 +156,6 @@ namespace Spark
                 m_pFun = pFun;
                 m_pNoParamFun = NULL;
                 m_pParam = lpParam;
-                m_lRunObjRef = 0;
-
-                ::InterlockedIncrement(&m_lRunObjRef);
             }
 
             MemberFunPtrRunnable(T* pObj, NoParamRunFun pFun)
@@ -127,9 +164,6 @@ namespace Spark
                 m_pNoParamFun = pFun;
                 m_pFun = NULL;
                 m_pParam = NULL;
-                m_lRunObjRef = 0;
-
-                ::InterlockedIncrement(&m_lRunObjRef);
             }
 
             virtual ~MemberFunPtrRunnable()
@@ -137,23 +171,7 @@ namespace Spark
 
             }
 
-            virtual void Run()
-            {
-                if (NULL == m_pObj) { return; }
-                if (NULL == m_pFun && NULL == m_pNoParamFun) { return; }
-
-                if (::InterlockedIncrement(&m_lRunObjRef) <= 1)
-                {
-                    ::InterlockedDecrement(&m_lRunObjRef);
-                    return;
-                }
-
-                Execute();
-
-                ::InterlockedDecrement(&m_lRunObjRef);
-            }
-
-            virtual void Execute()
+            virtual void SafeRun()
             {
                 if (NULL == m_pObj) { return; }
                 if (NULL == m_pFun && NULL == m_pNoParamFun) { return; }
@@ -176,26 +194,11 @@ namespace Spark
                 return m_pObj;
             }
 
-            virtual void ReleaseRunObj()
-            {
-                for (;;)
-                {
-                    if (::InterlockedDecrement(&m_lRunObjRef) <= 0)
-                    {
-                        break;
-                    }
-
-                    ::InterlockedIncrement(&m_lRunObjRef);
-                    ::Sleep(10);
-                }
-            }
-
         private:
-            T*                             m_pObj;
-            RunFun                     m_pFun;
+            T*                  m_pObj;
+            RunFun              m_pFun;
             NoParamRunFun       m_pNoParamFun;
-            ParamType                m_pParam;
-            volatile long               m_lRunObjRef;
+            ParamType           m_pParam;
 
         };
 
@@ -212,9 +215,6 @@ namespace Spark
                 m_pFun = pFun;
                 m_pNoParamFun = NULL;
                 m_pParam = lpParam;
-                m_lWorkRef = 0;
-
-                ::InterlockedIncrement(&m_lWorkRef);
             }
 
             SharedMemberFunPtrRunnable(SparkSharedPtr<T> pObj, NoParamRunFun pFun)
@@ -223,9 +223,6 @@ namespace Spark
                 m_pNoParamFun = pFun;
                 m_pFun = NULL;
                 m_pParam = NULL;
-                m_lWorkRef = 0;
-
-                ::InterlockedIncrement(&m_lWorkRef);
             }
 
             virtual ~SharedMemberFunPtrRunnable()
@@ -233,23 +230,7 @@ namespace Spark
 
             }
 
-            virtual void Run()
-            {
-                if (NULL == m_pObj) { return; }
-                if (NULL == m_pFun && NULL == m_pNoParamFun) { return; }
-
-                if (::InterlockedIncrement(&m_lWorkRef) <= 1)
-                {
-                    ::InterlockedDecrement(&m_lWorkRef);
-                    return;
-                }
-
-                Execute();
-
-                ::InterlockedDecrement(&m_lWorkRef);
-            }
-
-            virtual void Execute()
+            virtual void SafeRun()
             {
                 if (NULL == m_pObj) { return; }
                 if (NULL == m_pFun && NULL == m_pNoParamFun) { return; }
@@ -272,26 +253,11 @@ namespace Spark
                 return m_pObj;
             }
 
-            virtual void ReleaseRunObj()
-            {
-                for (;;)
-                {
-                    if (::InterlockedDecrement(&m_lWorkRef) <= 0)
-                    {
-                        break;
-                    }
-
-                    ::InterlockedIncrement(&m_lWorkRef);
-                    ::Sleep(10);
-                }
-            }
-
         private:
             SparkSharedPtr<T>       m_pObj;
             RunFun                  m_pFun;
             NoParamRunFun           m_pNoParamFun;
             ParamType               m_pParam;
-            volatile long           m_lWorkRef;
 
         };
 

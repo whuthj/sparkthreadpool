@@ -97,11 +97,13 @@
     <ClInclude Include="sparkthreadpool\sparkutils.hpp" />
     <ClInclude Include="sparkthreadpool\sparkweakptr.hpp" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="TestRunnable.h" />
     <ClInclude Include="threadpooltest.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="maindlg.cpp" />
+    <ClCompile Include="TestRunnable.cpp" />
     <ClCompile Include="threadpooltest.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

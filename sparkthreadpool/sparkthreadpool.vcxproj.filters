@@ -24,6 +24,9 @@
     <Filter Include="src\sparkthreadpool">
       <UniqueIdentifier>{954f5ce1-da8a-47b9-a5da-f11a2b50d040}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\run">
+      <UniqueIdentifier>{3e56c09d-701e-4c32-8468-463fc6d55e4a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -92,6 +95,9 @@
     <ClInclude Include="sparkthreadpool\sparkthreadqueue.hpp">
       <Filter>src\sparkthreadpool</Filter>
     </ClInclude>
+    <ClInclude Include="TestRunnable.h">
+      <Filter>src\run</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -102,6 +108,9 @@
     </ClCompile>
     <ClCompile Include="threadpooltest.cpp">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="TestRunnable.cpp">
+      <Filter>src\run</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
