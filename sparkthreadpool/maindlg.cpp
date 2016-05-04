@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "maindlg.h"
 #include "sparkthreadpool/sparkfunction.hpp"
+#include "sparkthreadpool/sparkany.hpp"
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -197,6 +198,25 @@ BOOL CMainDlg::OnInitDialog(CWindow wndFocus, LPARAM lInitParam)
     int a = t2.head;
     CString str = t2.Get<3>();
 
+    Any any_1(10);
+    Any any_2(CString(L"Any"));
+    Any any_3(10.1f);
+    Any any_4(10.123);
+
+    int n_1 = AnyCast<int>(any_1);
+    if (any_2.type() == typeid(CString))
+    {
+        CString str_2 = AnyCast<CString>(any_2);
+    }
+    float f_3 = AnyCast<float>(any_3);
+    double dd_4 = AnyCast<double>(any_4);
+
+    std::vector<Any> vec;
+    vec.push_back(any_1);
+    vec.push_back(any_2);
+    vec.push_back(any_3);
+    vec.push_back(any_4);
+
     m_timer1_1.StartTimer(this, &CMainDlg::DoTimer_1, 100, 2);
     m_timer1_1.StartTimer(this, &CMainDlg::DoTimer_1, 1000, 2);
     m_timer1_2.StartTimer(this, &CMainDlg::DoTimer_2, 200, 2);
@@ -247,7 +267,8 @@ LRESULT CMainDlg::OnBnClickedButtonTest(BOOL& /*bHandled*/)
     SPARK_PARAM_INSTANCE_ASYN(CMainDlg, DoAsyncEx_4, double, 1234.1234);
 
     //SPARK_POST_ASYN(CMainDlg, DoAsync, this, &Spark::Thread::SparkThreadPool::Instance(), NULL);
-    SPARK_NOPARAM_INSTANCE_ASYN(CMainDlg, DoAsync);
+    //SPARK_NOPARAM_INSTANCE_ASYN(CMainDlg, DoAsync);
+    SparkThreadPool::Instance().Execute(this, &CMainDlg::DoAsync);
 
     m_timer.StartTimer(this, &CMainDlg::DoTimer, 1000, 2);
     SparkWndTimer::Schedule(this, &CMainDlg::DoDelay, 123, 2000, 1);
@@ -309,6 +330,7 @@ void CMainDlg::DoFunction_1( int a, float b, double c, Tuple<int, float, double,
     double d_2 = d.Get<2>();
     char d_3 = d.Get<3>();
 
+    d_0 = e.item_0;
     CString e_3 = e.item_3;
 
     int len = TupleLength<Tuple<int, float, double>>::value;

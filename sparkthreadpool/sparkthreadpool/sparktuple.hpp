@@ -32,7 +32,7 @@
 #define TUPLE_FIELD_9(t, n, t1, ...)    t item##n; TUPLE_FIELD_8(t1, __VA_ARGS__)
 #endif
 #define TUPLE_FIELDX_(N, args)        CONCAT(TUPLE_FIELD_, N) args
-#define TUPLE_FIELD(...)                TUPLE_FIELDX_(__VA_ARGC_HALF__(__VA_ARGS__), (__VA_ARGS__))
+#define TUPLE_FIELD(...)                   TUPLE_FIELDX_(__VA_ARGC_HALF__(__VA_ARGS__), (__VA_ARGS__))
 
 #define TUPLE_ASSIGN_0(...)
 #define TUPLE_ASSIGN_1(v, ...)         item##v = v
