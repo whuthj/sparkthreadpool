@@ -240,6 +240,10 @@
 				Name="sparkthreadpool"
 				>
 				<File
+					RelativePath=".\sparkthreadpool\sparkany.hpp"
+					>
+				</File>
+				<File
 					RelativePath=".\sparkthreadpool\sparkasyndef.hpp"
 					>
 				</File>

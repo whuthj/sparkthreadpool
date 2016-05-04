@@ -197,7 +197,7 @@ namespace Spark
         private:
             T*                  m_pObj;
             RunFun              m_pFun;
-            NoParamRunFun       m_pNoParamFun;
+            NoParamRunFun        m_pNoParamFun;
             ParamType           m_pParam;
 
         };
@@ -255,7 +255,7 @@ namespace Spark
 
         private:
             SparkSharedPtr<T>       m_pObj;
-            RunFun                  m_pFun;
+            RunFun                         m_pFun;
             NoParamRunFun           m_pNoParamFun;
             ParamType               m_pParam;
 
