@@ -96,7 +96,10 @@ namespace Spark
                 {
                     if (::InterlockedIncrement(&_lock) == 1)
                     {
-                        _pInst = CreateInstance();
+                        if (NULL == _pInst)
+                        {
+                            _pInst = CreateInstance();
+                        }
                         ::InterlockedDecrement(&_lock);
                     }
                     else
