@@ -189,6 +189,14 @@
 			Name="src"
 			>
 			<File
+				RelativePath=".\TestRunnable.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TestRunnable.h"
+				>
+			</File>
+			<File
 				RelativePath=".\threadpooltest.cpp"
 				>
 			</File>
